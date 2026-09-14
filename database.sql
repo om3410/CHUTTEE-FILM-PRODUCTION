@@ -1,11 +1,16 @@
+-- ============================================================
+-- CHUTTEE FILM PRODUCTION DATABASE
+-- Target: PostgreSQL 12+
+-- ============================================================
 
--- database: :memory:
 -- Enable extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 CREATE EXTENSION IF NOT EXISTS "btree_gin";
 
+-- ============================================================
 -- 1. FILM PROJECTS (Master Table with JSONB)
+-- ============================================================
 DROP TABLE IF EXISTS film_projects CASCADE;
 CREATE TABLE film_projects (
     project_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -19,17 +24,21 @@ CREATE TABLE film_projects (
     currency VARCHAR(10) DEFAULT 'INR',
     start_date DATE,
     end_date DATE,
-    metadata JSONB DEFAULT '{}'::jsonb, -- Flexible storage for additional data
-    tags TEXT[] DEFAULT '{}', -- Array of tags
-    search_vector TSVECTOR, -- For full-text search
+    metadata JSONB DEFAULT '{}'::jsonb,
+    tags TEXT[] DEFAULT '{}',
+    search_vector TSVECTOR,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    
-    CONSTRAINT valid_status CHECK (status IN ('Development', 'Pre-Production', 'Production', 'Post-Production', 'Completed', 'Festival_Run'))
-);
-SELECT * FROM film_projects;
 
+    CONSTRAINT valid_status CHECK (status IN (
+        'Development', 'Pre-Production', 'Production',
+        'Post-Production', 'Completed', 'Festival_Run'
+    ))
+);
+
+-- ============================================================
 -- 2. CREW MEMBERS
+-- ============================================================
 DROP TABLE IF EXISTS crew_members CASCADE;
 CREATE TABLE crew_members (
     crew_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -49,9 +58,10 @@ CREATE TABLE crew_members (
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
-SELECT * FROM crew_members;
 
+-- ============================================================
 -- 3. CAST MEMBERS
+-- ============================================================
 DROP TABLE IF EXISTS cast_members CASCADE;
 CREATE TABLE cast_members (
     cast_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -70,12 +80,13 @@ CREATE TABLE cast_members (
     representation JSONB,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    
+
     CONSTRAINT valid_role_type CHECK (role_type IN ('Lead', 'Supporting', 'Cameo', 'Extra'))
 );
-SELECT * FROM cast_members;
 
+-- ============================================================
 -- 4. SCENES
+-- ============================================================
 DROP TABLE IF EXISTS scenes CASCADE;
 CREATE TABLE scenes (
     scene_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -96,15 +107,16 @@ CREATE TABLE scenes (
     camera_notes TEXT,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    
+
     CONSTRAINT valid_time_of_day CHECK (time_of_day IN ('Morning', 'Afternoon', 'Evening', 'Night')),
     CONSTRAINT valid_complexity CHECK (complexity_score BETWEEN 0 AND 1),
     CONSTRAINT valid_status CHECK (status IN ('Pending', 'Ready', 'In_Progress', 'Completed')),
     UNIQUE(project_id, scene_number)
 );
-SELECT * FROM scenes;
 
+-- ============================================================
 -- 5. SCENE-ACTOR MAPPING
+-- ============================================================
 DROP TABLE IF EXISTS scene_actors CASCADE;
 CREATE TABLE scene_actors (
     scene_id UUID REFERENCES scenes(scene_id) ON DELETE CASCADE,
@@ -116,12 +128,13 @@ CREATE TABLE scene_actors (
     is_stand_in BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    
+
     PRIMARY KEY (scene_id, cast_id)
 );
-SELECT * FROM scene_actors;
 
+-- ============================================================
 -- 6. EQUIPMENT
+-- ============================================================
 DROP TABLE IF EXISTS equipment CASCADE;
 CREATE TABLE equipment (
     equipment_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -140,12 +153,13 @@ CREATE TABLE equipment (
     maintenance_history JSONB DEFAULT '[]'::jsonb,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    
+
     CONSTRAINT valid_condition CHECK (condition_status IN ('Excellent', 'Good', 'Fair', 'Poor'))
 );
-SELECT * FROM equipment;
 
+-- ============================================================
 -- 7. EQUIPMENT USAGE LOG
+-- ============================================================
 DROP TABLE IF EXISTS equipment_usage CASCADE;
 CREATE TABLE equipment_usage (
     usage_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -159,9 +173,10 @@ CREATE TABLE equipment_usage (
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
-SELECT * FROM equipment_usage;
 
+-- ============================================================
 -- 8. SHOOT DAYS
+-- ============================================================
 DROP TABLE IF EXISTS shoot_days CASCADE;
 CREATE TABLE shoot_days (
     shoot_day_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -182,13 +197,14 @@ CREATE TABLE shoot_days (
     weather_data JSONB DEFAULT '{}'::jsonb,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    
+
     CONSTRAINT valid_status CHECK (status IN ('Scheduled', 'In_Progress', 'Completed', 'Cancelled', 'Rescheduled')),
     UNIQUE(project_id, day_number)
 );
-SELECT * FROM shoot_days;
 
+-- ============================================================
 -- 9. SHOOT DAY - SCENE MAPPING
+-- ============================================================
 DROP TABLE IF EXISTS shoot_day_scenes CASCADE;
 CREATE TABLE shoot_day_scenes (
     shoot_day_id UUID REFERENCES shoot_days(shoot_day_id) ON DELETE CASCADE,
@@ -199,13 +215,14 @@ CREATE TABLE shoot_day_scenes (
     notes TEXT,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    
+
     PRIMARY KEY (shoot_day_id, scene_id),
     CONSTRAINT valid_status CHECK (status IN ('Pending', 'In_Progress', 'Completed', 'Reshoot'))
 );
-SELECT * FROM shoot_day_scenes;
 
+-- ============================================================
 -- 10. BUDGET TRANSACTIONS
+-- ============================================================
 DROP TABLE IF EXISTS budget_transactions CASCADE;
 CREATE TABLE budget_transactions (
     transaction_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -223,15 +240,16 @@ CREATE TABLE budget_transactions (
     metadata JSONB DEFAULT '{}'::jsonb,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    
+
     CONSTRAINT valid_category CHECK (category IN (
         'Crew', 'Cast', 'Equipment', 'Location', 'Post_Production',
         'Marketing', 'Miscellaneous', 'Travel', 'Insurance', 'Legal'
     ))
 );
-SELECT * FROM budget_transactions;
 
+-- ============================================================
 -- 11. SCRIPT DIALOGUES
+-- ============================================================
 DROP TABLE IF EXISTS script_dialogues CASCADE;
 CREATE TABLE script_dialogues (
     dialogue_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -252,9 +270,10 @@ CREATE TABLE script_dialogues (
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
-SELECT * FROM script_dialogues;
 
+-- ============================================================
 -- 12. SENTIMENT ANALYSIS RESULTS
+-- ============================================================
 DROP TABLE IF EXISTS sentiment_analysis CASCADE;
 CREATE TABLE sentiment_analysis (
     sentiment_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -270,7 +289,9 @@ CREATE TABLE sentiment_analysis (
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
+-- ============================================================
 -- 13. PRODUCTION RISKS
+-- ============================================================
 DROP TABLE IF EXISTS production_risks CASCADE;
 CREATE TABLE production_risks (
     risk_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -280,7 +301,9 @@ CREATE TABLE production_risks (
     severity VARCHAR(20) DEFAULT 'Medium',
     probability DECIMAL(3,2),
     impact DECIMAL(3,2),
-    risk_score DECIMAL(5,2) GENERATED ALWAYS AS (COALESCE(probability, 0) * COALESCE(impact, 0) * 100) STORED,
+    risk_score DECIMAL(7,2) GENERATED ALWAYS AS (
+        COALESCE(probability, 0) * COALESCE(impact, 0) * 100
+    ) STORED,
     mitigation_plan TEXT,
     owner VARCHAR(100),
     status VARCHAR(20) DEFAULT 'Identified',
@@ -290,14 +313,18 @@ CREATE TABLE production_risks (
     mitigation_steps JSONB DEFAULT '[]'::jsonb,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    
+
     CONSTRAINT valid_severity CHECK (severity IN ('Low', 'Medium', 'High', 'Critical')),
     CONSTRAINT valid_status CHECK (status IN ('Identified', 'Mitigating', 'Resolved', 'Escalated', 'Closed')),
-    CONSTRAINT valid_risk_type CHECK (risk_type IN ('Weather', 'Budget', 'Schedule', 'Technical', 'Human Resources', 'Legal', 'Security', 'Health'))
+    CONSTRAINT valid_risk_type CHECK (risk_type IN (
+        'Weather', 'Budget', 'Schedule', 'Technical',
+        'Human Resources', 'Legal', 'Security', 'Health'
+    ))
 );
-SELECT * FROM production_risks;
 
+-- ============================================================
 -- 14. FESTIVAL SUBMISSIONS
+-- ============================================================
 DROP TABLE IF EXISTS festival_submissions CASCADE;
 CREATE TABLE festival_submissions (
     submission_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -315,12 +342,13 @@ CREATE TABLE festival_submissions (
     submission_documents JSONB DEFAULT '[]'::jsonb,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    
+
     CONSTRAINT valid_status CHECK (status IN ('Pending', 'Submitted', 'Selected', 'Rejected', 'Awarded'))
 );
-SELECT * FROM festival_submissions;
 
--- 15. ANALYTICS DAILY (Pre-computed metrics)
+-- ============================================================
+-- 15. ANALYTICS DAILY
+-- ============================================================
 DROP TABLE IF EXISTS analytics_daily CASCADE;
 CREATE TABLE analytics_daily (
     analytics_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -339,12 +367,13 @@ CREATE TABLE analytics_daily (
     key_metrics JSONB DEFAULT '{}'::jsonb,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    
+
     UNIQUE(project_id, date)
 );
-SELECT * FROM analytics_daily;
 
+-- ============================================================
 -- 16. ML PREDICTIONS STORAGE
+-- ============================================================
 DROP TABLE IF EXISTS ml_predictions CASCADE;
 CREATE TABLE ml_predictions (
     prediction_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -362,28 +391,32 @@ CREATE TABLE ml_predictions (
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
-SELECT * FROM ml_predictions;
 
+-- ============================================================
 -- 17. FULL-TEXT SEARCH INDEXES
-CREATE INDEX idx_projects_search ON film_projects USING GIN(search_vector);
-CREATE INDEX idx_dialogues_search ON script_dialogues USING GIN(search_vector);
+-- ============================================================
+CREATE INDEX IF NOT EXISTS idx_projects_search  ON film_projects      USING GIN(search_vector);
+CREATE INDEX IF NOT EXISTS idx_dialogues_search ON script_dialogues   USING GIN(search_vector);
 
+-- ============================================================
 -- 18. JSONB INDEXES
-CREATE INDEX idx_projects_metadata ON film_projects USING GIN(metadata);
-CREATE INDEX idx_equipment_specs ON equipment USING GIN(specifications);
-CREATE INDEX idx_risks_mitigation ON production_risks USING GIN(mitigation_steps);
-CREATE INDEX idx_festival_metadata ON festival_submissions USING GIN(festival_metadata);
+-- ============================================================
+CREATE INDEX IF NOT EXISTS idx_projects_metadata  ON film_projects        USING GIN(metadata);
+CREATE INDEX IF NOT EXISTS idx_equipment_specs    ON equipment            USING GIN(specifications);
+CREATE INDEX IF NOT EXISTS idx_risks_mitigation   ON production_risks     USING GIN(mitigation_steps);
+CREATE INDEX IF NOT EXISTS idx_festival_metadata  ON festival_submissions USING GIN(festival_metadata);
 
+-- ============================================================
 -- 19. TRIGGERS FOR AUTO-UPDATE
+-- ============================================================
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
     NEW.updated_at = CURRENT_TIMESTAMP;
     RETURN NEW;
 END;
-$$ language 'plpgsql';
+$$ LANGUAGE 'plpgsql';
 
--- Apply trigger to all tables
 CREATE TRIGGER update_film_projects_updated_at BEFORE UPDATE ON film_projects
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
@@ -399,17 +432,19 @@ CREATE TRIGGER update_scenes_updated_at BEFORE UPDATE ON scenes
 CREATE TRIGGER update_shoot_days_updated_at BEFORE UPDATE ON shoot_days
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- 20. FUNCTION: Update search vectors
+-- ============================================================
+-- 20. SEARCH VECTOR TRIGGERS
+-- ============================================================
 CREATE OR REPLACE FUNCTION update_project_search_vector()
 RETURNS TRIGGER AS $$
 BEGIN
-    NEW.search_vector = 
+    NEW.search_vector =
         setweight(to_tsvector('english', COALESCE(NEW.title, '')), 'A') ||
         setweight(to_tsvector('english', COALESCE(NEW.director, '')), 'B') ||
         setweight(to_tsvector('english', COALESCE(NEW.logline, '')), 'C');
     RETURN NEW;
 END;
-$$ language 'plpgsql';
+$$ LANGUAGE 'plpgsql';
 
 CREATE TRIGGER update_project_search_vector_trigger
 BEFORE INSERT OR UPDATE ON film_projects
@@ -418,24 +453,30 @@ FOR EACH ROW EXECUTE FUNCTION update_project_search_vector();
 CREATE OR REPLACE FUNCTION update_dialogue_search_vector()
 RETURNS TRIGGER AS $$
 BEGIN
-    NEW.search_vector = 
+    NEW.search_vector =
         setweight(to_tsvector('english', COALESCE(NEW.dialogue_text, '')), 'A') ||
         setweight(to_tsvector('english', COALESCE(NEW.character_name, '')), 'B') ||
         setweight(to_tsvector('english', COALESCE(NEW.emotion_tag, '')), 'C');
     RETURN NEW;
 END;
-$$ language 'plpgsql';
+$$ LANGUAGE 'plpgsql';
 
 CREATE TRIGGER update_dialogue_search_vector_trigger
 BEFORE INSERT OR UPDATE ON script_dialogues
 FOR EACH ROW EXECUTE FUNCTION update_dialogue_search_vector();
 
+-- ============================================================
+-- ============ DATA INSERTS ==================================
+-- ============================================================
 
+-- ------------------------------------------------------------
 -- 1. INSERT FILM PROJECT
+-- ------------------------------------------------------------
 INSERT INTO film_projects (
-    project_id, title, director, logline, genre, duration_minutes, status, total_budget, currency, start_date, end_date, metadata, tags
+    project_id, title, director, logline, genre, duration_minutes, status,
+    total_budget, currency, start_date, end_date, metadata, tags
 ) VALUES (
-    'a1b2c3d4-e5f6-4a5d-8c7d-9e0f1a2b3c4d',
+    'a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d',
     'Chuttee',
     'Vikrant Mahalle',
     'Two protagonists stuck in an ironical situation created by themselves and pretending to be independent in a complex emotional environment.',
@@ -447,7 +488,7 @@ INSERT INTO film_projects (
     '2026-08-01',
     '2026-08-04',
     jsonb_build_object(
-        'festival_goals', to_jsonb(ARRAY['Pune Sort Film Festival', 'MAMI', 'Berlinale']),
+        'festival_goals', to_jsonb(ARRAY['Pune Short Film Festival', 'MAMI', 'Berlinale']),
         'shooting_locations', to_jsonb(ARRAY['Pune', 'Mumbai']),
         'budget_breakdown', jsonb_build_object(
             'crew', 250000,
@@ -459,109 +500,77 @@ INSERT INTO film_projects (
         'social_media', jsonb_build_object(
             'instagram', '@chutteefilm',
             'twitter', '#ChutteeFilm',
-            'hashtag', to_jsonb(ARRAY['#Chuttee', 'SortFilm', '#IndianCinema'])
+            'hashtag', to_jsonb(ARRAY['#Chuttee', '#ShortFilm', '#IndianCinema'])
         )
     ),
-    ARRAY['Sort Film', 'Drama', 'Independent', 'Award-Winning']
+    ARRAY['Short Film', 'Drama', 'Independent', 'Award-Winning']
 );
-SELECT * FROM film_projects;
 
+-- ------------------------------------------------------------
 -- 2. INSERT CREW MEMBERS
-INSERT INTO crew_members (project_id, full_name, role, department, experience_years, email, phone, daily_rate, is_available, joined_date, skills, emergency_contact, certifications) VALUES
-('a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d', 'Vikrant Mahalle', 'Director', 'Direction', 3.5, 'vikrant@chuttee.com', '+91-98765-00001', 15000.00, TRUE, '2026-06-01', 
+-- ------------------------------------------------------------
+INSERT INTO crew_members (
+    project_id, full_name, role, department, experience_years, email, phone,
+    daily_rate, is_available, joined_date, skills, emergency_contact, certifications
+) VALUES
+('a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d', 'Vikrant Mahalle', 'Director', 'Direction', 3.5, 'vikrant@chuttee.com', '+91-98765-00001', 15000.00, TRUE, '2026-06-01',
  ARRAY['Storytelling', 'Screenwriting', 'Acting Coach', 'Editing'],
  jsonb_build_object('name', 'Priya Mahalle', 'relationship', 'Spouse', 'phone', '+91-98765-00099'),
- jsonb_build_array(
-    jsonb_build_object('name', 'Film Direction Certified', 'issuer', 'FTII', 'year', 2023)
- )
-),
+ jsonb_build_array(jsonb_build_object('name', 'Film Direction Certified', 'issuer', 'FTII', 'year', 2023))),
+
 ('a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d', 'Vishesh Gandhi', 'Cinematographer', 'Camera', 3.0, 'vishesh@chuttee.com', '+91-98765-00002', 12000.00, TRUE, '2026-06-01',
  ARRAY['Lighting', 'Composition', 'Color Grading', 'Drone Operation'],
  jsonb_build_object('name', 'Ritu Gandhi', 'relationship', 'Sister', 'phone', '+91-98765-00088'),
- jsonb_build_array(
-    jsonb_build_object('name', 'Cinematography Diploma', 'issuer', 'FTII', 'year', 2024)
- )
-),
+ jsonb_build_array(jsonb_build_object('name', 'Cinematography Diploma', 'issuer', 'FTII', 'year', 2024))),
+
 ('a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d', 'Vaishnavi Bhate', 'Editor', 'Post-Production', 5.0, 'vaishnavi@chuttee.com', '+91-98765-00003', 10000.00, TRUE, '2026-06-05',
  ARRAY['Adobe Premiere', 'DaVinci Resolve', 'Color Correction', 'Sound Syncing'],
  jsonb_build_object('name', 'Rahul Bhate', 'relationship', 'Brother', 'phone', '+91-98765-00077'),
- jsonb_build_array(
-    jsonb_build_object('name', 'Film Editing Certified', 'issuer', 'Mumbai Film School', 'year', 2019)
- )
-),
+ jsonb_build_array(jsonb_build_object('name', 'Film Editing Certified', 'issuer', 'Mumbai Film School', 'year', 2019))),
+
 ('a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d', 'Sumant Thakre', 'Sound Recordist', 'Sound', 5.0, 'sumant@chuttee.com', '+91-98765-00004', 8000.00, TRUE, '2026-06-01',
  ARRAY['Boom Operation', 'Audio Mixing', 'Sound Design', 'Field Recording'],
  jsonb_build_object('name', 'Meera Thakre', 'relationship', 'Mother', 'phone', '+91-98765-00066'),
- jsonb_build_array(
-    jsonb_build_object('name', 'Sound Engineering', 'issuer', 'Audio Academy', 'year', 2018)
- )
-),
+ jsonb_build_array(jsonb_build_object('name', 'Sound Engineering', 'issuer', 'Audio Academy', 'year', 2018))),
+
 ('a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d', 'Umakant Jagtap', 'Sound Designer', 'Sound', 4.0, 'umakant@chuttee.com', '+91-98765-00005', 9000.00, TRUE, '2026-06-05',
  ARRAY['Audio Post-Production', 'Foley Design', 'Ambient Sound', 'ADR'],
  jsonb_build_object('name', 'Amrita Jagtap', 'relationship', 'Sister', 'phone', '+91-98765-00055'),
- jsonb_build_array(
-    jsonb_build_object('name', 'Sound Design Certificate', 'issuer', 'FTII', 'year', 2020)
- )
-),
+ jsonb_build_array(jsonb_build_object('name', 'Sound Design Certificate', 'issuer', 'FTII', 'year', 2020))),
+
 ('a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d', 'Ketam Jain', 'Music Composer', 'Music', 10.0, 'ketam@chuttee.com', '+91-98765-00006', 12000.00, TRUE, '2026-06-01',
  ARRAY['Piano', 'Orchestration', 'Music Production', 'Soundtrack Composition'],
  jsonb_build_object('name', 'Anjali Jain', 'relationship', 'Wife', 'phone', '+91-98765-00044'),
  jsonb_build_array(
     jsonb_build_object('name', 'Music Composition MA', 'issuer', 'Royal College of Music', 'year', 2014),
-    jsonb_build_object('name', 'Film Scoring Certificate', 'issuer', 'Berklee', 'year', 2016)
- )
-),
+    jsonb_build_object('name', 'Film Scoring Certificate', 'issuer', 'Berklee', 'year', 2016))),
+
 ('a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d', 'Kaustubh Bhonge', 'Colorist', 'Post-Production', 3.0, 'kaustubh@chuttee.com', '+91-98765-00007', 8000.00, TRUE, '2026-06-05',
  ARRAY['DaVinci Resolve', 'Color Theory', 'Scene Matching', 'HDR Grading'],
  jsonb_build_object('name', 'Kavita Bhonge', 'relationship', 'Mother', 'phone', '+91-98765-00033'),
- jsonb_build_array(
-    jsonb_build_object('name', 'Color Grading Professional', 'issuer', 'Color Academy', 'year', 2023)
- )
-),
+ jsonb_build_array(jsonb_build_object('name', 'Color Grading Professional', 'issuer', 'Color Academy', 'year', 2023))),
+
 ('a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d', 'Saimah Khan', 'Makeup Artist', 'Art', 2.5, 'saimah@chuttee.com', '+91-98765-00008', 5000.00, TRUE, '2026-06-10',
  ARRAY['Special Effects Makeup', 'Period Makeup', 'Hairstyling'],
  jsonb_build_object('name', 'Imran Khan', 'relationship', 'Brother', 'phone', '+91-98765-00022'),
- jsonb_build_array(
-    jsonb_build_object('name', 'Makeup Artist Certified', 'issuer', 'L''Oreal Academy', 'year', 2023)
- )
-),
+ jsonb_build_array(jsonb_build_object('name', 'Makeup Artist Certified', 'issuer', 'L''Oreal Academy', 'year', 2023))),
+
 ('a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d', 'Abhishek Ingole', 'Assistant Director', 'Direction', 2.0, 'abhishek@chuttee.com', '+91-98765-00009', 6000.00, TRUE, '2026-06-01',
  ARRAY['Script Supervision', 'Crew Coordination', 'Continuity'],
  jsonb_build_object('name', 'Madhav Ingole', 'relationship', 'Father', 'phone', '+91-98765-00011'),
- jsonb_build_array(
-    jsonb_build_object('name', 'Film Studies', 'issuer', 'University of Pune', 'year', 2024)
- )
-),
+ jsonb_build_array(jsonb_build_object('name', 'Film Studies', 'issuer', 'University of Pune', 'year', 2024))),
+
 ('a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d', 'Sagar Khande', 'Assistant Director', 'Direction', 4.0, 'sagar@chuttee.com', '+91-98765-00010', 6000.00, TRUE, '2026-06-01',
  ARRAY['Production Management', 'Crew Scheduling', 'Location Scouting'],
  jsonb_build_object('name', 'Kiran Khande', 'relationship', 'Wife', 'phone', '+91-98765-00000'),
- jsonb_build_array(
-    jsonb_build_object('name', 'Theatre Director', 'issuer', 'Tea4Theatre', 'year', 2022)
- )
-);
-SELECT * FROM crew_members;
+ jsonb_build_array(jsonb_build_object('name', 'Theatre Director', 'issuer', 'Tea4Theatre', 'year', 2022)));
 
--- 3. INSERT CAST MEMBERS 
-BEGIN;
-
--- Step 1: Insert the parent project
-INSERT INTO film_projects (
-    project_id, title, director, genre, duration_minutes, status, start_date, end_date
-) VALUES (
-    'a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d',
-    'Chuttee',
-    'Vikrant Mahalle',
-    'Drama',
-    15,
-    'Pre-Production',
-    '2026-08-01',
-    '2026-08-04'
-);
-
--- Step 2: Insert all cast members
+-- ------------------------------------------------------------
+-- 3. INSERT CAST MEMBERS
+-- ------------------------------------------------------------
 INSERT INTO cast_members (
-    project_id, full_name, character_name, role_type, experience_years, 
-    email, phone, daily_rate, is_available, joined_date, 
+    project_id, full_name, character_name, role_type, experience_years,
+    email, phone, daily_rate, is_available, joined_date,
     physical_attributes, special_skills, representation
 ) VALUES
 ('a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d', 'Aadya Singh', 'Meera', 'Lead', 7.0, 'aadya@chuttee.com', '+91-98765-10001', 25000.00, TRUE, '2026-06-01',
@@ -604,26 +613,18 @@ INSERT INTO cast_members (
  ARRAY['Modern Dance','Singing'],
  jsonb_build_object('agent','NextGen Artists','email','nextgen@artists.com','phone','+91-98765-20008'));
 
-COMMIT;
-SELECT * FROM cast_members;
-
+-- ------------------------------------------------------------
 -- 4. INSERT SCENES
-INSERT INTO scenes (project_id, scene_number, location, time_of_day, complexity_score, emotional_tone, duration_estimate_minutes, is_indoor, status, props, wardrobe, lighting_notes, sound_notes, camera_notes)
+-- ------------------------------------------------------------
+INSERT INTO scenes (
+    project_id, scene_number, location, time_of_day, complexity_score,
+    emotional_tone, duration_estimate_minutes, is_indoor, status,
+    props, wardrobe, lighting_notes, sound_notes, camera_notes
+)
 SELECT
     'a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d',
-    scene_num,
-    location,
-    time_of_day,
-    complexity,
-    emotion,
-    duration,
-    indoor,
-    status,
-    props_json,
-    wardrobe_json,
-    lighting,
-    sound,
-    camera
+    scene_num, location, time_of_day, complexity, emotion, duration, indoor, status,
+    props_json, wardrobe_json, lighting, sound, camera
 FROM (VALUES
     (1, 'Kitchen', 'Morning', 0.30, 'Neutral', 5, TRUE, 'Ready',
      '["Coffee mug", "Newspaper", "Phone", "Keys"]'::jsonb,
@@ -698,10 +699,13 @@ FROM (VALUES
      'Emotional dialogue, soft background',
      'Medium shots, emotional close-ups')
 ) AS scenes_data(scene_num, location, time_of_day, complexity, emotion, duration, indoor, status, props_json, wardrobe_json, lighting, sound, camera);
-SELECT * FROM scenes;
 
+-- ------------------------------------------------------------
 -- 5. INSERT SCENE-ACTOR MAPPINGS
-INSERT INTO scene_actors(scene_id, cast_id, lines_count, screen_time_minutes, rehearsal_hours, performance_notes)
+-- ------------------------------------------------------------
+INSERT INTO scene_actors (
+    scene_id, cast_id, lines_count, screen_time_minutes, rehearsal_hours, performance_notes
+)
 SELECT
     s.scene_id,
     c.cast_id,
@@ -712,17 +716,18 @@ SELECT
         WHEN 0 THEN 'Great chemistry'
         WHEN 1 THEN 'Need more rehearsal'
         ELSE 'Solid performance'
-    end
+    END
 FROM scenes s
 CROSS JOIN cast_members c
 WHERE s.project_id = 'a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d'
-    AND c.project_id = 'a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d'
-    AND random() < 0.4
+  AND c.project_id = 'a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d'
+  AND random() < 0.4
 LIMIT 22;
-SELECT * FROM scene_actors;
 
+-- ------------------------------------------------------------
 -- 6. INSERT SCRIPT DIALOGUES
-WITH dialoges_data AS (
+-- ------------------------------------------------------------
+WITH dialogues_data AS (
     SELECT
         s.scene_id,
         d.character,
@@ -732,44 +737,43 @@ WITH dialoges_data AS (
         d.intensity,
         d.tone,
         d.conflict,
-        d.romance,
-        d.duration_sec
+        d.romance
     FROM scenes s
     CROSS JOIN LATERAL (
         VALUES
-        ('Meera', 'Another day, another routine. Sometimes I wonder if this is all there is.', 1, 'Melancholic', 0.65, 'Contemplative', FALSE, FALSE, 8),
-        ('Meera', 'The coffee tastes different today. Bitter... like my thoughts.', 2, 'Pensive', 0.55, 'Reflective', FALSE, FALSE, 6),
-        ('Meera', 'You don''t understand what it''s like to carry this burden alone.', 3, 'Angry', 0.85, 'Confrontational', TRUE, FALSE, 9),
-        ('Kavya', 'Alone? I''ve been here the whole time! You''re the one who shut me out.', 4, 'Frustrated', 0.80, 'Confrontational', TRUE, FALSE, 10),
-        ('Meera', 'Some things can''t be fixed with just "being here." You know that.', 5, 'Sad', 0.75, 'Emotional', TRUE, FALSE, 8),
-        ('Kavya', 'Then tell me what you need, Meera. I''m not a mind reader.', 6, 'Pleading', 0.70, 'Emotional', TRUE, FALSE, 9),
-        ('Meera', 'Looking at myself in the mirror, I see a stranger.', 7, 'Melancholic', 0.90, 'Introspective', FALSE, FALSE, 8),
-        ('Meera', 'The person looking back... she''s tired. So tired.', 8, 'Exhausted', 0.85, 'Sad', FALSE, FALSE, 7),
-        ('Meera', 'I don''t think I can keep doing this. Every day is a performance.', 9, 'Hopeless', 0.75, 'Emotional', TRUE, FALSE, 9),
-        ('Kavya', 'What are you saying? We''re in this together, remember?', 10, 'Concerned', 0.70, 'Supportive', TRUE, FALSE, 8),
-        ('Meera', 'Are we? Because it feels like I''m fighting a war alone.', 11, 'Angry', 0.80, 'Confrontational', TRUE, FALSE, 8),
-        ('Meera', 'You want the truth? The truth is I''ve been pretending for years!', 12, 'Angry', 0.95, 'Confrontational', TRUE, FALSE, 9),
-        ('Kavya', 'Pretending? I gave you everything! My time, my love, my life!', 13, 'Angry', 0.90, 'Emotional', TRUE, FALSE, 9),
-        ('Meera', 'And that''s supposed to make it all okay?', 14, 'Bitter', 0.85, 'Confrontational', TRUE, FALSE, 6),
-        ('Arjun', 'Stop this! Both of you. This isn''t who we are.', 15, 'Desperate', 0.80, 'Pleading', TRUE, FALSE, 8),
-        ('Meera', 'The flowers bloom even when nobody is watching.', 16, 'Hopeful', 0.60, 'Inspirational', FALSE, FALSE, 7),
-        ('Arjun', 'That''s because they know their purpose. Do you know yours?', 17, 'Pensive', 0.55, 'Philosophical', FALSE, FALSE, 8),
-        ('Kavya', 'Another day in this cubicle. What am I even doing with my life?', 18, 'Frustrated', 0.70, 'Workplace', FALSE, FALSE, 8),
-        ('Kavya', 'I need a break. I need to feel alive again.', 19, 'Yearning', 0.75, 'Contemplative', FALSE, FALSE, 7),
-        ('Meera', 'This place... it reminds me of our first date.', 20, 'Nostalgic', 0.70, 'Romantic', FALSE, TRUE, 7),
-        ('Priya', 'You remember that? I thought you''d forgotten everything.', 21, 'Tender', 0.80, 'Romantic', FALSE, TRUE, 8),
-        ('Meera', 'Some things you never forget, no matter how hard you try.', 22, 'Emotional', 0.75, 'Romantic', FALSE, TRUE, 8),
-        ('Meera', 'The city lights don''t hide the darkness inside.', 23, 'Melancholic', 0.85, 'Dark', TRUE, FALSE, 7),
-        ('Father', 'Darkness is just the absence of light. You have to create your own.', 24, 'Wisdom', 0.70, 'Inspirational', FALSE, FALSE, 9),
-        ('Meera', 'I can''t sleep. My mind keeps racing.', 25, 'Anxious', 0.80, 'Emotional', FALSE, FALSE, 6),
-        ('Kavya', 'You''re not the only one with demons, you know.', 26, 'Empathetic', 0.75, 'Supportive', FALSE, FALSE, 7),
-        ('Meera', 'I miss being carefree. When did everything get so complicated?', 27, 'Nostalgic', 0.70, 'Contemplative', FALSE, FALSE, 8),
-        ('Friend', 'It''s called growing up. It happens to everyone.', 28, 'Matter-of-fact', 0.50, 'Friendly', FALSE, FALSE, 6),
-        ('Meera', 'I''m sorry. For everything. I was scared.', 29, 'Sincere', 0.85, 'Apologetic', TRUE, FALSE, 7),
-        ('Kavya', 'We''re both scared. That''s what made us lash out at each other.', 30, 'Forgiving', 0.80, 'Emotional', TRUE, FALSE, 9),
-        ('Meera', 'Can we start over? I don''t want to lose you.', 31, 'Pleading', 0.90, 'Emotional', TRUE, FALSE, 7),
-        ('Kavya', 'We never lost each other. We just lost our way.', 32, 'Hopeful', 0.85, 'Emotional', TRUE, FALSE, 8)
-    ) AS d(character, dialogue_text, dialogue_order, emotion, intensity, tone, conflict, romance, duration_sec)
+        ('Meera', 'Another day, another routine. Sometimes I wonder if this is all there is.', 1, 'Melancholic', 0.65, 'Contemplative', FALSE, FALSE),
+        ('Meera', 'The coffee tastes different today. Bitter... like my thoughts.', 2, 'Pensive', 0.55, 'Reflective', FALSE, FALSE),
+        ('Meera', 'You don''t understand what it''s like to carry this burden alone.', 3, 'Angry', 0.85, 'Confrontational', TRUE, FALSE),
+        ('Kavya', 'Alone? I''ve been here the whole time! You''re the one who shut me out.', 4, 'Frustrated', 0.80, 'Confrontational', TRUE, FALSE),
+        ('Meera', 'Some things can''t be fixed with just "being here." You know that.', 5, 'Sad', 0.75, 'Emotional', TRUE, FALSE),
+        ('Kavya', 'Then tell me what you need, Meera. I''m not a mind reader.', 6, 'Pleading', 0.70, 'Emotional', TRUE, FALSE),
+        ('Meera', 'Looking at myself in the mirror, I see a stranger.', 7, 'Melancholic', 0.90, 'Introspective', FALSE, FALSE),
+        ('Meera', 'The person looking back... she''s tired. So tired.', 8, 'Exhausted', 0.85, 'Sad', FALSE, FALSE),
+        ('Meera', 'I don''t think I can keep doing this. Every day is a performance.', 9, 'Hopeless', 0.75, 'Emotional', TRUE, FALSE),
+        ('Kavya', 'What are you saying? We''re in this together, remember?', 10, 'Concerned', 0.70, 'Supportive', TRUE, FALSE),
+        ('Meera', 'Are we? Because it feels like I''m fighting a war alone.', 11, 'Angry', 0.80, 'Confrontational', TRUE, FALSE),
+        ('Meera', 'You want the truth? The truth is I''ve been pretending for years!', 12, 'Angry', 0.95, 'Confrontational', TRUE, FALSE),
+        ('Kavya', 'Pretending? I gave you everything! My time, my love, my life!', 13, 'Angry', 0.90, 'Emotional', TRUE, FALSE),
+        ('Meera', 'And that''s supposed to make it all okay?', 14, 'Bitter', 0.85, 'Confrontational', TRUE, FALSE),
+        ('Arjun', 'Stop this! Both of you. This isn''t who we are.', 15, 'Desperate', 0.80, 'Pleading', TRUE, FALSE),
+        ('Meera', 'The flowers bloom even when nobody is watching.', 16, 'Hopeful', 0.60, 'Inspirational', FALSE, FALSE),
+        ('Arjun', 'That''s because they know their purpose. Do you know yours?', 17, 'Pensive', 0.55, 'Philosophical', FALSE, FALSE),
+        ('Kavya', 'Another day in this cubicle. What am I even doing with my life?', 18, 'Frustrated', 0.70, 'Workplace', FALSE, FALSE),
+        ('Kavya', 'I need a break. I need to feel alive again.', 19, 'Yearning', 0.75, 'Contemplative', FALSE, FALSE),
+        ('Meera', 'This place... it reminds me of our first date.', 20, 'Nostalgic', 0.70, 'Romantic', FALSE, TRUE),
+        ('Priya', 'You remember that? I thought you''d forgotten everything.', 21, 'Tender', 0.80, 'Romantic', FALSE, TRUE),
+        ('Meera', 'Some things you never forget, no matter how hard you try.', 22, 'Emotional', 0.75, 'Romantic', FALSE, TRUE),
+        ('Meera', 'The city lights don''t hide the darkness inside.', 23, 'Melancholic', 0.85, 'Dark', TRUE, FALSE),
+        ('Father', 'Darkness is just the absence of light. You have to create your own.', 24, 'Wisdom', 0.70, 'Inspirational', FALSE, FALSE),
+        ('Meera', 'I can''t sleep. My mind keeps racing.', 25, 'Anxious', 0.80, 'Emotional', FALSE, FALSE),
+        ('Kavya', 'You''re not the only one with demons, you know.', 26, 'Empathetic', 0.75, 'Supportive', FALSE, FALSE),
+        ('Meera', 'I miss being carefree. When did everything get so complicated?', 27, 'Nostalgic', 0.70, 'Contemplative', FALSE, FALSE),
+        ('Friend', 'It''s called growing up. It happens to everyone.', 28, 'Matter-of-fact', 0.50, 'Friendly', FALSE, FALSE),
+        ('Meera', 'I''m sorry. For everything. I was scared.', 29, 'Sincere', 0.85, 'Apologetic', TRUE, FALSE),
+        ('Kavya', 'We''re both scared. That''s what made us lash out at each other.', 30, 'Forgiving', 0.80, 'Emotional', TRUE, FALSE),
+        ('Meera', 'Can we start over? I don''t want to lose you.', 31, 'Pleading', 0.90, 'Emotional', TRUE, FALSE),
+        ('Kavya', 'We never lost each other. We just lost our way.', 32, 'Hopeful', 0.85, 'Emotional', TRUE, FALSE)
+    ) AS d(character, dialogue_text, dialogue_order, emotion, intensity, tone, conflict, romance)
     WHERE s.scene_number = ((d.dialogue_order - 1) % 12) + 1
 )
 INSERT INTO script_dialogues (
@@ -789,14 +793,18 @@ SELECT
     conflict,
     romance,
     array_length(string_to_array(dialogue_text, ' '), 1) AS word_count
-FROM dialoges_data
+FROM dialogues_data
 ON CONFLICT DO NOTHING;
 
+-- ------------------------------------------------------------
 -- 7. INSERT PRODUCTION RISKS
+-- ------------------------------------------------------------
 INSERT INTO production_risks (
-    project_id, risk_date, risk_type, severity, probability, impact, mitigation_plan, owner, status, category, triggers
+    project_id, risk_date, risk_type, severity, probability, impact,
+    mitigation_plan, owner, status, category, triggers
 )
-SELECT 'a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d',
+SELECT
+    'a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d',
     current_date + (random() * 60)::int,
     (ARRAY['Weather', 'Budget', 'Schedule', 'Technical', 'Human Resources', 'Legal', 'Security'])[floor(random() * 7 + 1)::int],
     (ARRAY['Low', 'Medium', 'High', 'Critical'])[floor(random() * 4 + 1)::int],
@@ -806,26 +814,30 @@ SELECT 'a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d',
         WHEN 0 THEN 'Monitor weather forecast daily and have backup indoor locations'
         WHEN 1 THEN 'Implement daily budget tracking and alert system'
         WHEN 2 THEN 'Create contingency schedule with buffer days'
-        WHEN 3 THEN 'Have backup equipment ready and trained technicians'
+        ELSE 'Have backup equipment ready and trained technicians'
     END,
     (ARRAY['Vikrant Mahalle', 'Vishesh Gandhi', 'Sanjay Mehta', 'Vaishnavi Bhate'])[floor(random() * 4 + 1)::int],
     (ARRAY['Identified', 'Mitigating', 'Resolved', 'Escalated'])[floor(random() * 4 + 1)::int],
     (ARRAY['Production', 'Logistics', 'Financial', 'Technical'])[floor(random() * 4 + 1)::int],
     ARRAY['Heavy rain forecast', 'Budget overspending', 'Crew illness', 'Equipment failure']
 FROM generate_series(1, 15);
-SELECT * FROM production_risks;
 
+-- ------------------------------------------------------------
 -- 8. INSERT SHOOT DAYS
+-- ------------------------------------------------------------
 INSERT INTO shoot_days (
-    project_id, shoot_date, day_number, location, weather_conditiotemperature_celsius, is_rained, crew_present, cast_present, start_time, end_time, total_hours, status, notes, weather_data
+    project_id, shoot_date, day_number, location, weather_condition,
+    temperature_celsius, is_rained, crew_present, cast_present,
+    start_time, end_time, total_hours, status, notes, weather_data
 ) VALUES
-	('a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d', '2026-08-01', 1, 'Kitchen Studio', 'Clear', 28.5, FALSE, 12, 2, '06:00:00', '14:00:00', 8.0, 'Completed', 'Day 1 - Kitchen scenes completed successfully', jsonb_build_object('humidity', 65, 'wind_speed', 10, 'visibility', 'Good')),
-	('a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d', '2026-08-02', 2, 'Living Room Set', 'Partly Cloudy', 27.0, FALSE, 13, 3, '07:00:00', '16:00:00', 9.0, 'Completed', 'Day 2 - Living room scenes with both leads', jsonb_build_object('humidity', 70, 'wind_speed', 8, 'visibility', 'Good')),
-	('a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d', '2026-08-03', 3, 'Outdoor Location', 'Sunny', 32.5, FALSE, 15, 4, '05:30:00', '13:30:00', 8.0, 'Completed', 'Day 3 - Outdoor scenes with good natural light', jsonb_build_object('humidity', 55, 'wind_speed', 5, 'visibility', 'Excellent')),
-	('a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d', '2026-08-04', 4, 'Multiple Locations', 'Rainy', 24.0, TRUE, 14, 3, '08:00:00', '12:00:00', 4.0, 'Cancelled', 'Day 4 - Cancelled due to rain. Rescheduled', jsonb_build_object('humidity', 85, 'wind_speed', 25, 'visibility', 'Poor'));
-SELECT * FROM shoot_days;
+('a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d', '2026-08-01', 1, 'Kitchen Studio', 'Clear', 28.5, FALSE, 12, 2, '06:00:00', '14:00:00', 8.0, 'Completed', 'Day 1 - Kitchen scenes completed successfully', jsonb_build_object('humidity', 65, 'wind_speed', 10, 'visibility', 'Good')),
+('a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d', '2026-08-02', 2, 'Living Room Set', 'Partly Cloudy', 27.0, FALSE, 13, 3, '07:00:00', '16:00:00', 9.0, 'Completed', 'Day 2 - Living room scenes with both leads', jsonb_build_object('humidity', 70, 'wind_speed', 8, 'visibility', 'Good')),
+('a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d', '2026-08-03', 3, 'Outdoor Location', 'Sunny', 32.5, FALSE, 15, 4, '05:30:00', '13:30:00', 8.0, 'Completed', 'Day 3 - Outdoor scenes with good natural light', jsonb_build_object('humidity', 55, 'wind_speed', 5, 'visibility', 'Excellent')),
+('a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d', '2026-08-04', 4, 'Multiple Locations', 'Rainy', 24.0, TRUE, 14, 3, '08:00:00', '12:00:00', 4.0, 'Cancelled', 'Day 4 - Cancelled due to rain. Rescheduled', jsonb_build_object('humidity', 85, 'wind_speed', 25, 'visibility', 'Poor'));
 
+-- ------------------------------------------------------------
 -- 9. INSERT BUDGET TRANSACTIONS
+-- ------------------------------------------------------------
 INSERT INTO budget_transactions (
     project_id, category, description, amount, transaction_date,
     vendor_name, receipt_number, approved_by, payment_method,
@@ -843,11 +855,7 @@ SELECT
     payment_method,
     invoice_number,
     tax_amount,
-    jsonb_build_object(
-        'approved', true,
-        'payment_status', 'Paid',
-        'department', 'Production'
-    )
+    jsonb_build_object('approved', true, 'payment_status', 'Paid', 'department', 'Production')
 FROM (VALUES
     ('Crew', 'Director advance payment', 75000.00, '2026-06-01', 'Vikrant Mahalle', 'REC-001', 'Production Manager', 'Bank Transfer', 'INV-001', 7500.00),
     ('Crew', 'Cinematographer advance', 60000.00, '2026-06-01', 'Vishesh Gandhi', 'REC-002', 'Production Manager', 'Bank Transfer', 'INV-002', 6000.00),
@@ -871,44 +879,39 @@ FROM (VALUES
     ('Insurance', 'Insurance premium', 15000.00, '2026-07-01', 'Film Insurance Co', 'REC-020', 'Production Manager', 'Bank Transfer', 'INV-020', 1500.00)
 ) AS transactions(category, description, amount, transaction_date, vendor_name, receipt_number, approved_by, payment_method, invoice_number, tax_amount);
 
-SELECT * FROM budget_transactions;
-
+-- ------------------------------------------------------------
 -- 10. INSERT FESTIVAL SUBMISSIONS
+-- ------------------------------------------------------------
 INSERT INTO festival_submissions (
     project_id, festival_name, festival_category, submission_date,
     submission_fee, status, selection_probability, notes,
     festival_metadata, submission_documents
 ) VALUES
-('a1b2c3d4-e5f6-4a5d-8c7d-9e0f1a2b3c4d', 'Pune Short Film Festival', 'International Short Film', '2026-09-01', 1500.00, 'Pending', 0.85, 'High probability based on similar films',
+('a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d', 'Pune Short Film Festival', 'International Short Film', '2026-09-01', 1500.00, 'Pending', 0.85, 'High probability based on similar films',
  jsonb_build_object('website', 'https://puneshortfilmfestival.com', 'edition', '2026', 'deadline', '2026-08-15'),
  jsonb_build_array(
     jsonb_build_object('name', 'Entry Form', 'uploaded', true),
-    jsonb_build_object('name', 'Screening Copy', 'uploaded', false)
- )),
-('a1b2c3d4-e5f6-4a5d-8c7d-9e0f1a2b3c4d', 'Mumbai Academy (MAMI)', 'Indian Cinema', '2026-09-10', 2000.00, 'Pending', 0.78, 'Strong cultural relevance',
+    jsonb_build_object('name', 'Screening Copy', 'uploaded', false))),
+
+('a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d', 'Mumbai Academy (MAMI)', 'Indian Cinema', '2026-09-10', 2000.00, 'Pending', 0.78, 'Strong cultural relevance',
  jsonb_build_object('website', 'https://mami.org', 'edition', '2026', 'deadline', '2026-08-20'),
- jsonb_build_array(
-    jsonb_build_object('name', 'Submission Form', 'uploaded', true)
- )),
-('a1b2c3d4-e5f6-4a5d-8c7d-9e0f1a2b3c4d', 'Berlin International Film Festival', 'Short Film', '2026-10-01', 3500.00, 'Pending', 0.65, 'International exposure potential',
+ jsonb_build_array(jsonb_build_object('name', 'Submission Form', 'uploaded', true))),
+
+('a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d', 'Berlin International Film Festival', 'Short Film', '2026-10-01', 3500.00, 'Pending', 0.65, 'International exposure potential',
  jsonb_build_object('website', 'https://berlinale.com', 'edition', '2026', 'deadline', '2026-09-01'),
- jsonb_build_array(
-    jsonb_build_object('name', 'Online Entry', 'uploaded', true)
- )),
-('a1b2c3d4-e5f6-4a5d-8c7d-9e0f1a2b3c4d', 'Indian Film Festival (IFFI)', 'Indian Cinema', '2026-10-15', 2500.00, 'Pending', 0.82, 'Strong narrative for Indian audience',
+ jsonb_build_array(jsonb_build_object('name', 'Online Entry', 'uploaded', true))),
+
+('a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d', 'Indian Film Festival (IFFI)', 'Indian Cinema', '2026-10-15', 2500.00, 'Pending', 0.82, 'Strong narrative for Indian audience',
  jsonb_build_object('website', 'https://iffi.goa.gov.in', 'edition', '2026', 'deadline', '2026-09-15'),
- jsonb_build_array(
-    jsonb_build_object('name', 'Official Entry', 'uploaded', true)
- )),
-('a1b2c3d4-e5f6-4a5d-8c7d-9e0f1a2b3c4d', 'Cannes Short Film Corner', 'International', '2026-11-01', 4000.00, 'Pending', 0.55, 'Competitive but prestigious',
+ jsonb_build_array(jsonb_build_object('name', 'Official Entry', 'uploaded', true))),
+
+('a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d', 'Cannes Short Film Corner', 'International', '2026-11-01', 4000.00, 'Pending', 0.55, 'Competitive but prestigious',
  jsonb_build_object('website', 'https://cannes.com', 'edition', '2026', 'deadline', '2026-10-01'),
- jsonb_build_array(
-    jsonb_build_object('name', 'Cannes Entry', 'uploaded', false)
- ));
+ jsonb_build_array(jsonb_build_object('name', 'Cannes Entry', 'uploaded', false)));
 
-SELECT * FROM festival_submissions;
-
+-- ------------------------------------------------------------
 -- 11. INSERT ANALYTICS DAILY
+-- ------------------------------------------------------------
 INSERT INTO analytics_daily (
     project_id, date, daily_budget_spent, cumulative_budget_spent,
     scenes_completed_today, cumulative_scenes_completed,
@@ -917,7 +920,7 @@ INSERT INTO analytics_daily (
     risk_score_today, productivity_score, key_metrics
 )
 SELECT
-    'a1b2c3d4-e5f6-4a5d-8c7d-9e0f1a2b3c4d',
+    'a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d',
     current_date - (30 - day_num)::int,
     ROUND(CAST(random() * 50000 + 10000 AS NUMERIC), 2),
     ROUND(CAST((random() * 500000 + 200000) + (day_num * 15000) AS NUMERIC), 2),
@@ -935,20 +938,20 @@ SELECT
     )
 FROM generate_series(1, 30) AS day_num;
 
-SELECT * FROM analytics_daily;
-
--- 12. CREATE MATERIALIZED VIEWS
--- Production Summary
-CREATE MATERIALIZED VIEW my_production_summary AS
+-- ============================================================
+-- 12. MATERIALIZED VIEWS
+-- ============================================================
+DROP MATERIALIZED VIEW IF EXISTS mv_production_summary CASCADE;
+CREATE MATERIALIZED VIEW mv_production_summary AS
 SELECT
-	p.project_id,
-	p.title,
-	p.director,
-	p.status,
-	p.total_budget,
-	COALESCE(SUM(bt.amount), 0) AS spent_amount,
-	p.total_budget - COALESCE(SUM(bt.amount), 0) AS remaining_budget,
-	ROUND(COALESCE(SUM(bt.amount), 0) / p.total_budget * 100, 2) AS budget_used_percentage,
+    p.project_id,
+    p.title,
+    p.director,
+    p.status,
+    p.total_budget,
+    COALESCE(SUM(bt.amount), 0) AS spent_amount,
+    p.total_budget - COALESCE(SUM(bt.amount), 0) AS remaining_budget,
+    ROUND(COALESCE(SUM(bt.amount), 0) / NULLIF(p.total_budget, 0) * 100, 2) AS budget_used_percentage,
     COUNT(DISTINCT cm.crew_id) AS total_crew,
     COUNT(DISTINCT ca.cast_id) AS total_cast,
     COUNT(DISTINCT s.scene_id) AS total_scenes,
@@ -957,72 +960,54 @@ SELECT
     COUNT(DISTINCT CASE WHEN sd.status = 'Completed' THEN sd.shoot_day_id END) AS completed_shoot_days
 FROM film_projects p
 LEFT JOIN budget_transactions bt ON p.project_id = bt.project_id
-LEFT JOIN crew_members cm ON p.project_id = cm.project_id
-LEFT JOIN cast_members ca ON p.project_id = ca.project_id
-LEFT JOIN scenes s ON p.project_id = s.project_id
-LEFT JOIN shoot_days sd ON p.project_id = sd.project_id
+LEFT JOIN crew_members cm       ON p.project_id = cm.project_id
+LEFT JOIN cast_members ca       ON p.project_id = ca.project_id
+LEFT JOIN scenes s              ON p.project_id = s.project_id
+LEFT JOIN shoot_days sd         ON p.project_id = sd.project_id
 WHERE p.project_id = 'a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d'
 GROUP BY p.project_id;
 
--- Scene Analysis
+DROP MATERIALIZED VIEW IF EXISTS mv_scene_analysis CASCADE;
 CREATE MATERIALIZED VIEW mv_scene_analysis AS
 SELECT
-	s.scene_id,
-	s.scene_number,
-	s.complexity_score,
-	s.emotional_tone,
-	s.status,
-	COUNT(DISTINCT sa.cast_id) AS actor_count,
-	AVG(sa.lines_count) AS avg_lines,
-	AVG(sa.screen_time_minutes) AS asg_screen_time,
-	AVG(sa.rehearsal_hours) AS avg_rehearsal_hours
+    s.scene_id,
+    s.scene_number,
+    s.complexity_score,
+    s.emotional_tone,
+    s.status,
+    COUNT(DISTINCT sa.cast_id) AS actor_count,
+    AVG(sa.lines_count) AS avg_lines,
+    AVG(sa.screen_time_minutes) AS avg_screen_time,
+    AVG(sa.rehearsal_hours) AS avg_rehearsal_hours
 FROM scenes s
 LEFT JOIN scene_actors sa ON s.scene_id = sa.scene_id
 WHERE s.project_id = 'a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d'
 GROUP BY s.scene_id;
 
--- Sentiment Trends
+DROP MATERIALIZED VIEW IF EXISTS mv_sentiment_trends CASCADE;
 CREATE MATERIALIZED VIEW mv_sentiment_trends AS
-SELECT 
+SELECT
     date_trunc('week', sa.analyzed_date) AS week_start,
     AVG(sa.polarity) AS avg_polarity,
     AVG(sa.subjectivity) AS avg_subjectivity,
-    COUNT(*) AS dialogue_count,
-    jsonb_object_agg(sub.emotion_label, sub.emotion_count) AS emotion_distribution
-FROM (
-    SELECT 
-        date_trunc('week', sa.analyzed_date) AS week_start,
-        sa.emotion_label,
-        COUNT(*) AS emotion_count
-    FROM sentiment_analysis sa
-    WHERE sa.project_id = 'a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d'
-    GROUP BY date_trunc('week', sa.analyzed_date), sa.emotion_label
-) sub
-JOIN sentiment_analysis sa
-  ON sub.week_start = date_trunc('week', sa.analyzed_date)
+    COUNT(*) AS dialogue_count
+FROM sentiment_analysis sa
 WHERE sa.project_id = 'a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d'
 GROUP BY date_trunc('week', sa.analyzed_date)
 ORDER BY week_start DESC;
 
--- 13. FULL-TEXT SEARCH QUERIES
--- Enable full-text search on film projects
-CREATE INDEX idx_projects_fulltext ON film_projects USING GIN(search_vector);
-
--- Enable full-text search on dialogues
-CREATE INDEX idx_dialogues_fulltext ON script_dialogues USING GIN(search_vector);
-
--- 14. STORED PROCEDURES
+-- ============================================================
+-- 13. FUNCTIONS
+-- ============================================================
 CREATE OR REPLACE FUNCTION calculate_risk_score(
-	p_probability DECIMAL,
-	p_impact DECIMAL
-)RETURNS DECIMAL AS $$
+    p_probability DECIMAL,
+    p_impact DECIMAL
+) RETURNS DECIMAL AS $$
 BEGIN
-	RETURN COALESCE(p_probability, 0) * COALESCE(p_impact, 0) * 100;
+    RETURN COALESCE(p_probability, 0) * COALESCE(p_impact, 0) * 100;
 END;
 $$ LANGUAGE plpgsql IMMUTABLE;
-SELECT * FROM production_risks;
 
--- Procedure: Get Production Health
 CREATE OR REPLACE FUNCTION get_production_health(
     p_project_id UUID
 ) RETURNS TABLE(
@@ -1032,168 +1017,106 @@ CREATE OR REPLACE FUNCTION get_production_health(
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT 
+    SELECT
         'Budget Health'::VARCHAR,
-        (SELECT COALESCE(SUM(amount), 0) / total_budget * 100 
-         FROM budget_transactions, film_projects 
-         WHERE film_projects.project_id = p_project_id 
-           AND budget_transactions.project_id = p_project_id) AS value,
-        CASE 
-            WHEN (SELECT COALESCE(SUM(amount), 0) / total_budget * 100 
-                  FROM budget_transactions, film_projects 
-                  WHERE film_projects.project_id = p_project_id 
-                    AND budget_transactions.project_id = p_project_id) < 70 
+        ROUND(
+            (SELECT COALESCE(SUM(amount), 0) / NULLIF(total_budget, 0) * 100
+             FROM budget_transactions, film_projects
+             WHERE film_projects.project_id = p_project_id
+               AND budget_transactions.project_id = p_project_id)::DECIMAL(5,2), 2),
+        CASE
+            WHEN (SELECT COALESCE(SUM(amount), 0) / NULLIF(total_budget, 0) * 100
+                  FROM budget_transactions, film_projects
+                  WHERE film_projects.project_id = p_project_id
+                    AND budget_transactions.project_id = p_project_id) < 70
             THEN 'Good'
             ELSE 'Warning'
-        END AS status;
-    
+        END;
+
     RETURN QUERY
-    SELECT 
+    SELECT
         'Schedule Health'::VARCHAR,
-        (SELECT COUNT(*)::DECIMAL / 12 * 100 
-         FROM scenes 
-         WHERE project_id = p_project_id AND status = 'Completed') AS value,
-        CASE 
-            WHEN (SELECT COUNT(*)::DECIMAL / 12 * 100 
-                  FROM scenes 
-                  WHERE project_id = p_project_id AND status = 'Completed') > 50 
+        ROUND(
+            (SELECT COUNT(*)::DECIMAL / NULLIF(12, 0) * 100
+             FROM scenes
+             WHERE project_id = p_project_id AND status = 'Completed')::DECIMAL(5,2), 2),
+        CASE
+            WHEN (SELECT COUNT(*)::DECIMAL / NULLIF(12, 0) * 100
+                  FROM scenes
+                  WHERE project_id = p_project_id AND status = 'Completed') > 50
             THEN 'Good'
             ELSE 'Warning'
-        END AS status;
+        END;
 END;
 $$ LANGUAGE plpgsql;
 
--- 15. ANALYTICAL QUERIES
--- Query 1: Top budget categories with percentages
-SELECT category,
-	COUNT(*) AS transiction_count,
-	SUM(amount) AS total_amount,
-	ROUND(SUM(amount) / (SELECT total_budget FROM film_projects WHERE project_id = 'a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d') * 100, 2) AS percentage
-FROM budget_transactions
-WHERE project_id = 'a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d'
-GROUP BY category
-ORDER BY total_amount DESC;
-
--- Query 2: Sentiment heatmap by scene
-SELECT
-	s.scene_number,
-	s.emotional_tone,
-	ROUND(AVG(sa.polarity), 3) AS avg_polarity,
-	ROUND(AVG(sa.subjectivity), 3) AS avg_subjectivity,
-	COUNT(sa.dialogue_id) AS dialogue_count,
-	jsonb_agg(DISTINCT sa.emotion_label) AS emotions_present
-FROM scenes s
-JOIN sentiment_analysis sa ON s.scene_id = sa.scene_id
-WHERE s.project_id = 'a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d'
-GROUP BY s.scene_id
-ORDER BY s.scene_number;
-
--- Query 3: Risk matrix
-SELECT
-    severity,
-    AVG(probability) AS avg_probability,
-    AVG(impact) AS avg_impact,
-    AVG(risk_score) AS avg_risk_score,
-    COUNT(*) as count,
-    array_agg(risk_type) AS risk_types
-FROM production_risks
-WHERE project_id = 'a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d'
-GROUP BY severity
-ORDER BY array_position(ARRAY['Critical','High','Medium','Low'], severity);
-
--- Query 4: Full-text search in dialogues
-SELECT
-	dialogue_text,
-	character_name,
-	emotion_tag,
-	ts_rank(search_vector, plainto_tsquery('english', 'love emotional')) AS relevance
-FROM script_dialogues
-WHERE project_id = 'a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d'
-	AND search_vector @@ plainto_tsquery('english', 'love emotional')
-ORDER BY relevance DESC
-LIMIT 10;
-
--- Query 5: JSONB query - Find all scenes with specific props
-SELECT
-	scene_number,
-	location,
-	props,
-	wardrobe
-FROM scenes
-WHERE project_id = 'a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d'
-	AND props ? 'Coffee mug'
-	AND props ? 'Phone';
-
--- Query 6: Daily trend analysis using window functions
+-- ============================================================
+-- 14. ML FEATURES VIEW
+-- ============================================================
+DROP VIEW IF EXISTS vw_ml_features_complete CASCADE;
 CREATE OR REPLACE VIEW vw_ml_features_complete AS
-SELECT 
+SELECT
     p.project_id,
     p.title,
     p.total_budget,
     p.status,
-    -- Budget metrics
     COALESCE(SUM(bt.amount), 0) AS total_spent,
     COALESCE(SUM(CASE WHEN bt.category = 'Crew' THEN bt.amount END), 0) AS crew_cost,
     COALESCE(SUM(CASE WHEN bt.category = 'Cast' THEN bt.amount END), 0) AS cast_cost,
     COALESCE(SUM(CASE WHEN bt.category = 'Equipment' THEN bt.amount END), 0) AS equipment_cost,
-    -- Crew metrics
     COUNT(DISTINCT cm.crew_id) AS crew_count,
     AVG(cm.experience_years) AS avg_crew_experience,
-    -- Cast metrics
     COUNT(DISTINCT ca.cast_id) AS cast_count,
     AVG(ca.experience_years) AS avg_cast_experience,
-    -- Scene metrics
     COUNT(DISTINCT s.scene_id) AS total_scenes,
     COUNT(DISTINCT CASE WHEN s.status = 'Completed' THEN s.scene_id END) AS completed_scenes,
     AVG(s.complexity_score) AS avg_complexity,
-    -- Shoot metrics
     COUNT(DISTINCT sd.shoot_day_id) AS total_shoot_days,
     SUM(CASE WHEN sd.status = 'Completed' THEN sd.total_hours ELSE 0 END) AS total_production_hours,
-    -- Risk metrics
     COUNT(DISTINCT pr.risk_id) AS total_risks,
     COUNT(DISTINCT CASE WHEN pr.severity IN ('High', 'Critical') THEN pr.risk_id END) AS high_risks,
     AVG(pr.risk_score) AS avg_risk_score,
-    -- Sentiment metrics
     AVG(sa.polarity) AS avg_sentiment_polarity,
     AVG(sa.subjectivity) AS avg_sentiment_subjectivity,
-    -- Prediction target
     p.duration_minutes AS runtime_prediction
 FROM film_projects p
 LEFT JOIN budget_transactions bt ON p.project_id = bt.project_id
-LEFT JOIN crew_members cm ON p.project_id = cm.project_id
-LEFT JOIN cast_members ca ON p.project_id = ca.project_id
-LEFT JOIN scenes s ON p.project_id = s.project_id
-LEFT JOIN shoot_days sd ON p.project_id = sd.project_id
-LEFT JOIN production_risks pr ON p.project_id = pr.project_id
+LEFT JOIN crew_members cm       ON p.project_id = cm.project_id
+LEFT JOIN cast_members ca       ON p.project_id = ca.project_id
+LEFT JOIN scenes s              ON p.project_id = s.project_id
+LEFT JOIN shoot_days sd         ON p.project_id = sd.project_id
+LEFT JOIN production_risks pr   ON p.project_id = pr.project_id
 LEFT JOIN sentiment_analysis sa ON p.project_id = sa.project_id
-WHERE p.project_id = 'a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d'
 GROUP BY p.project_id;
 
--- 18. CLEANUP AND REINDEX
+-- ============================================================
+-- 15. INDEXES + REINDEX
+-- ============================================================
+CREATE INDEX IF NOT EXISTS idx_project_id ON film_projects(project_id);
+
 REINDEX SCHEMA public;
 REINDEX TABLE film_projects;
 REINDEX INDEX idx_project_id;
 
--- 18.1. Create the index explicitly
-CREATE INDEX idx_project_id ON film_projects(project_id);
-
--- 19 VERIFICATION QUERIES
-SELECT 'Total Projects' AS metrics, COUNT(*) FROM film_projects
+-- ============================================================
+-- 16. VERIFICATION QUERIES
+-- ============================================================
+SELECT 'Total Projects'       AS metrics, COUNT(*) FROM film_projects
 UNION ALL
-SELECT 'Total Crew', COUNT(*) FROM cast_members
+SELECT 'Total Crew',          COUNT(*) FROM crew_members
 UNION ALL
-SELECT 'Total Cast', COUNT(*) FROM cast_members
+SELECT 'Total Cast',          COUNT(*) FROM cast_members
 UNION ALL
-SELECT 'Total Scenes', COUNT(*) FROM scenes
+SELECT 'Total Scenes',        COUNT(*) FROM scenes
 UNION ALL
-SELECT 'Total Dialgues', COUNT(*) FROM script_dialogues
+SELECT 'Total Dialogues',     COUNT(*) FROM script_dialogues
 UNION ALL
-SELECT 'Total Stiments', COUNT(*) FROM sentiment_analysis
+SELECT 'Total Sentiments',    COUNT(*) FROM sentiment_analysis
 UNION ALL
-SELECT 'Total Risks', Count(*) FROM production_risks
+SELECT 'Total Risks',         COUNT(*) FROM production_risks
 UNION ALL
-SELECT 'Total Transictions', COUNT(*) FROM budget_transictions
+SELECT 'Total Transactions',  COUNT(*) FROM budget_transactions
 UNION ALL
-SELECT 'Total Analytics Days', COUNT(*) FROM analytics_daily
+SELECT 'Total Analytics Days',COUNT(*) FROM analytics_daily
 UNION ALL
-SELECT 'Total Festivals', COUNT(*) FROM festival_submissions;
+SELECT 'Total Festivals',     COUNT(*) FROM festival_submissions;
