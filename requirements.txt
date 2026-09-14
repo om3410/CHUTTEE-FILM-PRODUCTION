@@ -1,0 +1,43 @@
+# Build tools (fix for Python 3.12)
+setuptools>=68.0.0
+wheel>=0.42.0
+
+# Core Django and REST Framework
+Django==5.0.2
+djangorestframework==3.14.0
+djangorestframework-simplejwt==5.3.1
+
+# Database
+psycopg2-binary==2.9.9
+
+# Data processing and ML
+pandas==2.2.3          # Use newer version with wheels for Python 3.12
+scikit-learn==1.5.0    # Updated for compatibility
+joblib==1.4.2
+numpy==1.26.4          # Use latest stable for Python 3.12
+
+# Environment and configuration
+python-dotenv==1.0.0
+
+# CORS and filtering
+django-cors-headers==4.3.1
+django-filter==23.5
+
+# API documentation
+drf-yasg==1.21.7
+
+# Background tasks (optional)
+celery==5.3.6
+redis==5.0.1
+
+# Production server
+gunicorn==21.2.0
+
+# Payment (Stripe) – for paid version
+stripe==8.4.0
+
+# Gmail API (for email integration)
+google-auth-oauthlib==1.1.0
+google-api-python-client==2.100.0
+google-auth-httplib2==0.1.1
+textblob==0.18.0

@@ -16,6 +16,22 @@ staticfiles/
 
 # Environment variables
 .env
+.env.*
+!.env.example
+
+# Google credentials / OAuth tokens
+credentials.json
+token.json
+login.json
+register.json
+
+# ML generated/cache files
+*.pkl
+
+# Test/cache
+.pytest_cache/
+.coverage
+htmlcov/
 
 # IDE
 .vscode/

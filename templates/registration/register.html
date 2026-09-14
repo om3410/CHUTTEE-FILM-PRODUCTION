@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register · Chuttee Production</title>
+  <style>
+    :root {
+      --bg-1: #0f0c29;
+      --bg-2: #302b63;
+      --bg-3: #24243e;
+      --accent: #f4a261;
+      --accent-2: #e76f51;
+      --text: #f5f5f5;
+      --muted: #b8b8c8;
+      --card: rgba(255,255,255,0.06);
+      --border: rgba(255,255,255,0.12);
+      --error: #ff6b6b;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: var(--text);
+      background: linear-gradient(-45deg, var(--bg-1), var(--bg-2), var(--bg-3), var(--bg-1));
+      background-size: 400% 400%;
+      animation: gradientShift 18s ease infinite;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      overflow-x: hidden;
+    }
+
+    @keyframes gradientShift {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(90px);
+      opacity: 0.32;
+      animation: float 14s ease-in-out infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .orb-1 { width: 340px; height: 340px; background: #f4a261; top: -100px; left: -80px; }
+    .orb-2 { width: 280px; height: 280px; background: #6a4c93; bottom: -80px; right: -80px; animation-delay: 4s; }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0,0) scale(1); }
+      50%      { transform: translate(40px,-30px) scale(1.08); }
+    }
+
+    .card {
+      position: relative;
+      z-index: 1;
+      background: var(--card);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 42px 40px;
+      max-width: 460px;
+      width: 100%;
+      box-shadow: 0 24px 70px rgba(0,0,0,0.5);
+      animation: fadeInUp 0.7s cubic-bezier(0.22,1,0.36,1) both;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .logo {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 18px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #f4a261, #e76f51);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 34px;
+      box-shadow: 0 0 34px rgba(244,162,97,0.5);
+      animation: pop 0.6s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    @keyframes pop {
+      0%   { transform: scale(0) rotate(-45deg); opacity: 0; }
+      100% { transform: scale(1) rotate(0); opacity: 1; }
+    }
+
+    h2 {
+      font-size: 1.9rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 8px;
+      background: linear-gradient(90deg, #f4a261, #e76f51, #f4a261);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shine 4s linear infinite;
+    }
+    @keyframes shine { to { background-position: 200% center; } }
+
+    .subtitle {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 28px;
+    }
+
+    form p {
+      margin-bottom: 16px;
+      animation: fadeUp 0.5s both;
+    }
+    form p:nth-child(1) { animation-delay: 0.05s; }
+    form p:nth-child(2) { animation-delay: 0.10s; }
+    form p:nth-child(3) { animation-delay: 0.15s; }
+    form p:nth-child(4) { animation-delay: 0.20s; }
+    form p:nth-child(5) { animation-delay: 0.25s; }
+    form p:nth-child(6) { animation-delay: 0.30s; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    form label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+    }
+
+    form input[type="text"],
+    form input[type="email"],
+    form input[type="password"],
+    form input[type="number"],
+    form textarea,
+    form select {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.25);
+      color: var(--text);
+      font-size: 0.98rem;
+      outline: none;
+      transition: border 0.2s, box-shadow 0.2s, background 0.2s;
+    }
+    form input:focus, form textarea:focus, form select:focus {
+      border-color: var(--accent);
+      background: rgba(0,0,0,0.35);
+      box-shadow: 0 0 0 3px rgba(244,162,97,0.15);
+    }
+
+    .helptext {
+      display: block;
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 6px;
+      line-height: 1.4;
+    }
+
+    ul.errorlist {
+      list-style: none;
+      padding: 8px 12px;
+      margin-bottom: 8px;
+      background: rgba(255,107,107,0.12);
+      border-left: 3px solid var(--error);
+      border-radius: 6px;
+      color: var(--error);
+      font-size: 0.85rem;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 13px 20px;
+      border-radius: 11px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: transform 0.2s, box-shadow 0.3s;
+      position: relative;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+    .btn::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
+      transform: translateX(-100%);
+      transition: transform 0.6s;
+    }
+    .btn:hover::after { transform: translateX(100%); }
+    .btn:hover { transform: translateY(-2px); }
+    .btn:active { transform: translateY(0); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #1a1a1a;
+      box-shadow: 0 8px 24px rgba(244,162,97,0.35);
+    }
+    .btn-primary:hover { box-shadow: 0 12px 32px rgba(244,162,97,0.5); }
+
+    .footer-link {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+    .footer-link a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .footer-link a:hover { color: var(--accent-2); text-decoration: underline; }
+
+    @media (max-width: 480px) {
+      .card { padding: 32px 24px; border-radius: 18px; }
+      h2 { font-size: 1.6rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div class="card">
+    <div class="logo">🎬</div>
+    <h2>Create Account</h2>
+    <p class="subtitle">Join Chuttee Production</p>
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" class="btn btn-primary">Register</button>
+    </form>
+
+    <p class="footer-link">
+      Already have an account? <a href="{% url 'login' %}">Login</a>
+    </p>
+  </div>
+</body>
+</html>
