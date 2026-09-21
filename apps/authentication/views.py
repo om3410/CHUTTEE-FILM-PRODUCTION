@@ -5,8 +5,8 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .serializers import UserSerializer, RegisterSerializer
-from apps.authentication.services import send_email
 from .forms import CustomUserCreationForm, LoginForm
+from .emails import notify_new_registration
 
 # HTML Views
 class HomeView(View):
@@ -22,11 +22,7 @@ class RegisterView(View):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            if user.email:
-                try:
-                    send_email("Welcome to Chuttee Production", "Thank you for registration.", [user.email])
-                except Exception:
-                    pass
+            notify_new_registration(user)
             return redirect('home')
         return render(request, 'registration/register.html',  {'form': form})
     
@@ -49,6 +45,11 @@ class LogoutView(View):
 class RegisterAPIView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
     permission_classes = [permissions.AllowAny]
+
+    def perform_create(self, serializer):
+        user = serializer.save()
+        notify_new_registration(user)
+        return user
     
 class MeView(APIView):
     permission_classes = [permissions.IsAuthenticated]

@@ -199,3 +199,8 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Asia/Kolkata'
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+
+ADMIN_NOTIFICATION_EMAIL = os.getenv(
+    'ADMIN_NOTIFICATION_EMAIL',
+    'omrewaskar4@gmail.com'
+)

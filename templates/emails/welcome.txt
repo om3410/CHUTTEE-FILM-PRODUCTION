@@ -1,0 +1,7 @@
+Welcome, {{ first_name }}!
+
+Your account on Chuttee Film Production has been created.
+
+Log in: {{ login_url }}
+
+- Team Chuttee Film Production
