@@ -1,13 +1,21 @@
 from rest_framework import permissions
 
+
 class IsCrewMember(permissions.BasePermission):
-  """Only allows Crew Members to perform any action."""
-  def has_permission(self, request, view):
-    return bool(request.user and request.user.is_authenticated and request.user.role == 'CREW')
+    """Only CREW or ADMIN can access."""
+    def has_permission(self, request, view):
+        return bool(
+            request.user
+            and request.user.is_authenticated
+            and getattr(request.user, 'role', None) in ('CREW', 'ADMIN')
+        )
+
 
 class IsCrewOrReadOnly(permissions.BasePermission):
-  """Crew Members can edit. General Users can only view (GET, HEAD, OPTIONS)."""
-  def has_permission(self, request, view):
-    if request.method in permissions.SAFE_METHODS:
-      return True
-    return bool(request.user and request.user.is_authenticated and request.user.role == 'CREW')
+    """Anyone authenticated can read. Only CREW or ADMIN can write."""
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        return getattr(request.user, 'role', None) in ('CREW', 'ADMIN')

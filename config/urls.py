@@ -40,6 +40,11 @@ urlpatterns = [
     # API docs
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+    
+    path('api/exports/', include('apps.exports.urls')),
+    path('api/notifications/', include('apps.notifications.urls')),
+    path('api/collaboration/', include('apps.collaboration.urls')),
+    path('api/security/', include('apps.security_extras.urls')),
 ]
 
 # Serve media files during development
