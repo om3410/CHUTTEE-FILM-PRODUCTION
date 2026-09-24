@@ -8,9 +8,18 @@ https://docs.djangoproject.com/en/5.2/howto/deployment/asgi/
 """
 
 import os
+from celery import Celery
+from dotenv import load_dotenv
 
-from django.core.asgi import get_asgi_application
+load_dotenv()
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 
-application = get_asgi_application()
+app = Celery('chuttee')
+app.config_from_object('django.conf:settings', namespace='CELERY')
+app.autodiscover_tasks()
+
+
+@app.task(bind=True, ignore_result=True)
+def debug_task(self):
+    print(f'Request: {self.request!r}')

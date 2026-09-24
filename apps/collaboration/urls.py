@@ -1,9 +1,11 @@
-﻿from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import CommentViewSet, AuditLogViewSet
+﻿from django.urls import path
+from . import views
 
-router = DefaultRouter()
-router.register(r'comments', CommentViewSet)
-router.register(r'audit-logs', AuditLogViewSet)
+app_name = 'collaboration'
 
-urlpatterns = [path('', include(router.urls))]
+urlpatterns = [
+    path('comments/', views.comments, name='comments'),
+    path('comments/<uuid:comment_id>/', views.delete_comment, name='delete-comment'),
+    path('audit-logs/', views.audit_logs, name='audit-logs'),
+    path('activity/recent/', views.recent_activity, name='recent-activity'),
+]

@@ -7,9 +7,11 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ['id', 'user', 'user_name', 'scene', 'risk', 'body',
-                  'parent', 'mentions', 'created_at']
-        read_only_fields = ['user', 'user_name', 'created_at']
+        fields = (
+            'id', 'user', 'user_name', 'body', 'mentions',
+            'parent', 'risk', 'scene', 'created_at',
+        )
+        read_only_fields = ('id', 'user', 'created_at')
 
 
 class AuditLogSerializer(serializers.ModelSerializer):
@@ -17,4 +19,8 @@ class AuditLogSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AuditLog
-        fields = '__all__'
+        fields = (
+            'id', 'user', 'user_name', 'action', 'resource',
+            'resource_id', 'changes', 'ip_address', 'timestamp',
+        )
+        read_only_fields = fields

@@ -4,7 +4,7 @@ from django.contrib.postgres.fields import ArrayField
 
 
 class FilmProject(models.Model):
-    id = models.UUIDField(primary_key=True, db_column='project_id')
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, db_column='project_id')
     title = models.CharField(max_length=200)
     director = models.CharField(max_length=100)
     logline = models.TextField(blank=True, null=True)
@@ -29,7 +29,7 @@ class FilmProject(models.Model):
 
 
 class CrewMember(models.Model):
-    id = models.UUIDField(primary_key=True, db_column='crew_id')
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, db_column='crew_id')
     project = models.ForeignKey(
         FilmProject, on_delete=models.DO_NOTHING,
         db_column='project_id', related_name='crew', blank=True, null=True,
@@ -54,8 +54,9 @@ class CrewMember(models.Model):
     def __str__(self):
         return self.full_name
 
+
 class CastMember(models.Model):
-    id = models.UUIDField(primary_key=True, db_column='cast_id')
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, db_column='cast_id')
     project = models.ForeignKey(FilmProject, on_delete=models.DO_NOTHING, db_column='project_id', related_name='cast', blank=True, null=True)
     full_name = models.CharField(max_length=100)
     character_name = models.CharField(max_length=100, blank=True, null=True)
@@ -80,7 +81,7 @@ class CastMember(models.Model):
 
 
 class Scene(models.Model):
-    id = models.UUIDField(primary_key=True, db_column='scene_id')
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, db_column='scene_id')
     project = models.ForeignKey(FilmProject, on_delete=models.DO_NOTHING, db_column='project_id', related_name='scenes', blank=True, null=True)
     scene_number = models.IntegerField(blank=True, null=True)
     location = models.CharField(max_length=100, blank=True, null=True)
@@ -105,8 +106,23 @@ class Scene(models.Model):
 
 
 class SceneActor(models.Model):
-    scene = models.ForeignKey(Scene, on_delete=models.DO_NOTHING, db_column='scene_id', primary_key=True)
-    cast = models.ForeignKey(CastMember, on_delete=models.DO_NOTHING, db_column='cast_id')
+    """
+    Links a CastMember to a Scene.
+    A scene can have many actors; a cast member can appear in many scenes.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, db_column='scene_actor_id')
+    scene = models.ForeignKey(
+        Scene,
+        on_delete=models.DO_NOTHING,
+        db_column='scene_id',
+        related_name='cast_members',
+    )
+    cast = models.ForeignKey(
+        CastMember,
+        on_delete=models.DO_NOTHING,
+        db_column='cast_id',
+        related_name='scene_appearances',
+    )
     lines_count = models.IntegerField(blank=True, null=True)
     screen_time_minutes = models.IntegerField(blank=True, null=True)
     rehearsal_hours = models.DecimalField(max_digits=4, decimal_places=2, blank=True, null=True)
@@ -120,9 +136,12 @@ class SceneActor(models.Model):
         db_table = 'scene_actors'
         unique_together = (('scene', 'cast'))
 
+    def __str__(self):
+        return f"Scene {self.scene_id} - Cast {self.cast_id}"
+
 
 class Equipment(models.Model):
-    id = models.UUIDField(primary_key=True, db_column='equipment_id')
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, db_column='equipment_id')
     project = models.ForeignKey(FilmProject, on_delete=models.DO_NOTHING, db_column='project_id', related_name='equipment', blank=True, null=True)
     name = models.CharField(max_length=100, blank=True, null=True)
     category = models.CharField(max_length=50, blank=True, null=True)
@@ -148,7 +167,7 @@ class Equipment(models.Model):
 
 
 class EquipmentUsage(models.Model):
-    id = models.UUIDField(primary_key=True, db_column='usage_id')
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, db_column='usage_id')
     equipment = models.ForeignKey(Equipment, on_delete=models.DO_NOTHING, db_column='equipment_id')
     scene = models.ForeignKey(Scene, on_delete=models.DO_NOTHING, db_column='scene_id')
     used_date = models.DateField(blank=True, null=True)
@@ -164,7 +183,7 @@ class EquipmentUsage(models.Model):
 
 
 class ShootDay(models.Model):
-    shoot_day_id = models.UUIDField(primary_key=True, db_column='shoot_day_id')
+    shoot_day_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, db_column='shoot_day_id')
     project = models.ForeignKey(
         FilmProject, on_delete=models.DO_NOTHING,
         db_column='project_id', related_name='shoot_days', blank=True, null=True,
@@ -195,23 +214,44 @@ class ShootDay(models.Model):
 
 
 class ShootDayScene(models.Model):
-    shoot_day = models.ForeignKey(ShootDay, on_delete=models.DO_NOTHING, db_column='shoot_day_id', primary_key=True)
-    scene = models.ForeignKey(Scene, on_delete=models.DO_NOTHING, db_column='scene_id')
+    """
+    Links a Scene to a ShootDay.
+    One shoot day has many scenes; a scene can be shot across many days.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, db_column='shoot_day_scene_id')
+    shoot_day = models.ForeignKey(
+        ShootDay,
+        on_delete=models.DO_NOTHING,
+        db_column='shoot_day_id',
+        related_name='scenes',              # ✅ shoot_day.scenes.all()
+    )
+    scene = models.ForeignKey(
+        Scene,
+        on_delete=models.DO_NOTHING,
+        db_column='scene_id',
+        related_name='shoot_days',          # ✅ scene.shoot_days.all()
+    )
     shot_order = models.IntegerField(blank=True, null=True)
     status = models.CharField(max_length=20, blank=True, null=True)
     actual_time_taken_minutes = models.IntegerField(blank=True, null=True)
     notes = models.TextField(blank=True, null=True)
-    created_at = models.DateTimeField(blank=True, null=True)
-    updated_at = models.DateTimeField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)   # ✅ auto
+    updated_at = models.DateTimeField(auto_now=True)       # ✅ auto
 
     class Meta:
         managed = False
         db_table = 'shoot_day_scenes'
-        unique_together = (('shoot_day', 'scene'))
+        ordering = ['shoot_day', 'shot_order']
+        unique_together = (('shoot_day', 'scene'),)
+        verbose_name = 'Shoot Day Scene'
+        verbose_name_plural = 'Shoot Day Scenes'
+
+    def __str__(self):
+        return f"Scene {self.scene_id} on ShootDay {self.shoot_day_id}"
 
 
 class BudgetTransaction(models.Model):
-    id = models.UUIDField(primary_key=True, db_column='transaction_id')
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, db_column='transaction_id')
     project = models.ForeignKey(FilmProject, on_delete=models.DO_NOTHING, db_column='project_id', related_name='budget', blank=True, null=True)
     category = models.CharField(max_length=50, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
@@ -232,7 +272,7 @@ class BudgetTransaction(models.Model):
 
 
 class ScriptDialogue(models.Model):
-    id = models.UUIDField(primary_key=True, db_column='dialogue_id')
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, db_column='dialogue_id')
     project = models.ForeignKey(FilmProject, on_delete=models.DO_NOTHING, db_column='project_id', related_name='dialogues', blank=True, null=True)
     scene = models.ForeignKey(Scene, on_delete=models.DO_NOTHING, db_column='scene_id', blank=True, null=True)
     character_name = models.CharField(max_length=100, blank=True, null=True)
@@ -254,7 +294,7 @@ class ScriptDialogue(models.Model):
 
 
 class SentimentAnalysis(models.Model):
-    id = models.UUIDField(primary_key=True, db_column='sentiment_id')
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, db_column='sentiment_id')
     project = models.ForeignKey(FilmProject, on_delete=models.DO_NOTHING, db_column='project_id', related_name='sentiments', blank=True, null=True)
     scene = models.ForeignKey(Scene, on_delete=models.DO_NOTHING, db_column='scene_id', blank=True, null=True)
     dialogue = models.ForeignKey(ScriptDialogue, on_delete=models.DO_NOTHING, db_column='dialogue_id', blank=True, null=True)
@@ -272,7 +312,7 @@ class SentimentAnalysis(models.Model):
 
 
 class ProductionRisk(models.Model):
-    id = models.UUIDField(primary_key=True, db_column='risk_id')
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, db_column='risk_id')
     project = models.ForeignKey(FilmProject, on_delete=models.DO_NOTHING, db_column='project_id', related_name='risks', blank=True, null=True)
     risk_date = models.DateField(blank=True, null=True)
     risk_type = models.CharField(max_length=50, blank=True, null=True)
@@ -296,7 +336,7 @@ class ProductionRisk(models.Model):
 
 
 class FestivalSubmission(models.Model):
-    id = models.UUIDField(primary_key=True, db_column='submission_id')
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, db_column='submission_id')
     project = models.ForeignKey(FilmProject, on_delete=models.DO_NOTHING, db_column='project_id', related_name='festival_submissions', blank=True, null=True)
     festival_name = models.CharField(max_length=100, blank=True, null=True)
     festival_category = models.CharField(max_length=100, blank=True, null=True)
@@ -315,7 +355,7 @@ class FestivalSubmission(models.Model):
 
 
 class AnalyticsDaily(models.Model):
-    id = models.UUIDField(primary_key=True, db_column='analytics_id')
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, db_column='analytics_id')
     project = models.ForeignKey(FilmProject, on_delete=models.DO_NOTHING, db_column='project_id', related_name='analytics_daily', blank=True, null=True)
     cumulative_budget_spent = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
     scenes_completed_today = models.IntegerField(blank=True, null=True)
@@ -335,7 +375,7 @@ class AnalyticsDaily(models.Model):
 
 
 class MLPrediction(models.Model):
-    id = models.UUIDField(primary_key=True, db_column='prediction_id')
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, db_column='prediction_id')
     project = models.ForeignKey(FilmProject, on_delete=models.DO_NOTHING, db_column='project_id', related_name='ml_predictions', blank=True, null=True)
     prediction_date = models.DateField(blank=True, null=True)
     model_type = models.CharField(max_length=50, blank=True, null=True)

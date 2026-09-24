@@ -1,29 +1,71 @@
-setuptools>=68.0.0
-wheel>=0.42.0
+# ============================================================
+# CHUTTEE FILM PRODUCTION — Requirements
+# ============================================================
+
+# ---------- CORE ----------
 Django==5.0.2
 djangorestframework==3.14.0
 djangorestframework-simplejwt==5.3.1
+django-cors-headers==4.3.1
+django-filter==23.5
+drf-yasg==1.21.7
+
+# ---------- DATABASE ----------
 psycopg2-binary==2.9.9
+dj-database-url==2.1.0
+
+# ---------- ML / DATA ----------
 pandas==2.2.3
 scikit-learn==1.5.2
 joblib==1.4.2
 numpy==1.26.4
-python-dotenv==1.0.0
-django-cors-headers==4.3.1
-django-filter==23.5
-drf-yasg==1.21.7
-gunicorn==21.2.0
+
+# ---------- AI PROVIDERS (ALL 8 FREE) ----------
+google-generativeai>=0.8.0
+groq>=0.9.0
+mistralai>=1.0.0
+cohere>=5.0.0
+huggingface-hub>=0.25.0
+requests>=2.31.0
+
+# ---------- MEDIA ----------
+cloudinary==1.41.0
+
+# ---------- BILLING ----------
 stripe==8.4.0
+razorpay==1.4.2
+
+# ---------- GOOGLE APIs ----------
 google-auth-oauthlib==1.1.0
 google-api-python-client==2.100.0
 google-auth-httplib2==0.1.1
 
-# Feature pack
+# ---------- PUSH NOTIFICATIONS ----------
+firebase-admin==6.5.0
+
+# ---------- ASYNC / CELERY ----------
 celery==5.3.6
 redis==5.0.1
 django-celery-beat==2.6.0
+channels==4.1.0
+channels-redis==4.2.0
+
+# ---------- EXPORTS ----------
 reportlab==4.2.2
 openpyxl==3.1.5
+
+# ---------- SECURITY / 2FA ----------
 qrcode[pil]==7.4.2
 Pillow==10.4.0
 pyotp==2.9.0
+
+# ---------- UTILITIES ----------
+python-dotenv==1.0.0
+
+# ---------- SERVER ----------
+gunicorn==21.2.0
+uvicorn==0.30.6
+setuptools>=68.0.0
+wheel>=0.42.0
+
+google-genai>=1.0.0

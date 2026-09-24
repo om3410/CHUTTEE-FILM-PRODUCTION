@@ -1,21 +1,60 @@
-﻿from rest_framework import viewsets
+﻿from django.utils import timezone
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
+
 from .models import Comment, AuditLog
 from .serializers import CommentSerializer, AuditLogSerializer
 
 
-class CommentViewSet(viewsets.ModelViewSet):
-    queryset = Comment.objects.all()
-    serializer_class = CommentSerializer
-    permission_classes = [IsAuthenticated]
-    filterset_fields = ['scene', 'risk', 'parent']
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def comments(request):
+    if request.method == 'GET':
+        qs = Comment.objects.select_related('user').all()[:100]
+        return Response({
+            'results': CommentSerializer(qs, many=True).data,
+            'count': qs.count(),
+        })
 
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+    data = request.data.copy()
+    data.setdefault('mentions', [])
+    serializer = CommentSerializer(data=data)
+    if serializer.is_valid():
+        serializer.save(user=request.user, created_at=timezone.now())
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = AuditLog.objects.all()
-    serializer_class = AuditLogSerializer
-    permission_classes = [IsAuthenticated]
-    filterset_fields = ['action', 'resource', 'user']
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_comment(request, comment_id):
+    try:
+        comment = Comment.objects.get(id=comment_id)
+    except Comment.DoesNotExist:
+        return Response({'error': 'Not found'}, status=404)
+
+    is_admin = getattr(request.user, 'role', None) == 'ADMIN'
+    if comment.user_id != request.user.id and not is_admin:
+        return Response({'error': 'Forbidden'}, status=403)
+
+    comment.delete()
+    return Response(status=204)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def audit_logs(request):
+    qs = AuditLog.objects.select_related('user').all()[:100]
+    return Response({
+        'results': AuditLogSerializer(qs, many=True).data,
+        'count': qs.count(),
+    })
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def recent_activity(request):
+    qs = AuditLog.objects.select_related('user').all()[:20]
+    return Response(AuditLogSerializer(qs, many=True).data)
