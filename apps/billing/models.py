@@ -7,7 +7,7 @@ User = get_user_model()
 class Plan(models.Model):
   id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
   name = models.CharField(max_length=50, unique=True)
-  strip_price_id = models.CharField(max_length=100, blank=True, null=True)
+  strip_price_id = models.CharField(max_length=255, blank=True, null=True)
   monthly_price = models.DecimalField(max_digits=10, decimal_places =2)
   max_analytics_per_day = models.IntegerField(default=10)
   max_prediction_per_day = models.IntegerField(default=5)

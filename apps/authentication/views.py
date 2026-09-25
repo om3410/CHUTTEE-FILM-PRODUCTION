@@ -12,11 +12,11 @@ from .emails import notify_new_registration
 class HomeView(View):
     def get(self, request):
         return render(request, 'home.html')
-    
+
 class RegisterView(View):
     def get(self, request):
         return render(request, 'registration/register.html', {'form': CustomUserCreationForm()})
-    
+
     def post(self, request):
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
@@ -24,24 +24,30 @@ class RegisterView(View):
             login(request, user)
             notify_new_registration(user)
             return redirect('home')
-        return render(request, 'registration/register.html',  {'form': form})
-    
+        return render(request, 'registration/register.html', {'form': form})
+
 class LoginView(View):
     def get(self, request):
         return render(request, 'registration/login.html', {'form': LoginForm()})
-    
+
     def post(self, request):
         form = LoginForm(request, data=request.POST)
         if form.is_valid():
             login(request, form.get_user())
             return redirect('home')
         return render(request, 'registration/login.html', {'form': form})
-    
+
 class LogoutView(View):
-    def get(self, request):
+    def post(self, request):
         logout(request)
         return redirect('login')
-    
+
+    def get(self, request):
+        # Fallback for browsers that still link to GET /logout/.
+        # Consider removing once the frontend switches to POST.
+        logout(request)
+        return redirect('login')
+
 class RegisterAPIView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
     permission_classes = [permissions.AllowAny]
@@ -49,13 +55,12 @@ class RegisterAPIView(generics.CreateAPIView):
     def perform_create(self, serializer):
         user = serializer.save()
         notify_new_registration(user)
-        return user
-    
+
 class MeView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     def get(self, request):
         return Response(UserSerializer(request.user).data)
-    
+
 class SessionLoginView(APIView):
     permission_classes = [permissions.AllowAny]
     def post(self, request):

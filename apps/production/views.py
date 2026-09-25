@@ -62,7 +62,7 @@ class EquipmentViewSet(viewsets.ModelViewSet):
     serializer_class = EquipmentSerializer
     permission_classes = [IsCrewOrReadOnly]
     filterset_fields = ['category', 'is_available']
-
+    ordering = ['-created_at', 'id']
 
 class EquipmentUsageViewSet(viewsets.ModelViewSet):
     queryset = EquipmentUsage.objects.all()

@@ -56,7 +56,9 @@ class FestivalPredictionView(APIView):
         serializer = FestivalPredictionSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         features = serializer.validated_data
+
         result = ml_services.predict_festival(features)
+
         if 'error' not in result:
             try:
                 MLPrediction.objects.create(
@@ -67,8 +69,8 @@ class FestivalPredictionView(APIView):
                 )
             except Exception:
                 pass
-        return Response(result)
 
+        return Response(result)
 
 class BudgetForecastView(APIView):
     permission_classes = [IsAuthenticated]

@@ -7,19 +7,30 @@ For more information on this file, see
 https://docs.djangoproject.com/en/5.2/howto/deployment/asgi/
 """
 
+# config/asgi.py
 import os
-from celery import Celery
-from dotenv import load_dotenv
-
-load_dotenv()
+from django.core.asgi import get_asgi_application
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 
-app = Celery('chuttee')
-app.config_from_object('django.conf:settings', namespace='CELERY')
-app.autodiscover_tasks()
+# Initialize Django ASGI application early to ensure AppRegistry is populated
+django_asgi_app = get_asgi_application()
 
+from channels.routing import ProtocolTypeRouter, URLRouter
+from channels.auth import AuthMiddlewareStack
+from channels.security.websocket import AllowedHostsOriginValidator
 
-@app.task(bind=True, ignore_result=True)
-def debug_task(self):
-    print(f'Request: {self.request!r}')
+# If you have websocket URL patterns, import them here.
+# Example: from apps.collaboration.routing import websocket_urlpatterns
+try:
+    from apps.collaboration.routing import websocket_urlpatterns
+    ws_router = AuthMiddlewareStack(URLRouter(websocket_urlpatterns))
+except ImportError:
+    # No routing module yet — fall back to closing all websockets
+    from channels.routing import NoRouteFoundError
+    ws_router = URLRouter([])
+
+application = ProtocolTypeRouter({
+    "http": django_asgi_app,
+    "websocket": AllowedHostsOriginValidator(ws_router),
+})

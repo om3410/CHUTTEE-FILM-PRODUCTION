@@ -14,7 +14,7 @@ import uuid
 
 
 # ============================================================
-# NEW AI MODELS (Django-managed tables)
+# AI MODELS (external SQL tables — Django must not manage them)
 # ============================================================
 
 class AIScriptAnalysis(models.Model):
@@ -40,6 +40,7 @@ class AIScriptAnalysis(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        managed = False
         db_table = 'ai_script_analysis'
 
     def __str__(self):
@@ -61,6 +62,7 @@ class AISceneDurationPrediction(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        managed = False
         db_table = 'ai_scene_duration_predictions'
 
     def __str__(self):
@@ -83,6 +85,7 @@ class AIBudgetAnomaly(models.Model):
     detected_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        managed = False
         db_table = 'ai_budget_anomalies'
 
     def __str__(self):
@@ -106,6 +109,7 @@ class AICastRecommendation(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        managed = False
         db_table = 'ai_cast_recommendations'
 
     def __str__(self):
@@ -128,6 +132,7 @@ class AIRiskForecast(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        managed = False
         db_table = 'ai_risk_forecasts'
 
     def __str__(self):
@@ -149,6 +154,7 @@ class AIFestivalWin(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        managed = False
         db_table = 'ai_festival_wins'
 
     def __str__(self):
@@ -173,6 +179,7 @@ class AILocationRecommendation(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        managed = False
         db_table = 'ai_location_recommendations'
 
     def __str__(self):

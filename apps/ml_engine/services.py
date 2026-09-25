@@ -1,4 +1,5 @@
 import os
+from pyexpat import features
 import joblib
 import numpy as np
 from django.conf import settings
@@ -12,32 +13,66 @@ class MLService:
 
     def load_models(self):
         model_dir = os.path.join(settings.BASE_DIR, 'ml_models')
+
         try:
-            self.festival_model = joblib.load(os.path.join(model_dir, 'festival_model.pkl'))
-            self.scaler = joblib.load(os.path.join(model_dir, 'scaler.pkl'))
+            self.festival_model = joblib.load(
+                os.path.join(model_dir, 'festival_model.pkl')
+            )
         except FileNotFoundError:
-            pass
+            self.festival_model = None
+
+        try:
+            self.scaler = joblib.load(
+                os.path.join(model_dir, 'scaler.pkl')
+            )
+        except FileNotFoundError:
+            self.scaler = None
 
     def predict_festival(self, features):
-        if self.festival_model is None:
-            return {'error': 'Model not trained'}
-        X = np.array([[
-            features['submission_fee'],
-            features['competition_level'],
-            features['duration_minutes'],
-            features['budget'],
-        ]])
-        if self.scaler:
-            X = self.scaler.transform(X)
-        pred = self.festival_model.predict(X)[0]
-        prob = self.festival_model.predict_proba(X)[0]
+        # Try the ML model first
+        if self.festival_model is not None:
+            try:
+                X = np.array([[
+                    features['submission_fee'],
+                    features['competition_level'],
+                    features['duration_minutes'],
+                    features['budget'],
+                ]])
+                pred = int(self.festival_model.predict(X)[0])
+                prob = self.festival_model.predict_proba(X)[0]
+                return {
+                    'prediction': 'Accept' if pred == 1 else 'Reject',
+                    'confidence': float(prob[1] if pred == 1 else prob[0]),
+                    'method': 'ml_model',
+                }
+            except Exception:
+                # Model expects a different feature count — fall through
+                pass
+
+        # Fallback: rule-based heuristic
+        return self._festival_heuristic(features)
+
+    def _festival_heuristic(self, features):
+        fee = float(features.get('submission_fee') or 0)
+        comp = int(features.get('competition_level') or 0)
+        dur = int(features.get('duration_minutes') or 20)
+        budget = float(features.get('budget') or 0)
+
+        score = 0.5
+        score += 0.10 if fee < 100 else -0.05
+        score -= comp * 0.10
+        score += 0.05 if 10 <= dur <= 30 else -0.05
+        score += 0.05 if budget > 100000 else 0.0
+        score = max(0.05, min(0.95, score))
+
         return {
-            'prediction': 'Accept' if pred == 1 else 'Reject',
-            'confidence': float(prob[1] if pred == 1 else prob[0]),
+            'prediction': 'Accept' if score >= 0.5 else 'Reject',
+            'confidence': round(score, 3),
+            'method': 'heuristic',
         }
-
-
 class ScriptSentimentService:
+    """AI-powered dialogue sentiment analysis with heuristic fallback."""
+
     EMOTION_KEYWORDS = {
         'Anger':   ['angry', 'furious', 'hate', 'rage', 'mad', 'damn', 'stop'],
         'Sadness': ['sad', 'cry', 'tears', 'alone', 'lost', 'sorry', 'miss'],
@@ -50,8 +85,83 @@ class ScriptSentimentService:
 
     @classmethod
     def analyze(cls, text):
+        # 1) Try AI first
+        ai_result = cls._ai_analyze(text)
+        if ai_result is not None:
+            return ai_result
+
+        # 2) Fall back to heuristics
+        return cls._heuristic_analyze(text)
+
+    # ------------------------------------------------------------------
+    # AI path
+    # ------------------------------------------------------------------
+    @classmethod
+    def _ai_analyze(cls, text):
+        from .ai_service import ai_call
+        import json, re
+
+        prompt = (
+            "You are a script analyst. Analyze the emotional content of the "
+            "following dialogue and return ONLY a JSON object.\n\n"
+            f"Dialogue: {text!r}\n\n"
+            "Return JSON with exactly these keys:\n"
+            '  "polarity": float between -1.0 (very negative) and 1.0 (very positive)\n'
+            '  "subjectivity": float between 0.0 (objective) and 1.0 (subjective)\n'
+            '  "dominant_emotion": one of "Anger","Sadness","Joy","Fear","Love","Irony","Tension","Neutral"\n'
+            '  "emotion_confidence": float between 0.0 and 1.0\n'
+            '  "intensity_level": one of "Low","Medium","High"\n'
+            '  "pacing_suggestion": short sentence about how to pace the scene\n'
+            "No prose outside the JSON. No markdown fences."
+        )
+
+        try:
+            response = ai_call(prompt)
+            text_out = response['text'].strip()
+
+            # Extract JSON object even if AI wraps it in prose
+            match = re.search(r'\{.*\}', text_out, re.DOTALL)
+            if not match:
+                return None
+            data = json.loads(match.group(0))
+
+            # Normalise / clamp
+            polarity = max(-1.0, min(1.0, float(data.get('polarity', 0.0))))
+            subjectivity = max(0.0, min(1.0, float(data.get('subjectivity', 0.5))))
+            confidence = max(0.0, min(1.0, float(data.get('emotion_confidence', 0.3))))
+
+            emotion = data.get('dominant_emotion', 'Neutral')
+            if emotion not in list(cls.EMOTION_KEYWORDS.keys()) + ['Neutral']:
+                emotion = 'Neutral'
+
+            intensity = data.get('intensity_level', 'Medium')
+            if intensity not in ('Low', 'Medium', 'High'):
+                intensity = 'Medium'
+
+            pacing = str(data.get(
+                'pacing_suggestion',
+                'Balanced pacing with normal takes'
+            ))[:200]
+
+            return {
+                'polarity': round(polarity, 3),
+                'subjectivity': round(subjectivity, 3),
+                'dominant_emotion': emotion,
+                'emotion_confidence': round(confidence, 3),
+                'intensity_level': intensity,
+                'pacing_suggestion': pacing,
+            }
+        except Exception:
+            return None
+
+    # ------------------------------------------------------------------
+    # Heuristic fallback (only used if AI fails)
+    # ------------------------------------------------------------------
+    @classmethod
+    def _heuristic_analyze(cls, text):
         polarity = 0.0
         subjectivity = 0.5
+
         try:
             from textblob import TextBlob
             blob = TextBlob(text)
@@ -91,10 +201,10 @@ class ScriptSentimentService:
             pacing = 'Slow, reflective pacing with long takes'
 
         return {
-            'polarity': round(polarity, 4),
-            'subjectivity': round(subjectivity, 4),
+            'polarity': round(polarity, 3),
+            'subjectivity': round(subjectivity, 3),
             'dominant_emotion': dominant,
-            'emotion_confidence': round(confidence, 4),
+            'emotion_confidence': round(confidence, 3),
             'intensity_level': intensity,
             'pacing_suggestion': pacing,
         }
@@ -172,38 +282,156 @@ class CastRecommendationService:
     @staticmethod
     def recommend(role_description, required_skills, min_experience, cast_members):
         try:
-            from sklearn.feature_extraction.text import TfidfVectorizer
-            from sklearn.metrics.pairwise import cosine_similarity
-
             if not cast_members:
                 return []
 
-            role_text = ' '.join(required_skills + [role_description]).lower()
-            corpus = [role_text] + [
-                ' '.join(
-                    (c.get('special_skills') or []) +
-                    [c.get('character_name') or '', c.get('role_type') or '']
-                ).lower()
-                for c in cast_members
-            ]
-            vectorizer = TfidfVectorizer()
-            tfidf = vectorizer.fit_transform(corpus)
-            sims = cosine_similarity(tfidf[0:1], tfidf[1:]).flatten()
+            # Filter by experience first
+            eligible = [
+                c for c in cast_members
+                if (c.get('experience_years') or 0) >= min_experience
+            ][:10]
 
-            results = []
-            for i, c in enumerate(cast_members):
-                if (c.get('experience_years') or 0) < min_experience:
-                    continue
-                results.append({
-                    'cast_id': str(c['id']),
-                    'full_name': c['full_name'],
-                    'match_score': round(float(sims[i]), 4),
-                    'reason': f"Skill overlap with {len(required_skills)} required skills",
-                })
-            results.sort(key=lambda x: x['match_score'], reverse=True)
-            return results[:5]
+            if not eligible:
+                return []
+
+            # Try AI first
+            ai_result = CastRecommendationService._ai_match(
+                role_description, required_skills, eligible
+            )
+            if ai_result:
+                return ai_result[:5]
+
+            # Fallback: improved heuristic
+            return CastRecommendationService._heuristic_match(
+                role_description, required_skills, eligible
+            )[:5]
         except Exception as e:
             return [{'error': str(e)}]
+
+    # ------------------------------------------------------------------
+    # AI path
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _ai_match(role_description, required_skills, cast_members):
+        from .ai_service import ai_call
+        import json, re
+
+        roster = [
+            {
+                'id': str(c['id']),
+                'name': c['full_name'],
+                'skills': c.get('special_skills') or [],
+                'character': c.get('character_name') or '',
+                'role_type': c.get('role_type') or '',
+            }
+            for c in cast_members
+        ]
+
+        prompt = (
+            "You are a casting director. Score how well each actor fits the role.\n"
+            f"Role description: {role_description}\n"
+            f"Required skills: {', '.join(required_skills)}\n\n"
+            f"Candidates:\n{json.dumps(roster, ensure_ascii=False, indent=2)}\n\n"
+            "Return ONLY a JSON array of objects with these keys:\n"
+            '  {"cast_id": "<id>", "match_score": <0.0-1.0>, "reason": "<short explanation>"}\n'
+            "Order from best to worst. No prose outside the JSON array."
+        )
+
+        try:
+            response = ai_call(prompt, provider_order=None)
+            text = response['text'].strip()
+
+            # Extract JSON array even if AI wraps it in markdown fences
+            match = re.search(r'\[.*\]', text, re.DOTALL)
+            if not match:
+                return None
+            parsed = json.loads(match.group(0))
+
+            by_id = {str(c['id']): c for c in cast_members}
+            results = []
+            for item in parsed:
+                cid = str(item.get('cast_id', ''))
+                c = by_id.get(cid)
+                if not c:
+                    continue
+                results.append({
+                    'cast_id': cid,
+                    'full_name': c['full_name'],
+                    'match_score': round(float(item.get('match_score', 0)), 4),
+                    'reason': str(item.get('reason', ''))[:200],
+                })
+            return results or None
+        except Exception:
+            return None
+
+    # ------------------------------------------------------------------
+    # Heuristic fallback (fuzzy)
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _heuristic_match(role_description, required_skills, cast_members):
+        required_set = {
+            s.lower().strip()
+            for s in (required_skills or [])
+            if s and s.strip()
+        }
+        req_count = len(required_set) or 1
+
+        role_words = {
+            w.strip('.,;:!?').lower()
+            for w in (role_description or '').split()
+            if w.strip()
+        }
+
+        results = []
+        for c in cast_members:
+            skills = {
+                s.lower().strip()
+                for s in (c.get('special_skills') or [])
+                if s and s.strip()
+            }
+
+            # Fuzzy: substring match in either direction
+            matched = set()
+            for req in required_set:
+                for sk in skills:
+                    if req in sk or sk in req:
+                        matched.add(req)
+                        break
+
+            skill_score = len(matched) / req_count
+            missing = required_set - matched
+
+            cast_words = {
+                w.strip('.,;:!?').lower()
+                for w in ' '.join([
+                    c.get('character_name') or '',
+                    c.get('role_type') or '',
+                ]).split()
+                if w.strip()
+            }
+            text_score = len(role_words & cast_words) / max(len(role_words), 1)
+
+            score = round(min(skill_score * 0.7 + text_score * 0.3, 1.0), 4)
+
+            if matched and not missing:
+                reason = f"Matches all required skills: {', '.join(sorted(matched))}"
+            elif matched:
+                reason = (
+                    f"Matches {len(matched)}/{req_count} skills "
+                    f"({', '.join(sorted(matched))}); missing: {', '.join(sorted(missing))}"
+                )
+            else:
+                reason = "No direct skill match — ranked by text similarity"
+
+            results.append({
+                'cast_id': str(c['id']),
+                'full_name': c['full_name'],
+                'match_score': score,
+                'reason': reason,
+            })
+
+        results.sort(key=lambda x: x['match_score'], reverse=True)
+        return results
 
 
 class RiskForecastService:

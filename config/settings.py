@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'django_filters',
     'drf_yasg',
     'django_celery_beat',
+    'daphne',
     'channels',
     'cloudinary',
     'cloudinary_storage',
@@ -52,7 +53,39 @@ INSTALLED_APPS = [
     'apps.collaboration',
     'apps.security_extras',
 ]
+INSTALLED_APPS = [
+    'daphne',                                  # must be before staticfiles
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'django.contrib.postgres',
 
+    # Third-party
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'corsheaders',
+    'django_filters',
+    'drf_yasg',
+    'django_celery_beat',
+    'channels',
+    'cloudinary',
+    'cloudinary_storage',
+
+    # Core apps
+    'apps.authentication',
+    'apps.production',
+    'apps.analytics',
+    'apps.ml_engine',
+
+    # Feature pack
+    'apps.notifications',
+    'apps.exports',
+    'apps.collaboration',
+    'apps.security_extras',
+]
 # ============================================================
 # MIDDLEWARE
 # ============================================================
@@ -184,6 +217,7 @@ REST_FRAMEWORK = {
         'user': '300/min',
         'ai': '20/min',
     },
+    'EXCEPTION_HANDLER': 'apps.production.exceptions.custom_exception_handler',
 }
 
 # ============================================================
@@ -199,7 +233,7 @@ SIMPLE_JWT = {
 # ============================================================
 # EMAIL
 # ============================================================
-EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
 EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
 EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
@@ -219,6 +253,8 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Asia/Kolkata'
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+CELERY_TASK_ALWAYS_EAGER = True
+CELERY_TASK_EAGER_PROPAGATES = True
 
 # ============================================================
 # CHANNELS (WebSockets)
@@ -227,7 +263,7 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            'hosts': [(os.getenv('REDIS_HOST', '127.0.0.1'), 6379)],
+            'hosts': [(os.getenv('REDIS_HOST', 'redis://127.0.0.1'), 6379)],
         },
     },
 }
@@ -241,9 +277,26 @@ CLOUDINARY_STORAGE = {
     'API_SECRET': os.getenv('CLOUDINARY_API_SECRET'),
 }
 
-# Only enable Cloudinary if keys are set; otherwise use local media
+# Django 5.0+ STORAGES setting (replaces deprecated DEFAULT_FILE_STORAGE).
+# Only enable Cloudinary if keys are set; otherwise use local media.
 if os.getenv('CLOUDINARY_CLOUD_NAME'):
-    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+    STORAGES = {
+        'default': {
+            'BACKEND': 'cloudinary_storage.storage.MediaCloudinaryStorage',
+        },
+        'staticfiles': {
+            'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
+        },
+    }
+else:
+    STORAGES = {
+        'default': {
+            'BACKEND': 'django.core.files.storage.FileSystemStorage',
+        },
+        'staticfiles': {
+            'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
+        },
+    }
 
 # ============================================================
 # AI PROVIDERS (8 FREE)
@@ -262,10 +315,13 @@ AI_PROVIDER_ORDER = os.getenv(
     'gemini,groq,cerebras,openrouter,mistral,deepseek,cohere,huggingface'
 ).split(',')
 
-DEFAULT_GEMINI_MODEL = os.getenv('DEFAULT_GEMINI_MODEL', 'gemini-3.7-flash')
+# NOTE: Model names below are real, currently-supported identifiers.
+# Verify against each provider's docs before deployment — providers
+# deprecate and rename models frequently.
+DEFAULT_GEMINI_MODEL = os.getenv('DEFAULT_GEMINI_MODEL', 'gemini-1.5-flash')
 DEFAULT_GROQ_MODEL = os.getenv('DEFAULT_GROQ_MODEL', 'llama-3.3-70b-versatile')
-DEFAULT_CEREBRAS_MODEL = os.getenv('DEFAULT_CEREBRAS_MODEL', 'llama-3.3-70b')
-DEFAULT_OPENROUTER_MODEL = os.getenv('DEFAULT_OPENROUTER_MODEL', 'nvidia/nemotron-3.5-lightning:free')
+DEFAULT_CEREBRAS_MODEL = os.getenv('DEFAULT_CEREBRAS_MODEL', 'llama3.1-70b')
+DEFAULT_OPENROUTER_MODEL = os.getenv('DEFAULT_OPENROUTER_MODEL', 'meta-llama/llama-3.1-8b-instruct:free')
 DEFAULT_MISTRAL_MODEL = os.getenv('DEFAULT_MISTRAL_MODEL', 'mistral-large-latest')
 DEFAULT_DEEPSEEK_MODEL = os.getenv('DEFAULT_DEEPSEEK_MODEL', 'deepseek-chat')
 DEFAULT_COHERE_MODEL = os.getenv('DEFAULT_COHERE_MODEL', 'command-r-plus-08-2024')
@@ -307,3 +363,15 @@ LOGGING = {
         'level': 'INFO',
     },
 }
+
+import sys
+if 'test' in sys.argv:
+    MIGRATION_MODULES = {
+        'production': None,
+        'ml_engine': None,
+        'analytics': None,
+        'collaboration': None,
+        'notifications': None,
+        'exports': None,
+        'security_extras': None,
+    }

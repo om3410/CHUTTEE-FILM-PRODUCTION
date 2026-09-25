@@ -64,7 +64,10 @@ class RiskMatrixAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        risks = ProductionRisk.objects.filter(probability__gt=0.6, impact__gt=0.7)
+        risks = ProductionRisk.objects.filter(
+            probability__gte=0.5,
+            impact__gte=0.4,
+        ).order_by('-risk_score')
         return Response([{
             'risk_type': r.risk_type,
             'severity': r.severity,
@@ -72,7 +75,6 @@ class RiskMatrixAPIView(APIView):
             'impact': float(r.impact or 0),
             'risk_score': float(r.risk_score or 0),
         } for r in risks])
-
 
 class FestivalStatusAPIView(APIView):
     permission_classes = [IsAuthenticated]
@@ -91,14 +93,45 @@ class CrewAvailabilityAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        from django.db.models import Sum
+
         date = request.query_params.get('date')
         if not date:
             return Response({'error': 'Provide ?date=YYYY-MM-DD'}, status=400)
-        busy_ids = ShootDay.objects.filter(shoot_date=date).values_list('crew_present', flat=True)
-        available = CrewMember.objects.exclude(id__in=busy_ids)
-        return Response(list(available.values('id', 'full_name', 'role')))
 
+        # The schema tracks only a *count* of crew present on a shoot day,
+        # not which individuals. Comparing an integer count against a UUID
+        # primary key (the old code) raised:
+        #   DataError: invalid input syntax for type uuid: "12"
+        # Compare headcounts instead of IDs.
+        busy_count = (
+            ShootDay.objects
+            .filter(shoot_date=date)
+            .aggregate(total=Sum('crew_present'))['total']
+        ) or 0
 
+        all_crew = list(CrewMember.objects.values('id', 'full_name', 'role'))
+        total_crew = len(all_crew)
+
+        # If the whole crew is on set, nobody is available.
+        # Otherwise the schema can't tell us *which* names are free,
+        # so return the whole roster and report the count honestly.
+        if busy_count >= total_crew and total_crew > 0:
+            available = []
+        else:
+            available = all_crew
+
+        return Response({
+            'date': date,
+            'total_crew': total_crew,
+            'busy_count': busy_count,
+            'available_count': len(available),
+            'available': available,
+            'note': (
+                'Individual crew presence is not tracked per shoot day; '
+                'this is a headcount-based estimate.'
+            ),
+        })
 class UpcomingFestivalsAPIView(APIView):
     permission_classes = [IsAuthenticated]
 

@@ -17,14 +17,23 @@ def generate_call_sheet_pdf(shoot_day, scenes, crew):
     story.append(Spacer(1, 12))
     story.append(Paragraph(f"<b>Date:</b> {shoot_day['shoot_date']}", styles['Normal']))
     story.append(Paragraph(f"<b>Location:</b> {shoot_day['location']}", styles['Normal']))
-    story.append(Paragraph(f"<b>Weather:</b> {shoot_day['weather_condition']} ({shoot_day['temperature_celsius']}C)", styles['Normal']))
-    story.append(Paragraph(f"<b>Time:</b> {shoot_day['start_time']} - {shoot_day['end_time']}", styles['Normal']))
+    story.append(Paragraph(
+        f"<b>Weather:</b> {shoot_day['weather_condition']} ({shoot_day['temperature_celsius']}C)",
+        styles['Normal']
+    ))
+    story.append(Paragraph(
+        f"<b>Time:</b> {shoot_day['start_time']} - {shoot_day['end_time']}",
+        styles['Normal']
+    ))
     story.append(Spacer(1, 20))
 
     story.append(Paragraph("<b>Scenes</b>", styles['Heading2']))
     scene_data = [['#', 'Location', 'Time', 'Duration']]
     for s in scenes:
-        scene_data.append([s['scene_number'], s['location'], s['time_of_day'], f"{s['duration_estimate_minutes']} min"])
+        scene_data.append([
+            s['scene_number'], s['location'], s['time_of_day'],
+            f"{s['duration_estimate_minutes']} min"
+        ])
     t1 = Table(scene_data)
     t1.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#d13f4d')),
@@ -58,7 +67,7 @@ def generate_csv(rows, headers):
     writer = csv.writer(buffer)
     writer.writerow(headers)
     for r in rows:
-        writer.writerow([r.get(h, '') for h in headers])
+        writer.writerow([r.get(h, '') for h in headers])   # ← fixed
     buffer.seek(0)
     return buffer
 
@@ -70,7 +79,7 @@ def generate_excel(sheets):
         ws = wb.create_sheet(title=name[:30])
         ws.append(data['headers'])
         for r in data['rows']:
-            ws.append([r.get(h, '') for h in data['headers']])
+            ws.append([r.get(h, '') for h in data['headers']])   # ← fixed
     buffer = io.BytesIO()
     wb.save(buffer)
     buffer.seek(0)

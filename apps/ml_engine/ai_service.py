@@ -56,25 +56,25 @@ def call_gemini(prompt: str) -> str:
     if not gemini_client:
         raise RuntimeError("Gemini not configured (missing SDK or key)")
     response = gemini_client.models.generate_content(
-        model=os.getenv('DEFAULT_GEMINI_MODEL', 'gemini-3.6-flash'),
+        model=os.getenv('DEFAULT_GEMINI_MODEL', 'gemini-1.5-flash'),
         contents=prompt,
     )
     return response.text
 
 
 def call_groq(prompt: str) -> str:
-    """Call Groq free tier (GPT-OSS 120B)."""
+    """Call Groq free tier (Llama 3.3 70B)."""
     if not groq_client:
         raise RuntimeError("Groq not configured (missing SDK or key)")
     response = groq_client.chat.completions.create(
-        model=os.getenv('DEFAULT_GROQ_MODEL', 'openai/gpt-oss-120b'),
+        model=os.getenv('DEFAULT_GROQ_MODEL', 'llama-3.3-70b-versatile'),
         messages=[{"role": "user", "content": prompt}],
     )
     return response.choices[0].message.content
 
 
 def call_cerebras(prompt: str) -> str:
-    """Call Cerebras free tier (Qwen 3.8 27B)."""
+    """Call Cerebras free tier (Llama 3.1 70B)."""
     key = os.getenv('CEREBRAS_API_KEY')
     if not key:
         raise RuntimeError("Cerebras not configured")
@@ -86,7 +86,7 @@ def call_cerebras(prompt: str) -> str:
             'Content-Type': 'application/json',
         },
         json={
-            'model': os.getenv('DEFAULT_CEREBRAS_MODEL', 'qwen-3.8-27b'),
+            'model': os.getenv('DEFAULT_CEREBRAS_MODEL', 'llama3.1-70b'),
             'messages': [{'role': 'user', 'content': prompt}],
         },
         timeout=60,
@@ -112,7 +112,7 @@ def call_openrouter(prompt: str) -> str:
         json={
             'model': os.getenv(
                 'DEFAULT_OPENROUTER_MODEL',
-                'nvidia/nemotron-3.5-lightning:free'
+                'meta-llama/llama-3.1-8b-instruct:free'
             ),
             'messages': [{'role': 'user', 'content': prompt}],
         },
@@ -188,7 +188,11 @@ def call_cohere(prompt: str) -> str:
         timeout=60,
     )
     r.raise_for_status()
-    return r.json()['message']['content'][0]['text']
+    # Cohere v2 returns content as a list of parts; concatenate safely.
+    content = r.json()['message']['content']
+    if isinstance(content, list):
+        return ''.join(part.get('text', '') for part in content)
+    return content
 
 
 def call_huggingface(prompt: str) -> str:

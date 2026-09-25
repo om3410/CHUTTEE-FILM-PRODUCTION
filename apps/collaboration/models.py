@@ -1,6 +1,7 @@
 ﻿import uuid
 from django.db import models
 from django.conf import settings
+from django.utils import timezone
 
 
 class Comment(models.Model):
@@ -8,7 +9,7 @@ class Comment(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     body = models.TextField()
     mentions = models.JSONField(default=list)
-    created_at = models.DateTimeField()
+    created_at = models.DateTimeField(default=timezone.now)
     parent = models.ForeignKey(
         'self',
         on_delete=models.DO_NOTHING,
@@ -54,7 +55,7 @@ class AuditLog(models.Model):
     resource_id = models.CharField(max_length=100)
     changes = models.JSONField(default=dict)
     ip_address = models.GenericIPAddressField(blank=True, null=True)
-    timestamp = models.DateTimeField()
+    timestamp = models.DateTimeField(default=timezone.now) 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.DO_NOTHING,

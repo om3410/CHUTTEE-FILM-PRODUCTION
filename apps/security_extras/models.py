@@ -11,4 +11,5 @@ class TwoFactorProfile(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        managed = False
         db_table = 'security_2fa'

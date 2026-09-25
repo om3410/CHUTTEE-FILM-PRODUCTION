@@ -12,10 +12,12 @@ from .serializers import CommentSerializer, AuditLogSerializer
 @permission_classes([IsAuthenticated])
 def comments(request):
     if request.method == 'GET':
-        qs = Comment.objects.select_related('user').all()[:100]
+        base_qs = Comment.objects.select_related('user').all()
+        count = base_qs.count()
+        qs = base_qs[:100]
         return Response({
             'results': CommentSerializer(qs, many=True).data,
-            'count': qs.count(),
+            'count': count,
         })
 
     data = request.data.copy()
@@ -46,10 +48,12 @@ def delete_comment(request, comment_id):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def audit_logs(request):
-    qs = AuditLog.objects.select_related('user').all()[:100]
+    base_qs = AuditLog.objects.select_related('user').all()
+    count = base_qs.count()
+    qs = base_qs[:100]
     return Response({
         'results': AuditLogSerializer(qs, many=True).data,
-        'count': qs.count(),
+        'count': count,
     })
 
 

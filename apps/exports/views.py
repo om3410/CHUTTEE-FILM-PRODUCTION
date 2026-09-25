@@ -18,6 +18,8 @@ class CallSheetPDFView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, shoot_day_id):
+        from apps.production.models import ShootDayScene
+
         sd = get_object_or_404(ShootDay, pk=shoot_day_id)
         shoot_day = {
             'day_number': sd.day_number,
@@ -28,12 +30,16 @@ class CallSheetPDFView(APIView):
             'start_time': sd.start_time,
             'end_time': sd.end_time,
         }
-        scenes = list(Scene.objects.all().values(
-            'scene_number', 'location', 'time_of_day', 'duration_estimate_minutes'
-        ))
-        crew = list(CrewMember.objects.all().values(
-            'full_name', 'role', 'department'
-        ))
+        # Only scenes scheduled for this shoot day.
+        scene_ids = ShootDayScene.objects.filter(shoot_day=sd).values_list('scene_id', flat=True)
+        scenes = list(
+            Scene.objects.filter(id__in=scene_ids).values(
+                'scene_number', 'location', 'time_of_day', 'duration_estimate_minutes'
+            )
+        )
+        # Schema has no per-shoot-day crew link — include full roster as a fallback.
+        crew = list(CrewMember.objects.all().values('full_name', 'role', 'department'))
+
         buffer = generate_call_sheet_pdf(shoot_day, scenes, crew)
         response = HttpResponse(buffer.read(), content_type='application/pdf')
         response['Content-Disposition'] = f'attachment; filename="call_sheet_day_{sd.day_number}.pdf"'
@@ -87,9 +93,14 @@ class SRTGeneratorView(APIView):
 
     def get(self, request, scene_id):
         scene = get_object_or_404(Scene, pk=scene_id)
-        dialogues = list(ScriptDialogue.objects.filter(scene=scene)
-                         .order_by('dialogue_order')
-                         .values('dialogue_order', 'character_name', 'dialogue_text'))
+        # ScriptDialogue has no `dialogue_order` field.
+        # Order chronologically by created_at instead.
+        dialogues = list(
+            ScriptDialogue.objects
+            .filter(scene=scene)
+            .order_by('created_at')
+            .values('character_name', 'dialogue_text')
+        )
         parsed = [{
             'order': i + 1,
             'start_seconds': i * 3,

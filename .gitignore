@@ -57,3 +57,17 @@ htmlcov/
 dist/
 build/
 *.egg-info/
+token_body.json
+token*.json
+*_body.json
+*_response.json
+
+token_body.json
+token*.json
+*_body.json
+*_response.json
+
+token_body.json
+token*.json
+*_body.json
+*_response.json

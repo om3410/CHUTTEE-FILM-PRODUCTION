@@ -92,8 +92,8 @@ class Scene(models.Model):
     is_indoor = models.BooleanField(blank=True, null=True)
     status = models.CharField(max_length=20, blank=True, null=True)
     notes = models.TextField(blank=True, null=True)
-    props = ArrayField(models.CharField(max_length=100), blank=True, null=True)
-    wardrobe = ArrayField(models.CharField(max_length=100), blank=True, null=True)
+    props    = models.JSONField(default=list, blank=True, null=True)
+    wardrobe = models.JSONField(default=list, blank=True, null=True)
     created_at = models.DateTimeField(blank=True, null=True)
     updated_at = models.DateTimeField(blank=True, null=True)
 
@@ -134,7 +134,7 @@ class SceneActor(models.Model):
     class Meta:
         managed = False
         db_table = 'scene_actors'
-        unique_together = (('scene', 'cast'))
+        unique_together = (('scene', 'cast'),)   # ✅ trailing comma added
 
     def __str__(self):
         return f"Scene {self.scene_id} - Cast {self.cast_id}"
@@ -223,20 +223,20 @@ class ShootDayScene(models.Model):
         ShootDay,
         on_delete=models.DO_NOTHING,
         db_column='shoot_day_id',
-        related_name='scenes',              # ✅ shoot_day.scenes.all()
+        related_name='scenes',
     )
     scene = models.ForeignKey(
         Scene,
         on_delete=models.DO_NOTHING,
         db_column='scene_id',
-        related_name='shoot_days',          # ✅ scene.shoot_days.all()
+        related_name='shoot_days',
     )
     shot_order = models.IntegerField(blank=True, null=True)
     status = models.CharField(max_length=20, blank=True, null=True)
     actual_time_taken_minutes = models.IntegerField(blank=True, null=True)
     notes = models.TextField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)   # ✅ auto
-    updated_at = models.DateTimeField(auto_now=True)       # ✅ auto
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         managed = False
@@ -409,7 +409,7 @@ class FilmAsset(models.Model):
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        managed = True
+        managed = False              
         db_table = 'film_assets'
 
     def __str__(self):

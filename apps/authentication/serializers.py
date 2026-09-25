@@ -16,13 +16,18 @@ class UserSerializer(serializers.ModelSerializer):
 
 class RegisterSerializer(serializers.ModelSerializer):
     """Serializer for API registration from React."""
-    password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
+    password = serializers.CharField(
+        write_only=True, required=True, validators=[validate_password]
+    )
     password2 = serializers.CharField(write_only=True, required=True)
     email = serializers.EmailField(required=True)
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password', 'password2', 'role', 'first_name', 'last_name']
+        fields = [
+            'username', 'email', 'password', 'password2',
+            'first_name', 'last_name',
+        ]   # 'role' removed — assigned server-side
 
     def validate_email(self, value):
         domain = value.split('@')[-1].lower()
@@ -43,7 +48,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             username=validated_data['username'],
             email=validated_data.get('email', ''),
             password=validated_data['password'],
-            role=validated_data.get('role', 'USER'),
+            role='USER',                     # forced — client can't override
             first_name=validated_data.get('first_name', ''),
             last_name=validated_data.get('last_name', ''),
         )
