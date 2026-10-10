@@ -414,3 +414,17 @@ class FilmAsset(models.Model):
 
     def __str__(self):
         return f"{self.title} - {self.get_category_display()}"
+
+
+class CrewMemberImage(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    crew_id = models.UUIDField(db_index=True)
+    image = models.ImageField(upload_to='crew_gallery/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'crew_member_images'
+        ordering = ['uploaded_at', 'id']
+
+    def __str__(self):
+        return f"Crew image {self.id} for {self.crew_id}"

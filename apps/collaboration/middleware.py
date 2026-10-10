@@ -38,6 +38,9 @@ class AuditLogMiddleware:
         if request.method not in ('POST', 'PUT', 'PATCH', 'DELETE'):
             return response
 
+        if response.status_code >= 400:
+            return response
+
         # Skip noise
         if request.path.startswith(AUDIT_SKIP_PREFIXES):
             return response

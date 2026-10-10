@@ -2,7 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
     FilmProjectViewSet, CrewMemberViewSet, CastMemberViewSet, SceneViewSet,
-    SceneActorViewSet, EquipmentViewSet, EquipmentUsageViewSet,
+    SceneActorViewSet, EquipmentViewSet, EquipmentUsageViewSet, FilmAssetViewSet,
     ShootDayViewSet, ShootDaySceneViewSet, BudgetTransactionViewSet,
     ScriptDialogueViewSet, SentimentAnalysisViewSet, ProductionRiskViewSet,
     FestivalSubmissionViewSet, AnalyticsDailyViewSet, MLPredictionViewSet,
@@ -16,6 +16,7 @@ router.register(r'scenes', SceneViewSet)
 router.register(r'scene-actors', SceneActorViewSet)
 router.register(r'equipment', EquipmentViewSet)
 router.register(r'equipment-usage', EquipmentUsageViewSet)
+router.register(r'film-assets', FilmAssetViewSet)
 router.register(r'shoot-days', ShootDayViewSet)
 router.register(r'shoot-day-scenes', ShootDaySceneViewSet)
 router.register(r'budget', BudgetTransactionViewSet)

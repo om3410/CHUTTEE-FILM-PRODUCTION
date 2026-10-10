@@ -184,6 +184,7 @@ AUTH_USER_MODEL = 'authentication.User'
 CORS_ALLOWED_ORIGINS = [
     o.strip() for o in os.getenv(
         'CORS_ALLOWED_ORIGINS',
+	'http://localhost:5173,http://127.0.0.1:5173,'
         'http://localhost:3000,http://127.0.0.1:3000'
     ).split(',') if o.strip()
 ]
@@ -240,6 +241,7 @@ EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:5173').rstrip('/')
 
 ADMIN_NOTIFICATION_EMAIL = os.getenv('ADMIN_NOTIFICATION_EMAIL', 'omrewaskar4@gmail.com')
 

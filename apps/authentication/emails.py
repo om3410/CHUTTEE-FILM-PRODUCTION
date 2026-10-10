@@ -83,20 +83,17 @@ def send_welcome_email(user):
         return False
 
     try:
-        subject = "Welcome to Chuttee Film Production"
+        subject = "Your CHUTTEE account is ready"
 
         context = {
             'user': user,
             'username': user.username,
             'first_name': user.first_name or user.username,
-            'login_url': (
-                f"{getattr(settings, 'FRONTEND_URL', 'http://localhost:3000')}"
-                "/login"
-            ),
+            'login_url': f"{settings.FRONTEND_URL}/login",
         }
 
         html_body = render_to_string('emails/welcome.html', context)
-        text_body = strip_tags(html_body)
+        text_body = render_to_string('emails/welcome.txt', context)
 
         msg = EmailMultiAlternatives(
             subject=subject,

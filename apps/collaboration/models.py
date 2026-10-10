@@ -33,8 +33,9 @@ class Comment(models.Model):
     )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.DO_NOTHING,
+        on_delete=models.SET_NULL,
         db_column='user_id',
+        blank=True, null=True,
         related_name='comments',
     )
 
@@ -58,7 +59,7 @@ class AuditLog(models.Model):
     timestamp = models.DateTimeField(default=timezone.now) 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.DO_NOTHING,
+        on_delete=models.SET_NULL,
         db_column='user_id',
         blank=True, null=True,
         related_name='audit_logs',

@@ -17,7 +17,7 @@ from .serializers import (
     FestivalSubmissionSerializer, AnalyticsDailySerializer, MLPredictionSerializer,
     FilmAssetSerializer,
 )
-from .permissions import IsCrewMember, IsCrewOrReadOnly
+from .permissions import IsCrewMember, IsCrewOrReadOnly, IsAuthenticatedForSceneUpdates
 
 
 # --- General Film Data ---
@@ -47,7 +47,7 @@ class CastMemberViewSet(viewsets.ModelViewSet):
 class SceneViewSet(viewsets.ModelViewSet):
     queryset = Scene.objects.all()
     serializer_class = SceneSerializer
-    permission_classes = [IsCrewOrReadOnly]
+    permission_classes = [IsAuthenticatedForSceneUpdates]
     filterset_fields = ['status', 'location']
 
 
@@ -60,7 +60,7 @@ class SceneActorViewSet(viewsets.ModelViewSet):
 class EquipmentViewSet(viewsets.ModelViewSet):
     queryset = Equipment.objects.all()
     serializer_class = EquipmentSerializer
-    permission_classes = [IsCrewOrReadOnly]
+    permission_classes = [IsAuthenticated]
     filterset_fields = ['category', 'is_available']
     ordering = ['-created_at', 'id']
 
@@ -136,6 +136,6 @@ class MLPredictionViewSet(viewsets.ModelViewSet):
 class FilmAssetViewSet(viewsets.ModelViewSet):
     queryset = FilmAsset.objects.all().order_by('-uploaded_at')
     serializer_class = FilmAssetSerializer
-    permission_classes = [IsCrewOrReadOnly]
+    permission_classes = [IsAuthenticated]
     filterset_fields = ['category']
     search_fields = ['title']

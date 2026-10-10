@@ -1,4 +1,5 @@
 ﻿from django.utils import timezone
+from django.db.models import Q
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -60,5 +61,8 @@ def audit_logs(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def recent_activity(request):
-    qs = AuditLog.objects.select_related('user').all()[:20]
+    qs = AuditLog.objects.select_related('user').filter(
+        Q(resource__startswith='/api/production/')
+        | Q(resource__startswith='/api/collaboration/comments/')
+    )[:30]
     return Response(AuditLogSerializer(qs, many=True).data)

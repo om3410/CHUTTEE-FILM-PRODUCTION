@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.urls import reverse
 from rest_framework.test import APITestCase
 from rest_framework import status
 
@@ -32,10 +33,12 @@ class EquipmentAPITests(APITestCase):
         resp = self.client.post('/api/production/equipment/', {})
         self.assertEqual(resp.status_code, status.HTTP_401_UNAUTHORIZED)
 
-    def test_non_crew_cannot_create(self):
+    def test_authenticated_user_can_create_equipment(self):
         self.client.force_authenticate(self.normal)
-        resp = self.client.post('/api/production/equipment/', {})
-        self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
+        resp = self.client.post('/api/production/equipment/', {
+            "condition_status": "Used",
+        })
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_superuser_can_bypass_role(self):
         # Superuser with role=USER. Sending an invalid condition_status
@@ -50,5 +53,20 @@ class EquipmentAPITests(APITestCase):
         self.client.force_authenticate(superuser)
         resp = self.client.post('/api/production/equipment/', {
             "condition_status": "Used",
+        })
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_film_assets_endpoint_is_registered(self):
+        self.assertEqual(reverse('filmasset-list'), '/api/production/film-assets/')
+
+    def test_anonymous_cannot_create_film_asset(self):
+        resp = self.client.post('/api/production/film-assets/', {})
+        self.assertEqual(resp.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_authenticated_user_can_submit_film_asset(self):
+        self.client.force_authenticate(self.normal)
+        resp = self.client.post('/api/production/film-assets/', {
+            'title': 'Test poster',
+            'category': 'INVALID',
         })
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
