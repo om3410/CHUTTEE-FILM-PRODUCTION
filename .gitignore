@@ -72,5 +72,3 @@ frontend/dist/
 # Pytest cache
 .pytest_cache/
 
-# Frontend (kept locally, not tracked in repo)
-frontend/
