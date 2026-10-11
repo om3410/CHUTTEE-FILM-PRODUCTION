@@ -68,5 +68,9 @@ node_modules/
 frontend/node_modules/
 frontend/dist/
 
-# Stray backend folder at root
-backend/
+
+# Pytest cache
+.pytest_cache/
+
+# Frontend (kept locally, not tracked in repo)
+frontend/
