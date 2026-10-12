@@ -22,6 +22,13 @@ const mapCastMember = (actor) => ({
   name: actor.full_name ?? actor.name ?? '',
   character: actor.character_name ?? actor.character ?? '',
   age: actor.physical_attributes?.age ?? actor.age ?? '',
+  category: actor.category ?? actor.cast_category ?? 'Actor',
+  categories:
+    Array.isArray(actor.categories) && actor.categories.length
+      ? actor.categories
+      : Array.isArray(actor.cast_categories) && actor.cast_categories.length
+        ? actor.cast_categories
+        : [actor.category ?? actor.cast_category ?? 'Actor'],
   skills: actor.special_skills ?? actor.skills ?? [],
 });
 
@@ -69,15 +76,22 @@ export const fetchCast = async () => {
   return (await fetchAllPages('/production/cast/')).map(mapCastMember);
 };
 
-export const createCastMember = async ({ name, character, age }) => {
+export const createCastMember = async ({ name, character, age, categories }) => {
+  const cats = Array.isArray(categories) && categories.length ? categories : ['Actor'];
   const { data } = await api.post('/production/cast/', {
     full_name: name,
     character_name: character,
     physical_attributes: { age: Number(age) },
+    category: cats[0],
+    categories: cats,
     special_skills: [],
     is_available: true,
   });
   return mapCastMember(data);
+};
+
+export const deleteCastMember = async (id) => {
+  await api.delete(`/production/cast/${id}/`);
 };
 
 export const fetchScenes = async () => {
@@ -206,10 +220,6 @@ export const fetchFilmAssets = async () => {
 };
 
 export const createFilmAsset = async ({ title, category, image }) => {
-  if (USE_MOCK) {
-    const { data } = await api.post('/production/film-assets/', { title, category, image: '' });
-    return mapFilmAsset(data);
-  }
   const formData = new FormData();
   formData.append('title', title);
   formData.append('category', category);

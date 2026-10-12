@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
-import { FiSearch, FiStar, FiArchive, FiInbox } from 'react-icons/fi';
+import { FiSearch, FiStar, FiArchive, FiInbox, FiPlus, FiSend } from 'react-icons/fi';
 import { MOCK } from '../utils/constants';
 import Card from '../components/ui/Card';
 import Avatar from '../components/ui/Avatar';
 import SkeletonLoader from '../components/feedback/SkeletonLoader';
 import EmptyState from '../components/feedback/EmptyState';
+import Button from '../components/ui/Button';
+import Modal from '../components/ui/Modal';
+import Input from '../components/ui/Input';
 import { useToast } from '../context/ToastContext';
 
 export default function Inbox() {
@@ -13,6 +16,11 @@ export default function Inbox() {
   const [messages, setMessages] = useState([]);
   const [active, setActive] = useState(null);
   const [search, setSearch] = useState('');
+
+  // Compose state
+  const [composeOpen, setComposeOpen] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [draft, setDraft] = useState({ to: '', subject: '', body: '' });
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -26,11 +34,13 @@ export default function Inbox() {
   }, []);
 
   const filtered = messages.filter((m) => !search || m.subject.toLowerCase().includes(search.toLowerCase()) || m.from.toLowerCase().includes(search.toLowerCase()));
+
   const toggleStar = () => {
     const updated = { ...active, starred: !active.starred };
     setActive(updated);
     setMessages((list) => list.map((message) => message.id === active.id ? updated : message));
   };
+
   const archiveActive = () => {
     const remaining = messages.filter((message) => message.id !== active.id);
     setMessages(remaining);
@@ -38,14 +48,51 @@ export default function Inbox() {
     toast('Message archived', 'success');
   };
 
+  const openCompose = () => {
+    setDraft({ to: '', subject: '', body: '' });
+    setComposeOpen(true);
+  };
+
+  const sendMessage = async (e) => {
+    e.preventDefault();
+    setSending(true);
+    try {
+      // TODO: replace with real API call, e.g.:
+      // const message = await createMessage(draft);
+      const message = {
+        id: `m${Date.now()}`,
+        from: draft.to,
+        to: 'me',
+        subject: draft.subject,
+        preview: draft.body,
+        body: draft.body,
+        time: 'just now',
+        unread: false,
+        starred: false,
+      };
+      setMessages((list) => [message, ...list]);
+      setActive(message);
+      setComposeOpen(false);
+      setDraft({ to: '', subject: '', body: '' });
+      toast('Message sent', 'success');
+    } catch (error) {
+      toast('Could not send message', 'error');
+    } finally {
+      setSending(false);
+    }
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center gap-3">
-        <div className="rounded-xl bg-brand-500/15 p-3"><FiInbox className="h-6 w-6 text-brand-400" /></div>
-        <div>
-          <h1 className="text-2xl font-bold">Inbox</h1>
-          <p className="text-sm text-zinc-400">{messages.filter((m) => m.unread).length} unread</p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="rounded-xl bg-brand-500/15 p-3"><FiInbox className="h-6 w-6 text-brand-400" /></div>
+          <div>
+            <h1 className="text-2xl font-bold">Inbox</h1>
+            <p className="text-sm text-zinc-400">{messages.filter((m) => m.unread).length} unread</p>
+          </div>
         </div>
+        <Button variant="primary" icon={FiPlus} onClick={openCompose}>Compose</Button>
       </div>
 
       {loading ? (
@@ -108,6 +155,41 @@ export default function Inbox() {
           </Card>
         </div>
       )}
+
+      <Modal open={composeOpen} onClose={() => setComposeOpen(false)} title="New Message" icon={FiSend} size="sm">
+        <form onSubmit={sendMessage} className="space-y-4">
+          <Input
+            label="To"
+            value={draft.to}
+            onChange={(e) => setDraft({ ...draft, to: e.target.value })}
+            placeholder="recipient@example.com"
+            required
+          />
+          <Input
+            label="Subject"
+            value={draft.subject}
+            onChange={(e) => setDraft({ ...draft, subject: e.target.value })}
+            required
+          />
+          <div>
+            <label className="mb-1 block text-sm font-medium text-zinc-300">Message</label>
+            <textarea
+              value={draft.body}
+              onChange={(e) => setDraft({ ...draft, body: e.target.value })}
+              rows={5}
+              className="input w-full resize-none"
+              placeholder="Write your message…"
+              required
+            />
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="ghost" onClick={() => setComposeOpen(false)}>Cancel</Button>
+            <Button type="submit" variant="primary" icon={FiSend} disabled={sending}>
+              {sending ? 'Sending…' : 'Send'}
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }
