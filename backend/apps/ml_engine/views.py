@@ -19,7 +19,7 @@ from .serializers import (
 )
 from .models import (
     AIScriptAnalysis, AISceneDurationPrediction, AIBudgetAnomaly,
-    AIRiskForecast, AIFestivalWin, AILocationRecommendation,
+    AICastRecommendation, AIRiskForecast, AIFestivalWin, AILocationRecommendation,
 )
 
 ml_services = MLService()
@@ -47,6 +47,19 @@ def _to_primitive(obj):
 
 
 # ============================================================
+# Helper: resolve project from request (fallback to first)
+# ============================================================
+def _resolve_project(request):
+    pid = request.data.get('project_id') or request.query_params.get('project_id')
+    if pid:
+        try:
+            return FilmProject.objects.filter(pk=pid).first()
+        except Exception:
+            pass
+    return FilmProject.objects.first()
+
+
+# ============================================================
 # EXISTING ENDPOINTS
 # ============================================================
 class FestivalPredictionView(APIView):
@@ -61,12 +74,14 @@ class FestivalPredictionView(APIView):
 
         if 'error' not in result:
             try:
-                MLPrediction.objects.create(
-                    project=FilmProject.objects.first(),
-                    model_type='RandomForest',
-                    prediction_data={'features': features, 'result': result},
-                    prediction_score=result.get('confidence'),
-                )
+                project = _resolve_project(request)
+                if project:
+                    MLPrediction.objects.create(
+                        project=project,
+                        model_type='RandomForest',
+                        prediction_data=_to_primitive({'features': features, 'result': result}),
+                        prediction_score=result.get('confidence'),
+                    )
             except Exception:
                 pass
 
@@ -98,11 +113,10 @@ class AIScriptSentimentView(APIView):
     def post(self, request):
         s = ScriptSentimentInputSerializer(data=request.data)
         s.is_valid(raise_exception=True)
-        # FIXED: use the SERVICE, not the serializer
         result = ScriptSentimentService.analyze(s.validated_data['dialogue_text'])
         try:
             AIScriptAnalysis.objects.create(
-                project=FilmProject.objects.first(),
+                project=_resolve_project(request),
                 character_name=s.validated_data.get('character_name', ''),
                 dialogue_excerpt=s.validated_data['dialogue_text'][:500],
                 polarity=result['polarity'],
@@ -143,21 +157,27 @@ class AIBudgetAnomaliesView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        txns = list(BudgetTransaction.objects.all().values('id', 'amount', 'transaction_date', 'category'))
+        project = _resolve_project(request)
+
+        qs = BudgetTransaction.objects.all()
+        txns = list(qs.values('id', 'amount', 'transaction_date', 'category'))
         if not txns:
             return Response({'anomalies': [], 'message': 'No transactions found'})
         result = BudgetAnomalyService.detect(txns)
+
         try:
-            AIBudgetAnomaly.objects.all().delete()
+            # Scoped delete — only this project's anomalies
+            if project:
+                AIBudgetAnomaly.objects.filter(project=project).delete()
             for a in result.get('anomalies', []):
                 AIBudgetAnomaly.objects.create(
-                    transaction_id=a['transaction_id'],
-                    project=FilmProject.objects.first(),
-                    amount=a['amount'],
-                    category=a['category'],
-                    anomaly_score=a['anomaly_score'],
-                    severity=a['severity'],
-                    explanation=a['explanation'],
+                    transaction_id=a.get('transaction_id'),
+                    project=project,
+                    amount=a.get('amount'),
+                    category=a.get('category'),
+                    anomaly_score=a.get('anomaly_score'),
+                    severity=a.get('severity'),
+                    explanation=a.get('explanation'),
                 )
         except Exception:
             pass
@@ -180,6 +200,19 @@ class AICastRecommendationView(APIView):
             s.validated_data.get('min_experience', 0),
             cast,
         )
+        # FIXED: persist results to AICastRecommendation like other views do
+        try:
+            project = _resolve_project(request)
+            for r in results:
+                AICastRecommendation.objects.create(
+                    project=project,
+                    role_description=s.validated_data['role_description'],
+                    recommended_cast_id=r.get('cast_id') or r.get('id'),
+                    match_score=r.get('match_score'),
+                    reason=r.get('reason', ''),
+                )
+        except Exception:
+            pass
         return Response({'recommendations': results})
 
 
@@ -200,10 +233,13 @@ class AIRiskForecastView(APIView):
         } for f in forecasts]
 
         try:
-            AIRiskForecast.objects.all().delete()
+            project = _resolve_project(request)
+            # Scoped delete — only this project's forecasts
+            if project:
+                AIRiskForecast.objects.filter(project=project).delete()
             for f in cleaned:
                 AIRiskForecast.objects.create(
-                    project=FilmProject.objects.first(),
+                    project=project,
                     forecast_date=timezone.now().date(),
                     risk_type=f['risk_type'],
                     predicted_probability=f['predicted_probability'],
@@ -232,12 +268,12 @@ class AIFestivalWinView(APIView):
         )
         try:
             AIFestivalWin.objects.create(
-                project=FilmProject.objects.first(),
+                project=_resolve_project(request),
                 festival_name=s.validated_data['festival_name'],
                 win_probability=result['win_probability'],
-                tier=result['tier'],                # FIXED: was 'tier' from validated_data
-                factors=result['factors'],
-                recommendation=result['recommendation'],
+                tier=result.get('tier', 'unknown'),   # FIXED: protected
+                factors=result.get('factors', {}),
+                recommendation=result.get('recommendation', ''),
             )
         except Exception:
             pass
@@ -258,9 +294,10 @@ class AILocationRecommendationView(APIView):
         )
         try:
             scene = Scene.objects.filter(scene_number=s.validated_data['scene_number']).first()
+            project = _resolve_project(request)
             for r in results:
                 AILocationRecommendation.objects.create(
-                    project=FilmProject.objects.first(),
+                    project=project,
                     scene=scene,
                     recommended_location=r['recommended_location'],
                     match_score=r['match_score'],
@@ -272,13 +309,12 @@ class AILocationRecommendationView(APIView):
 
 
 # ============================================================
-# FIXED: AIDailyInsightsView (used by urls.py)
+# AIDailyInsightsView
 # ============================================================
 class AIDailyInsightsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        # FIXED: 'severity' not 'servity'
         recent_sentiments = list(
             AIScriptAnalysis.objects.all().order_by('-created_at')[:5]
             .values('dominant_emotion', 'polarity', 'intensity_level')
@@ -311,3 +347,50 @@ class AIDailyInsightsView(APIView):
                 + AISceneDurationPrediction.objects.count()
             ),
         }))
+
+# ============================================================
+# NEW: Script analysis (A1) + Text-to-SQL (B11)
+# Appended - does not modify any existing view.
+# ============================================================
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.permissions import AllowAny
+from .nlp.script_analyzer import ScriptAnalyzer
+from .text2sql.agent import ask as ask_sql
+
+
+class MLPingView(APIView):
+    """Health check - no auth required."""
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        return Response({"status": "ok", "app": "ml_engine", "version": "1.0"})
+
+
+class ScriptAnalyzeView(APIView):
+    """A1 - upload a screenplay, return characters / scenes / locations."""
+    permission_classes = [AllowAny]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def post(self, request):
+        f = request.FILES.get("file")
+        if f:
+            text = f.read().decode("utf-8", errors="ignore")
+        else:
+            text = request.data.get("text", "")
+        if not text:
+            return Response(
+                {"error": 'Provide either a "file" upload or "text" field'},
+                status=400,
+            )
+        return Response(ScriptAnalyzer(text).analyze())
+
+
+class NLQueryView(APIView):
+    """B11 - natural language to SQL against the real schema."""
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        q = (request.data.get("question") or "").strip()
+        if not q:
+            return Response({"error": "question required"}, status=400)
+        return Response(ask_sql(q))

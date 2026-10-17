@@ -1,4 +1,4 @@
-# ============================================================
+﻿# ============================================================
 # apps/ml_engine/models.py
 #
 # NOTE: The MLPrediction model lives in apps/production/models.py
@@ -14,7 +14,7 @@ import uuid
 
 
 # ============================================================
-# AI MODELS (external SQL tables — Django must not manage them)
+# AI MODELS (external SQL tables â€” Django must not manage them)
 # ============================================================
 
 class AIScriptAnalysis(models.Model):
@@ -184,3 +184,72 @@ class AILocationRecommendation(models.Model):
 
     def __str__(self):
         return f"{self.recommended_location} ({self.match_score})"
+    
+class AIScriptDocument(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    project = models.ForeignKey(
+        FilmProject, on_delete=models.DO_NOTHING,
+        db_column='project_id', related_name='ai_script_documents',
+        blank=True, null=True,
+    )
+    title = models.CharField(max_length=200)
+    file = models.FileField(upload_to="scripts/", blank=True, null=True)
+    raw_text = models.TextField(blank=True, default="")
+    analysis = models.JSONField(default=dict, blank=True)
+    mood = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        managed = True
+        db_table = 'ai_script_documents'
+
+    def __str__(self):
+        return self.title
+    
+class AIKnowledgeDoc(models.Model):
+    KIND_CHOICES = [
+        ("contract", "Contract"),
+        ("budget", "Budget"),
+        ("profile", "Cast Profile"),
+        ("note", "Production Note"),
+        ("script", "Script"),
+        ("other", "Other"),
+    ]
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    project = models.ForeignKey(
+        FilmProject, on_delete=models.DO_NOTHING,
+        db_column='project_id', related_name='ai_knowledge_docs',
+        blank=True, null=True,
+    )
+    kind = models.CharField(max_length=32, choices=KIND_CHOICES, default="other")
+    title = models.CharField(max_length=200)
+    file = models.FileField(upload_to="docs/", blank=True, null=True)
+    raw_text = models.TextField(blank=True, default="")
+    chroma_ids = models.JSONField(default=list)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        managed = True
+        db_table = 'ai_knowledge_docs'
+
+    def __str__(self):
+        return f"[{self.kind}] {self.title}"
+    
+class AIAgentRun(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    project = models.ForeignKey(
+        FilmProject, on_delete=models.DO_NOTHING,
+        db_column='project_id', related_name='ai_agent_runs',
+        blank=True, null=True,
+    )
+    brief = models.TextField()
+    trace = models.JSONField(default=list)
+    result = models.JSONField(default=dict)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        managed = True
+        db_table = 'ai_agent_runs'
+
+    def __str__(self):
+        return self.brief[:80]

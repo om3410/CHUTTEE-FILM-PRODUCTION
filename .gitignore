@@ -72,3 +72,9 @@ frontend/dist/
 # Pytest cache
 .pytest_cache/
 
+
+backend/.env
+
+test_script.txt
+
+backend/test_script.txt
