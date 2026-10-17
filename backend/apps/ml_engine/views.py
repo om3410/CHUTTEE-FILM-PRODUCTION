@@ -394,3 +394,66 @@ class NLQueryView(APIView):
         if not q:
             return Response({"error": "question required"}, status=400)
         return Response(ask_sql(q))
+
+
+# ============================================================
+# NEW: A2 Summarization + A3 Mood/genre classification
+# ============================================================
+from .llm.client import generate, generate_json
+
+
+class ScriptSummarizeView(APIView):
+    """A2 - summarize a screenplay (short / scene / producer / marketing)."""
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        text = request.data.get("text", "")
+        style = request.data.get("style", "short")
+        if not text:
+            return Response({"error": "text required"}, status=400)
+
+        prompts = {
+            "short":     "Summarize this screenplay in 3 sentences.",
+            "scene":     "Summarize this screenplay scene by scene (1 sentence per scene).",
+            "producer":  "Write a producer-facing summary: budget sensibility, cast load, risks.",
+            "marketing": "Write a marketing synopsis suitable for a poster blurb.",
+        }
+        prompt = prompts.get(style, prompts["short"])
+
+        try:
+            summary = generate(f"{prompt}\n\n{text[:15000]}")
+            return Response({"summary": summary, "style": style})
+        except Exception as e:
+            return Response({"error": f"LLM failed: {e}"}, status=500)
+
+
+class ScriptMoodView(APIView):
+    """A3 - classify genre / mood from screenplay dialogue."""
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        text = request.data.get("text", "")
+        if not text:
+            return Response({"error": "text required"}, status=400)
+
+        dialogues = ScriptAnalyzer(text).dialogues()
+        if not dialogues:
+            return Response({"error": "no dialogue found in script"}, status=400)
+
+        sample = "\n".join(
+            f"{d['character']}: {d['text']}" for d in dialogues[:100]
+        )
+        prompt = (
+            "Classify this screenplay's genre mix by percentage (must sum to 100). "
+            'Return JSON: {"genres": [{"name": str, "percent": int}], '
+            '"dominant": str, "reasoning": str}\n\n'
+            f"Dialogue sample:\n{sample}"
+        )
+        try:
+            result = generate_json(
+                prompt,
+                system="You are a film genre classifier. Return only JSON.",
+            )
+            return Response(result)
+        except Exception as e:
+            return Response({"error": f"LLM failed: {e}"}, status=500)
