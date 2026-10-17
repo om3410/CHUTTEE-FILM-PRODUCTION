@@ -168,7 +168,6 @@ class AIBudgetAnomaliesView(APIView):
         result = BudgetAnomalyService.detect(txns)
 
         try:
-            # Scoped delete ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â only this project's anomalies
             if project:
                 AIBudgetAnomaly.objects.filter(project=project).delete()
             for a in result.get('anomalies', []):
@@ -202,7 +201,6 @@ class AICastRecommendationView(APIView):
             s.validated_data.get('min_experience', 0),
             cast,
         )
-        # FIXED: persist results to AICastRecommendation like other views do
         try:
             project = _resolve_project(request)
             for r in results:
@@ -236,7 +234,6 @@ class AIRiskForecastView(APIView):
 
         try:
             project = _resolve_project(request)
-            # Scoped delete ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â only this project's forecasts
             if project:
                 AIRiskForecast.objects.filter(project=project).delete()
             for f in cleaned:
@@ -273,7 +270,7 @@ class AIFestivalWinView(APIView):
                 project=_resolve_project(request),
                 festival_name=s.validated_data['festival_name'],
                 win_probability=result['win_probability'],
-                tier=result.get('tier', 'unknown'),   # FIXED: protected
+                tier=result.get('tier', 'unknown'),
                 factors=result.get('factors', {}),
                 recommendation=result.get('recommendation', ''),
             )
@@ -350,9 +347,9 @@ class AIDailyInsightsView(APIView):
             ),
         }))
 
+
 # ============================================================
 # NEW: Script analysis (A1) + Text-to-SQL (B11)
-# Appended - does not modify any existing view.
 # ============================================================
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import AllowAny
@@ -399,16 +396,13 @@ class NLQueryView(APIView):
 
 
 # ============================================================
-
-
-# ============================================================
 # NEW: A2 Summarization + A3 Mood/genre classification
 # ============================================================
 from .llm.client import generate, generate_json
 
 
 def _extract_text(request):
-    """Robust text extraction Ã¢â‚¬â€ handles str, dict, nested dict, and list."""
+    """Robust text extraction - handles str, dict, nested dict, and list."""
     data = request.data
     if isinstance(data, str):
         return data.strip()
@@ -481,32 +475,55 @@ class ScriptMoodView(APIView):
         except Exception as e:
             return Response({"error": f"LLM failed: {e}"}, status=500)
 
+
 class DailyReportView(APIView):
     permission_classes = [AllowAny]
     def post(self, request):
         pid = request.data.get("project_id") if isinstance(request.data, dict) else None
-        
         if not pid:
             return Response({"error": "project_id required"}, status=400)
-        return Response(scheduling.daily_report(int(pid)))
-    
+        
+        # Safely attempt to call daily_report
+        try:
+            if hasattr(scheduling, 'daily_report'):
+                return Response(scheduling.daily_report(int(pid)))
+            return Response({"error": "daily_report not implemented in scheduling module"}, status=501)
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
+
+
 class ContractRiskView(APIView):
     permission_classes = [AllowAny]
     def post(self, request):
         text = request.data.get("text", "") if isinstance(request.data, dict) else ""
-        return Response(document_intel.contract_risk(text))
-    
+        try:
+            return Response(document_intel.contract_risk(text))
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
+
+
 class LegalQAView(APIView):
     permission_classes = [AllowAny]
     def post(self, request):
         q = request.data.get("question", "") if isinstance(request.data, dict) else ""
-        return Response(document_intel.legal_qa(q))
-    
+        try:
+            return Response(document_intel.legal_qa(q))
+        except RuntimeError as e:
+            return Response({"error": str(e)}, status=503)
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
+
+
 class MeetingMinutesView(APIView):
     permission_classes = [AllowAny]
     def post(self, request):
         text = request.data.get("transcript", "") if isinstance(request.data, dict) else ""
-        return Response(document_intel.meeting_minutes(text))
+        try:
+            if hasattr(document_intel, 'meeting_minutes'):
+                return Response(document_intel.meeting_minutes(text))
+            return Response({"error": "meeting_minutes not implemented"}, status=501)
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
 
 
 # --- Executive ---
@@ -514,27 +531,43 @@ class ProducerCopilotView(APIView):
     permission_classes = [AllowAny]
     def post(self, request):
         q = request.data.get("question", "") if isinstance(request.data, dict) else ""
-        return Response(executive.producer_copilot(q))
+        try:
+            return Response(executive.producer_copilot(q))
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
+
 
 class NLAnalyticsView(APIView):
     permission_classes = [AllowAny]
     def post(self, request):
         q = request.data.get("question", "") if isinstance(request.data, dict) else ""
-        return Response(executive.nl_analytics(q))
-    
+        try:
+            return Response(executive.nl_analytics(q))
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
+
+
 # --- Multimedia ---
 class TrailerNarrationView(APIView):
     permission_classes = [AllowAny]
     def post(self, request):
         text = request.data.get("text", "") if isinstance(request.data, dict) else ""
-        return Response(multimedia.trailer_narration(text))
+        try:
+            return Response(multimedia.trailer_narration(text))
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
+
 
 class PosterContentView(APIView):
     permission_classes = [AllowAny]
     def post(self, request):
         text = request.data.get("text", "") if isinstance(request.data, dict) else ""
         genre = request.data.get("genre", "") if isinstance(request.data, dict) else ""
-        return Response(multimedia.poster_content(text, genre))
+        try:
+            return Response(multimedia.poster_content(text, genre))
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
+
 
 class StoryboardView(APIView):
     permission_classes = [AllowAny]
@@ -542,20 +575,34 @@ class StoryboardView(APIView):
         text = _extract_text(request)
         if not text:
             return Response({"error": "text required"}, status=400)
-        return Response(multimedia.storyboard_prompts(text))
-    
+        try:
+            return Response(multimedia.storyboard_prompts(text))
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
+
+
 # --- Memory ---
 class MemoryRememberView(APIView):
     permission_classes = [AllowAny]
     def post(self, request):
         text = request.data.get("text", "") if isinstance(request.data, dict) else ""
         meta = request.data.get("metadata", {}) if isinstance(request.data, dict) else {}
-        memory.remember(text, meta)
-        return Response({"ok": True})
+        try:
+            memory.remember(text, meta)
+            return Response({"ok": True})
+        except RuntimeError as e:
+            return Response({"error": str(e)}, status=503)
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
+
 
 class MemoryRecallView(APIView):
     permission_classes = [AllowAny]
     def post(self, request):
         q = request.data.get("question", "") if isinstance(request.data, dict) else ""
-        return Response(memory.recall(q))
-
+        try:
+            return Response(memory.recall(q))
+        except RuntimeError as e:
+            return Response({"error": str(e)}, status=503)
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)

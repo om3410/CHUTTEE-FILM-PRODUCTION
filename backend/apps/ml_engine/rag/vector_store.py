@@ -2,13 +2,30 @@
 import os
 from functools import lru_cache
 
-import chromadb
 from django.conf import settings
-from sentence_transformers import SentenceTransformer
+
+# Graceful fallback if heavy AI packages aren't installed (e.g., Render free tier)
+try:
+    import chromadb
+    from sentence_transformers import SentenceTransformer
+    HAS_RAG = True
+except ImportError:
+    HAS_RAG = False
+    chromadb = None
+    SentenceTransformer = None
+
+
+def _require_rag():
+    if not HAS_RAG:
+        raise RuntimeError(
+            "RAG is unavailable: chromadb / sentence-transformers not installed "
+            "on this server. All other AI features work normally."
+        )
 
 
 @lru_cache(maxsize=1)
 def _client():
+    _require_rag()
     path = getattr(settings, "CHROMA_PATH", str(settings.BASE_DIR / "chroma_db"))
     os.makedirs(path, exist_ok=True)
     return chromadb.PersistentClient(path=path)
@@ -16,6 +33,7 @@ def _client():
 
 @lru_cache(maxsize=1)
 def _embedder():
+    _require_rag()
     return SentenceTransformer("all-MiniLM-L6-v2")
 
 
