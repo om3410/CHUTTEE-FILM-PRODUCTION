@@ -6,10 +6,13 @@ from .views import (
     AILocationRecommendationView, AIDailyInsightsView,
     MLPingView, ScriptAnalyzeView, NLQueryView,
     ScriptSummarizeView, ScriptMoodView,
+    DailyReportView, ContractRiskView, LegalQAView, MeetingMinutesView,
+    ProducerCopilotView, NLAnalyticsView,
+    TrailerNarrationView, PosterContentView, StoryboardView,
+    MemoryRememberView, MemoryRecallView,
 )
 
 urlpatterns = [
-    # --- existing ---
     path("predict/festival/", FestivalPredictionView.as_view()),
     path("forecast/budget/", BudgetForecastView.as_view()),
     path("ai/script-sentiment/", AIScriptSentimentView.as_view()),
@@ -21,12 +24,21 @@ urlpatterns = [
     path("ai/location-recommendation/", AILocationRecommendationView.as_view()),
     path("ai/daily-insights/", AIDailyInsightsView.as_view()),
 
-    # --- A1 + B11 ---
-    path("ping/", MLPingView.as_view(), name="ml-ping"),
-    path("script/analyze/", ScriptAnalyzeView.as_view(), name="ml-script-analyze"),
-    path("query/sql/", NLQueryView.as_view(), name="ml-query-sql"),
+    path("ping/", MLPingView.as_view()),
+    path("script/analyze/", ScriptAnalyzeView.as_view()),
+    path("script/summarize/", ScriptSummarizeView.as_view()),
+    path("script/mood/", ScriptMoodView.as_view()),
+    path("query/sql/", NLQueryView.as_view()),
 
-    # --- A2 + A3 ---
-    path("script/summarize/", ScriptSummarizeView.as_view(), name="ml-script-summarize"),
-    path("script/mood/", ScriptMoodView.as_view(), name="ml-script-mood"),
+    path("report/daily/", DailyReportView.as_view()),
+    path("contract/risk/", ContractRiskView.as_view()),
+    path("legal/qa/", LegalQAView.as_view()),
+    path("meeting/minutes/", MeetingMinutesView.as_view()),
+    path("copilot/producer/", ProducerCopilotView.as_view()),
+    path("analytics/nl/", NLAnalyticsView.as_view()),
+    path("script/trailer/", TrailerNarrationView.as_view()),
+    path("marketing/poster/", PosterContentView.as_view()),
+    path("script/storyboard/", StoryboardView.as_view()),
+    path("memory/remember/", MemoryRememberView.as_view()),
+    path("memory/recall/", MemoryRecallView.as_view()),
 ]

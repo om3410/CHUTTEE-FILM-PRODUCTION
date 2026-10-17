@@ -21,6 +21,8 @@ from .models import (
     AIScriptAnalysis, AISceneDurationPrediction, AIBudgetAnomaly,
     AICastRecommendation, AIRiskForecast, AIFestivalWin, AILocationRecommendation,
 )
+from .genai import script_intel, actor_crew, finance, scheduling, document_intel
+from .genai import executive, multimedia, multi_agent, memory
 
 ml_services = MLService()
 
@@ -166,7 +168,7 @@ class AIBudgetAnomaliesView(APIView):
         result = BudgetAnomalyService.detect(txns)
 
         try:
-            # Scoped delete â€” only this project's anomalies
+            # Scoped delete ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â only this project's anomalies
             if project:
                 AIBudgetAnomaly.objects.filter(project=project).delete()
             for a in result.get('anomalies', []):
@@ -234,7 +236,7 @@ class AIRiskForecastView(APIView):
 
         try:
             project = _resolve_project(request)
-            # Scoped delete â€” only this project's forecasts
+            # Scoped delete ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â only this project's forecasts
             if project:
                 AIRiskForecast.objects.filter(project=project).delete()
             for f in cleaned:
@@ -406,7 +408,7 @@ from .llm.client import generate, generate_json
 
 
 def _extract_text(request):
-    """Robust text extraction — handles str, dict, nested dict, and list."""
+    """Robust text extraction Ã¢â‚¬â€ handles str, dict, nested dict, and list."""
     data = request.data
     if isinstance(data, str):
         return data.strip()
@@ -478,3 +480,82 @@ class ScriptMoodView(APIView):
             return Response(result)
         except Exception as e:
             return Response({"error": f"LLM failed: {e}"}, status=500)
+
+class DailyReportView(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request):
+        pid = request.data.get("project_id") if isinstance(request.data, dict) else None
+        
+        if not pid:
+            return Response({"error": "project_id required"}, status=400)
+        return Response(scheduling.daily_report(int(pid)))
+    
+class ContractRiskView(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request):
+        text = request.data.get("text", "") if isinstance(request.data, dict) else ""
+        return Response(document_intel.contract_risk(text))
+    
+class LegalQAView(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request):
+        q = request.data.get("question", "") if isinstance(request.data, dict) else ""
+        return Response(document_intel.legal_qa(q))
+    
+class MeetingMinutesView(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request):
+        text = request.data.get("transcript", "") if isinstance(request.data, dict) else ""
+        return Response(document_intel.meeting_minutes(text))
+
+
+# --- Executive ---
+class ProducerCopilotView(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request):
+        q = request.data.get("question", "") if isinstance(request.data, dict) else ""
+        return Response(executive.producer_copilot(q))
+
+class NLAnalyticsView(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request):
+        q = request.data.get("question", "") if isinstance(request.data, dict) else ""
+        return Response(executive.nl_analytics(q))
+    
+# --- Multimedia ---
+class TrailerNarrationView(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request):
+        text = request.data.get("text", "") if isinstance(request.data, dict) else ""
+        return Response(multimedia.trailer_narration(text))
+
+class PosterContentView(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request):
+        text = request.data.get("text", "") if isinstance(request.data, dict) else ""
+        genre = request.data.get("genre", "") if isinstance(request.data, dict) else ""
+        return Response(multimedia.poster_content(text, genre))
+
+class StoryboardView(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request):
+        text = _extract_text(request)
+        if not text:
+            return Response({"error": "text required"}, status=400)
+        return Response(multimedia.storyboard_prompts(text))
+    
+# --- Memory ---
+class MemoryRememberView(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request):
+        text = request.data.get("text", "") if isinstance(request.data, dict) else ""
+        meta = request.data.get("metadata", {}) if isinstance(request.data, dict) else {}
+        memory.remember(text, meta)
+        return Response({"ok": True})
+
+class MemoryRecallView(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request):
+        q = request.data.get("question", "") if isinstance(request.data, dict) else ""
+        return Response(memory.recall(q))
+
