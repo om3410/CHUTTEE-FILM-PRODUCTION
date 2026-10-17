@@ -166,7 +166,7 @@ class AIBudgetAnomaliesView(APIView):
         result = BudgetAnomalyService.detect(txns)
 
         try:
-            # Scoped delete — only this project's anomalies
+            # Scoped delete â€” only this project's anomalies
             if project:
                 AIBudgetAnomaly.objects.filter(project=project).delete()
             for a in result.get('anomalies', []):
@@ -234,7 +234,7 @@ class AIRiskForecastView(APIView):
 
         try:
             project = _resolve_project(request)
-            # Scoped delete — only this project's forecasts
+            # Scoped delete â€” only this project's forecasts
             if project:
                 AIRiskForecast.objects.filter(project=project).delete()
             for f in cleaned:
@@ -397,9 +397,30 @@ class NLQueryView(APIView):
 
 
 # ============================================================
+
+
+# ============================================================
 # NEW: A2 Summarization + A3 Mood/genre classification
 # ============================================================
 from .llm.client import generate, generate_json
+
+
+def _extract_text(request):
+    """Robust text extraction — handles str, dict, nested dict, and list."""
+    data = request.data
+    if isinstance(data, str):
+        return data.strip()
+    if not isinstance(data, dict):
+        return ""
+    text = data.get("text", "")
+    # Handle malformed nested input like {"text": {"value": "...", "Count": 1}}
+    while isinstance(text, dict):
+        text = text.get("text") or text.get("value") or text.get("content") or ""
+    if isinstance(text, list):
+        text = "\n".join(str(x) for x in text if x)
+    elif not isinstance(text, str):
+        text = "" if text is None else str(text)
+    return text.strip()
 
 
 class ScriptSummarizeView(APIView):
@@ -407,8 +428,8 @@ class ScriptSummarizeView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        text = request.data.get("text", "")
-        style = request.data.get("style", "short")
+        text = _extract_text(request)
+        style = request.data.get("style", "short") if isinstance(request.data, dict) else "short"
         if not text:
             return Response({"error": "text required"}, status=400)
 
@@ -432,7 +453,7 @@ class ScriptMoodView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        text = request.data.get("text", "")
+        text = _extract_text(request)
         if not text:
             return Response({"error": "text required"}, status=400)
 
