@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react'; // FIX: added useMemo
 import { useNavigate } from 'react-router-dom';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { 
@@ -34,6 +34,13 @@ export default function Dashboard() {
   const [savingDeadline, setSavingDeadline] = useState(false);
   const [deletingDeadlineId, setDeletingDeadlineId] = useState(null);
   const [deadlineForm, setDeadlineForm] = useState({ type: 'shoot-day', projectId: '', date: '', location: '' });
+  // FIX: state for the four search-strip dropdowns
+  const [searchFilters, setSearchFilters] = useState({
+    projectId: '',
+    department: '',
+    budget: '',
+    status: '',
+  });
   const { user } = useAuth();
 
   useEffect(() => {
@@ -87,6 +94,43 @@ export default function Dashboard() {
     return () => { cancelled = true; };
   }, [toast]);
 
+  // FIX: option lists for the search strip
+  const projectOptions = useMemo(() => {
+    if (!data?.projects) return [];
+    return data.projects.map((p) => ({ value: String(p.id), label: p.title }));
+  }, [data?.projects]);
+
+  const statusOptions = useMemo(() => {
+    if (!data?.projects) return [];
+    const set = new Set(data.projects.map((p) => p.status).filter(Boolean));
+    return Array.from(set).map((s) => ({ value: s, label: s }));
+  }, [data?.projects]);
+
+  const budgetOptions = [
+    { value: '', label: 'Any budget' },
+    { value: 'under-10l', label: 'Under ₹10L' },
+    { value: '10l-50l', label: '₹10L – ₹50L' },
+    { value: '50l-1cr', label: '₹50L – ₹1Cr' },
+    { value: 'over-1cr', label: 'Over ₹1Cr' },
+  ];
+
+  const departmentOptions = [
+    { value: '', label: 'All departments' },
+    { value: 'direction', label: 'Direction' },
+    { value: 'camera', label: 'Camera' },
+    { value: 'sound', label: 'Sound' },
+    { value: 'art', label: 'Art & Design' },
+    { value: 'post', label: 'Post' },
+    { value: 'vfx', label: 'VFX' },
+    { value: 'music', label: 'Music' },
+    { value: 'production', label: 'Production' },
+  ];
+
+  // FIX: actually do something when "Search Productions" is clicked
+  const handleSearch = () => {
+    navigate('/projects', { state: { filters: searchFilters } });
+  };
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -114,7 +158,8 @@ export default function Dashboard() {
     setEditingDeadline(deadline);
     setDeadlineForm(deadline ? {
       type: deadline.kind,
-      projectId: String(deadline.projectId ?? ''),
+      // FIX: coerce projectId to string so the <select> matches an option
+      projectId: deadline.projectId != null ? String(deadline.projectId) : '',
       date: deadline.date,
       location: deadline.location ?? '',
     } : { type: 'shoot-day', projectId: '', date: '', location: '' });
@@ -177,6 +222,7 @@ export default function Dashboard() {
       return;
     }
     setSavingDeadline(true);
+    const wasEditing = Boolean(editingDeadline); // FIX: capture before nulling
     try {
       let projects = data.projects;
       let shootDays = data.shootDays;
@@ -190,7 +236,8 @@ export default function Dashboard() {
           ? editingDeadline.dayNumber
           : Math.max(0, ...shootDays.map((day) => Number(day.day_number) || 0)) + 1;
         const values = {
-          projectId: deadlineForm.projectId || null,
+          // FIX: send null (not '') when unassigned
+          projectId: deadlineForm.projectId ? Number(deadlineForm.projectId) : null,
           shootDate: deadlineForm.date,
           dayNumber,
           location: deadlineForm.location.trim(),
@@ -218,7 +265,8 @@ export default function Dashboard() {
       }));
       setDeadlineOpen(false);
       setEditingDeadline(null);
-      toast(editingDeadline ? 'Deadline updated' : 'Deadline added', 'success');
+      // FIX: use captured wasEditing
+      toast(wasEditing ? 'Deadline updated' : 'Deadline added', 'success');
     } catch (error) {
       toast(getApiErrorMessage(error, 'Could not save deadline.'), 'error');
     } finally {
@@ -290,14 +338,39 @@ export default function Dashboard() {
         </div>
 
         <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <SearchField label="Productions" placeholder="Select production" />
-          <SearchField label="Department" placeholder="Select department" />
-          <SearchField label="Budget Range" placeholder="Any budget" />
-          <SearchField label="Status" placeholder="All statuses" />
+          {/* FIX: real options + value + onChange */}
+          <SearchField
+            label="Productions"
+            value={searchFilters.projectId}
+            onChange={(value) => setSearchFilters((f) => ({ ...f, projectId: value }))}
+            options={projectOptions}
+            placeholder="All productions"
+          />
+          <SearchField
+            label="Department"
+            value={searchFilters.department}
+            onChange={(value) => setSearchFilters((f) => ({ ...f, department: value }))}
+            options={departmentOptions}
+            placeholder="All departments"
+          />
+          <SearchField
+            label="Budget Range"
+            value={searchFilters.budget}
+            onChange={(value) => setSearchFilters((f) => ({ ...f, budget: value }))}
+            options={budgetOptions}
+            placeholder="Any budget"
+          />
+          <SearchField
+            label="Status"
+            value={searchFilters.status}
+            onChange={(value) => setSearchFilters((f) => ({ ...f, status: value }))}
+            options={statusOptions}
+            placeholder="All statuses"
+          />
         </div>
 
         <div className="mt-4 flex flex-wrap items-center gap-3">
-          <Button variant="primary" size="sm" icon={FiSearch}>Search Productions</Button>
+          <Button variant="primary" size="sm" icon={FiSearch} onClick={handleSearch}>Search Productions</Button>
           <Button variant="outline" size="sm" icon={FiFilm} onClick={() => navigate('/scenes')}>View All Projects</Button>
         </div>
 
@@ -942,7 +1015,9 @@ export default function Dashboard() {
               className="input"
             >
               <option value="">Unassigned</option>
-              {data.projects.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}
+              {data.projects.map((item) => (
+                <option key={item.id} value={String(item.id)}>{item.title}</option>
+              ))}
             </select>
           </label>
           <Input
@@ -976,12 +1051,20 @@ export default function Dashboard() {
    HELPER COMPONENTS
    ═══════════════════════════════════════════════════════════ */
 
-function SearchField({ label, placeholder }) {
+// FIX: SearchField is controlled and accepts real options
+function SearchField({ label, value, onChange, options, placeholder }) {
   return (
     <label className="block">
       <span className="mb-1.5 block text-[10px] uppercase tracking-[0.2em] text-zinc-500">{label}</span>
-      <select className="input">
-        <option>{placeholder}</option>
+      <select
+        className="input"
+        value={value}
+        onChange={(event) => onChange?.(event.target.value)}
+      >
+        <option value="">{placeholder}</option>
+        {options.map((opt) => (
+          <option key={opt.value || opt.label} value={opt.value}>{opt.label}</option>
+        ))}
       </select>
     </label>
   );
