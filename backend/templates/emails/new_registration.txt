@@ -1,0 +1,17 @@
+New Registration - Chuttee Film Production
+==========================================
+
+A new user has just registered.
+
+Username:    {{ username }}
+Email:       {{ email }}
+Full name:   {{ full_name }}
+Phone:       {{ phone }}
+Role:        {{ role }}
+Joined:      {{ date_joined }}
+
+View in Django Admin:
+{{ admin_url }}
+
+--
+Automated notification from CHUTTEE FILM PRODUCTION.

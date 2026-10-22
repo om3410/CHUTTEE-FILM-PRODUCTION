@@ -1,0 +1,16 @@
+CHUTTEE FILM PRODUCTION
+
+REGISTRATION CONFIRMED
+
+Welcome, {{ first_name }}!
+
+Registration successful. Your CHUTTEE account is ready to use.
+
+Your username: {{ username }}
+
+Sign in to manage your productions, collaborate with your team, and keep your projects moving:
+{{ login_url }}
+
+If you did not create this account, please contact our support team.
+
+This is an automated message from CHUTTEE Film Production.

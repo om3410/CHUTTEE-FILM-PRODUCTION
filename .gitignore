@@ -1,0 +1,86 @@
+# Environment
+.env
+.env.local
+*.env
+.env.*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv/
+pip-log.txt
+
+# Django
+*.log
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+_backup/
+logs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Secrets
+credentials.json
+token.json
+login.json
+register.json
+chuttee_admin_credentials.txt
+client_secret.json
+
+# ML Models (optional)
+*.pkl
+
+# Coverage
+.coverage
+htmlcov/
+
+# Build
+dist/
+build/
+*.egg-info/
+
+# Token / response dumps
+token_body.json
+token*.json
+*_body.json
+*_response.json
+
+# Node / frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+
+
+# Pytest cache
+.pytest_cache/
+
+
+backend/.env
+
+test_script.txt
+
+backend/test_script.txt
+
+*.mp4
+backend/database.sql
+backend/import_log.txt
+backend/query
+

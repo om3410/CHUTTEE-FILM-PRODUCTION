@@ -1,0 +1,243 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body, #root { @apply h-full; }
+
+  body {
+    @apply antialiased;
+    background: #0A0A0A;
+    color: #F5F5F5;
+    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.05;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(212,175,55,0.06), transparent 60%),
+      radial-gradient(800px 400px at 0% 100%, rgba(212,175,55,0.04), transparent 60%);
+  }
+
+  #root { position: relative; z-index: 2; }
+
+  h1, h2, h3, .font-serif {
+    font-family: 'Playfair Display', Georgia, serif;
+    letter-spacing: -0.01em;
+  }
+
+  html:not(.dark) { color-scheme: light; }
+
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { @apply bg-transparent; }
+  ::-webkit-scrollbar-thumb { @apply rounded-full bg-zinc-700 hover:bg-zinc-600; }
+
+  input, select, textarea, button { font: inherit; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   COMPONENTS
+   ═══════════════════════════════════════════════════════════ */
+
+@layer components {
+  .input {
+    @apply w-full rounded-premium border border-zinc-700 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-gold-500 focus:ring-2 focus:ring-gold-500/20 transition-all;
+  }
+
+  .card {
+    @apply rounded-premium border border-zinc-800 bg-zinc-900/60 shadow-card transition-colors;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-premium font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-500/60 disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  /* ─── PREMIUM CARD — DARK MODE (default) ─── */
+  .premium-card {
+    background: #141414;
+    border: 1px solid #262626;
+    border-radius: 0.875rem;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.4), 0 8px 24px -12px rgba(0,0,0,0.6);
+    transition:
+      border-color 0.25s ease,
+      transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+      background-color 0.25s ease;
+  }
+  .premium-card:hover {
+    border-color: rgba(212, 175, 55, 0.4);
+    transform: translateY(-3px);
+    box-shadow:
+      0 12px 40px -16px rgba(212, 175, 55, 0.25),
+      0 4px 12px -4px rgba(0, 0, 0, 0.5);
+  }
+
+  /* ─── GLASS NAV — DARK MODE ─── */
+  .glass-nav {
+    background: rgba(20, 20, 20, 0.78);
+    backdrop-filter: saturate(140%) blur(14px);
+    -webkit-backdrop-filter: saturate(140%) blur(14px);
+  }
+
+  /* ─── GOLD DIVIDER — DARK MODE ─── */
+  .gold-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.5), transparent);
+  }
+
+  /* ─── GOLD GRADIENT TEXT — DARK MODE ─── */
+  .text-gold-gradient {
+    background: linear-gradient(135deg, #F5EBC6 0%, #D4AF37 45%, #937522 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* ─── SHIMMER — DARK MODE ─── */
+  .shimmer {
+    background: linear-gradient(90deg, #141414, #1C1C1E, #141414);
+    background-size: 1000px 100%;
+    animation: shimmer 2s linear infinite;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LIGHT MODE OVERRIDES
+   Uses html:not(.dark) so they apply whenever the dark class
+   is absent. This matches your ThemeContext logic exactly.
+   ═══════════════════════════════════════════════════════════ */
+
+html:not(.dark) body {
+  background: #f4f4f5;
+  color: #18181b;
+}
+
+html:not(.dark) body::before { opacity: 0.02; }
+html:not(.dark) body::after  { opacity: 0.4; }
+
+/* Premium card — WHITE background in light mode */
+html:not(.dark) .premium-card {
+  background: #ffffff;
+  border-color: #e4e4e7;
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.04),
+    0 8px 24px -12px rgba(0,0,0,0.12);
+}
+html:not(.dark) .premium-card:hover {
+  border-color: rgba(184,148,43,0.4);
+  box-shadow:
+    0 12px 40px -16px rgba(184,148,43,0.2),
+    0 4px 12px -4px rgba(0,0,0,0.08);
+}
+
+/* Glass navbar */
+html:not(.dark) .glass-nav {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: #e4e4e7;
+}
+
+/* Gold divider */
+html:not(.dark) .gold-divider {
+  background: linear-gradient(90deg, transparent, rgba(184,148,43,0.4), transparent);
+}
+
+/* Gold gradient text — darker tones for readability */
+html:not(.dark) .text-gold-gradient {
+  background: linear-gradient(135deg, #B8942B 0%, #937522 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Shimmer skeleton */
+html:not(.dark) .shimmer {
+  background: linear-gradient(90deg, #f4f4f5, #e4e4e7, #f4f4f5);
+  background-size: 1000px 100%;
+}
+
+/* Inputs */
+html:not(.dark) .input {
+  background-color: #ffffff;
+  border-color: #d4d4d8;
+  color: #18181b;
+}
+html:not(.dark) .input:focus {
+  border-color: #b8942b;
+  box-shadow: 0 0 0 3px rgba(184,148,43,0.15);
+}
+
+/* ─── Tailwind utility overrides ─── */
+html:not(.dark) [class*="bg-zinc-950"]      { background-color: #f4f4f5 !important; }
+html:not(.dark) [class*="bg-zinc-950\/"]    { background-color: rgba(244,244,245,0.8) !important; }
+html:not(.dark) [class*="bg-zinc-900"]      { background-color: #ffffff !important; }
+html:not(.dark) [class*="bg-zinc-900\/40"]  { background-color: rgba(255,255,255,0.6) !important; }
+html:not(.dark) [class*="bg-zinc-900\/50"]  { background-color: rgba(255,255,255,0.7) !important; }
+html:not(.dark) [class*="bg-zinc-900\/60"]  { background-color: rgba(255,255,255,0.85) !important; }
+html:not(.dark) [class*="bg-zinc-800"]      { background-color: #f4f4f5 !important; }
+html:not(.dark) [class*="bg-zinc-800\/"]    { background-color: rgba(244,244,245,0.8) !important; }
+html:not(.dark) [class*="bg-zinc-700"]      { background-color: #e4e4e7 !important; }
+
+/* Text */
+html:not(.dark) [class*="text-zinc-100"],
+html:not(.dark) [class*="text-zinc-200"]    { color: #18181b !important; }
+html:not(.dark) [class*="text-zinc-300"]    { color: #3f3f46 !important; }
+html:not(.dark) [class*="text-zinc-400"],
+html:not(.dark) [class*="text-zinc-500"]    { color: #71717a !important; }
+html:not(.dark) [class*="text-zinc-600"]    { color: #a1a1aa !important; }
+
+/* Borders */
+html:not(.dark) [class*="border-zinc-800"]  { border-color: #e4e4e7 !important; }
+html:not(.dark) [class*="border-zinc-700"]  { border-color: #d4d4d8 !important; }
+
+/* Gold tints — adjust for light mode (keeps them visible on white) */
+html:not(.dark) [class*="bg-gold-500\/10"]  { background-color: rgba(184,148,43,0.1) !important; }
+html:not(.dark) [class*="bg-gold-500\/15"]  { background-color: rgba(184,148,43,0.14) !important; }
+
+/* Divider inside cards uses inline class; ensure visibility */
+html:not(.dark) hr,
+html:not(.dark) [class*="divide-zinc-800"] { border-color: #e4e4e7 !important; }
+
+/* ═══════════════════════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════════════════════ */
+
+.page-enter {
+  animation: fadeIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes shimmer {
+  0%   { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+@keyframes fadeIn {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes pulseGold {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(212,175,55,0.5); }
+  50%      { box-shadow: 0 0 0 8px rgba(212,175,55,0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
