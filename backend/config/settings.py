@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'apps.collaboration',
     'apps.security_extras',
 ]
+
 # ============================================================
 # MIDDLEWARE
 # ============================================================
@@ -185,9 +186,9 @@ if not DEBUG:
 # DJANGO REST FRAMEWORK
 # ============================================================
 REST_FRAMEWORK = {
+    # FIX: removed SessionAuthentication — JWT-only API, no CSRF on POST
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',

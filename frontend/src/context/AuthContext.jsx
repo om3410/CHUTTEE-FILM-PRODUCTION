@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { useAuthStore } from '../store/authStore';
+import { logout as clearTokens } from '../api/auth';
 
 const AuthContext = createContext(null);
 
@@ -8,48 +8,56 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // On mount: restore session from localStorage
   useEffect(() => {
-    const t = localStorage.getItem('chuttee-token');
-    const u = localStorage.getItem('chuttee-user');
-    if (t && u) {
+    const storedToken = localStorage.getItem('chuttee-token');
+    const storedUser = localStorage.getItem('chuttee-user');
+
+    if (storedToken && storedUser) {
+      setToken(storedToken);
       try {
-        const parsedUser = JSON.parse(u);
-        setToken(t);
-        setUser(parsedUser);
-        useAuthStore.getState().login(t, parsedUser);
+        setUser(JSON.parse(storedUser));
       } catch {
-        localStorage.removeItem('chuttee-token');
-        localStorage.removeItem('chuttee-user');
+        setUser(null);
       }
     }
     setLoading(false);
   }, []);
 
-  const login = (t, u) => {
-    localStorage.setItem('chuttee-token', t);
-    localStorage.setItem('chuttee-user', JSON.stringify(u));
-    setToken(t);
-    setUser(u);
-    useAuthStore.getState().login(t, u);
+  // The `login` function is called by Login.jsx via `setAuth(token, user)`
+  const login = (newToken, newUser) => {
+    setToken(newToken);
+    setUser(newUser);
+    localStorage.setItem('chuttee-token', newToken);
+    localStorage.setItem('chuttee-user', JSON.stringify(newUser));
   };
 
   const logout = () => {
-    localStorage.removeItem('chuttee-token');
-    localStorage.removeItem('chuttee-user');
     setToken(null);
     setUser(null);
-    useAuthStore.getState().logout();
+    clearTokens();
   };
 
   const updateUser = (patch) => {
-    const next = { ...user, ...patch };
-    localStorage.setItem('chuttee-user', JSON.stringify(next));
-    setUser(next);
-    useAuthStore.getState().updateUser(patch);
+    setUser((prev) => {
+      const next = { ...prev, ...patch };
+      localStorage.setItem('chuttee-user', JSON.stringify(next));
+      return next;
+    });
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, isAuthenticated: !!token, loading, login, logout, updateUser }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        isAuthenticated: !!token,
+        loading,
+        login,
+        logout,
+        updateUser,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

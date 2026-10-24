@@ -13,25 +13,40 @@ export const useAuthStore = create(
       isAuthenticated: false,
       loading: false,
 
-      /* ─── Sign in ─── */
+      /* ─── Sign in (JWT) ─── */
       login: async (email, password) => {
         set({ loading: true });
         try {
-          const { data } = await api.post('/auth/login/', { email, password });
+          // FIX 1: backend JWT endpoint is /token/ and expects { username, password }
+          const { data } = await api.post('/token/', {
+            username: email,
+            password,
+          });
 
-          if (data.access) localStorage.setItem('chuttee.access', data.access);
-          if (data.refresh) localStorage.setItem('chuttee.refresh', data.refresh);
+          // FIX 2: use 'chuttee-token' key (matches client.js ACCESS_KEY)
+          if (data.access) localStorage.setItem('chuttee-token', data.access);
+          if (data.refresh) localStorage.setItem('chuttee-refresh', data.refresh);
+
+          // FIX 3: /token/ doesn't return user — fetch from /auth/api/me/
+          let user = null;
+          try {
+            const meResp = await api.get('/auth/api/me/');
+            user = meResp.data;
+            localStorage.setItem('chuttee-user', JSON.stringify(user));
+          } catch {
+            user = { email };
+          }
 
           set({
-            user: data.user || { email },
-            company: data.company || null,
+            user,
+            company: null,
             access: data.access,
             refresh: data.refresh,
             isAuthenticated: true,
             loading: false,
           });
 
-          return data;
+          return { ...data, user };
         } catch (err) {
           set({ loading: false });
           throw err;
@@ -42,17 +57,26 @@ export const useAuthStore = create(
       register: async (payload) => {
         set({ loading: true });
         try {
-          const { data } = await api.post('/auth/register/', payload);
+          // FIX 4: register endpoint is /auth/api/register/
+          const { data } = await api.post('/auth/api/register/', payload);
 
-          if (data.access) localStorage.setItem('chuttee.access', data.access);
-          if (data.refresh) localStorage.setItem('chuttee.refresh', data.refresh);
+          if (data.access) localStorage.setItem('chuttee-token', data.access);
+          if (data.refresh) localStorage.setItem('chuttee-refresh', data.refresh);
+
+          // After register, fetch user
+          let user = data.user || { email: payload.email, name: payload.name };
+          try {
+            const meResp = await api.get('/auth/api/me/');
+            user = meResp.data;
+            localStorage.setItem('chuttee-user', JSON.stringify(user));
+          } catch {}
 
           set({
-            user: data.user || { email: payload.email, name: payload.name },
+            user,
             company: data.company || null,
             access: data.access,
             refresh: data.refresh,
-            isAuthenticated: true,
+            isAuthenticated: !!data.access,
             loading: false,
           });
 
@@ -65,8 +89,9 @@ export const useAuthStore = create(
 
       /* ─── Manual auth setter ─── */
       setAuth: ({ user, company, access, refresh }) => {
-        if (access) localStorage.setItem('chuttee.access', access);
-        if (refresh) localStorage.setItem('chuttee.refresh', refresh);
+        if (access) localStorage.setItem('chuttee-token', access);
+        if (refresh) localStorage.setItem('chuttee-refresh', refresh);
+        if (user) localStorage.setItem('chuttee-user', JSON.stringify(user));
         set({
           user,
           company: company || null,
@@ -76,13 +101,17 @@ export const useAuthStore = create(
         });
       },
 
-      updateUser: (user) => set({ user }),
+      updateUser: (user) => {
+        localStorage.setItem('chuttee-user', JSON.stringify(user));
+        set({ user });
+      },
       updateCompany: (company) => set({ company }),
 
       /* ─── Sign out ─── */
       logout: () => {
-        localStorage.removeItem('chuttee.access');
-        localStorage.removeItem('chuttee.refresh');
+        localStorage.removeItem('chuttee-token');
+        localStorage.removeItem('chuttee-refresh');
+        localStorage.removeItem('chuttee-user');
         set({
           user: null,
           company: null,

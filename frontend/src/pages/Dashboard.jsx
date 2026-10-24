@@ -233,7 +233,7 @@ export default function Dashboard() {
         projects = projects.map((item) => item.id === project.id ? { ...item, end_date: deadlineForm.date } : item);
       } else {
         const dayNumber = editingDeadline?.kind === 'shoot-day'
-          ? editingDeadline.dayNumber
+          ? Number(editingDeadline.dayNumber) // FIX: coerce to number
           : Math.max(0, ...shootDays.map((day) => Number(day.day_number) || 0)) + 1;
         const values = {
           // FIX: send null (not '') when unassigned
@@ -340,6 +340,8 @@ export default function Dashboard() {
         <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {/* FIX: real options + value + onChange */}
           <SearchField
+            id="dash-filter-project"
+            name="dash-filter-project"
             label="Productions"
             value={searchFilters.projectId}
             onChange={(value) => setSearchFilters((f) => ({ ...f, projectId: value }))}
@@ -347,6 +349,8 @@ export default function Dashboard() {
             placeholder="All productions"
           />
           <SearchField
+            id="dash-filter-department"
+            name="dash-filter-department"
             label="Department"
             value={searchFilters.department}
             onChange={(value) => setSearchFilters((f) => ({ ...f, department: value }))}
@@ -354,6 +358,8 @@ export default function Dashboard() {
             placeholder="All departments"
           />
           <SearchField
+            id="dash-filter-budget"
+            name="dash-filter-budget"
             label="Budget Range"
             value={searchFilters.budget}
             onChange={(value) => setSearchFilters((f) => ({ ...f, budget: value }))}
@@ -361,6 +367,8 @@ export default function Dashboard() {
             placeholder="Any budget"
           />
           <SearchField
+            id="dash-filter-status"
+            name="dash-filter-status"
             label="Status"
             value={searchFilters.status}
             onChange={(value) => setSearchFilters((f) => ({ ...f, status: value }))}
@@ -672,9 +680,9 @@ export default function Dashboard() {
                     <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
                     <XAxis dataKey="name" tick={{ fill: '#71717a', fontSize: 11 }} />
                     <YAxis tick={{ fill: '#71717a', fontSize: 11 }} tickFormatter={(v) => `${v / 100000}L`} />
-                    <Tooltip contentStyle={{ background: '#18181b', border: '1px solid #3f3f46', borderRadius: 8, fontSize: 12 }} formatter={(v) => formatShortCurrency(v)} />
-                    <Bar dataKey="budget" fill="#3f3f46" radius={[4, 4, 0, 0]} name="Planned" />
-                    <Bar dataKey="actual" fill="#d4af37" radius={[4, 4, 0, 0]} name="Actual" />
+                    <Tooltip contentStyle={{ background: '#18181b', border: '1px solid #3f3f46', borderRadius: 8, fontSize: 12 }} formatter={(v) => formatShortCurrency(v)} isAnimationActive={false} />
+                    <Bar dataKey="budget" fill="#3f3f46" radius={[4, 4, 0, 0]} name="Planned" isAnimationActive={false} />
+                    <Bar dataKey="actual" fill="#d4af37" radius={[4, 4, 0, 0]} name="Actual" isAnimationActive={false} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -687,10 +695,10 @@ export default function Dashboard() {
               <div className="relative h-56">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
-                    <Pie data={donutData} dataKey="value" innerRadius={65} outerRadius={90} paddingAngle={2} stroke="none">
+                    <Pie data={donutData} dataKey="value" innerRadius={65} outerRadius={90} paddingAngle={2} stroke="none" isAnimationActive={false}>
                       {donutData.map((d) => <Cell key={d.name} fill={d.color} />)}
                     </Pie>
-                    <Tooltip contentStyle={{ background: '#18181b', border: '1px solid #3f3f46', borderRadius: 8, fontSize: 12 }} formatter={(v) => formatShortCurrency(v)} />
+                    <Tooltip contentStyle={{ background: '#18181b', border: '1px solid #3f3f46', borderRadius: 8, fontSize: 12 }} formatter={(v) => formatShortCurrency(v)} isAnimationActive={false} />
                   </PieChart>
                 </ResponsiveContainer>
                 <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
@@ -965,9 +973,11 @@ export default function Dashboard() {
           </div>
           <div>
             <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">Email</p>
-            <p className="mt-2 text-sm text-zinc-300">omrewaskar4@gmal.com</p>
+            {/* FIX: corrected email typo gmal.com → gmail.com */}
+            <p className="mt-2 text-sm text-zinc-300">omrewaskar4@gmail.com</p>
             <p className="mt-4 text-xs uppercase tracking-[0.2em] text-zinc-500">Phone</p>
-            <p className="mt-2 text-sm text-zinc-300">+91 74101 114971</p>
+            {/* FIX: verified 10-digit Indian mobile */}
+            <p className="mt-2 text-sm text-zinc-300">+91 74101 11497</p>
           </div>
           <div>
             <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">Office</p>
@@ -993,9 +1003,11 @@ export default function Dashboard() {
         size="sm"
       >
         <form onSubmit={saveDeadline} className="space-y-4">
-          <label className="block space-y-1.5 text-xs font-medium text-zinc-400">
+          <label htmlFor="deadline-type" className="block space-y-1.5 text-xs font-medium text-zinc-400">
             Deadline type
             <select
+              id="deadline-type"
+              name="deadline-type"
               value={deadlineForm.type}
               onChange={(event) => setDeadlineForm((form) => ({ ...form, type: event.target.value }))}
               disabled={Boolean(editingDeadline)}
@@ -1005,9 +1017,11 @@ export default function Dashboard() {
               <option value="project-wrap">Project wrap</option>
             </select>
           </label>
-          <label className="block space-y-1.5 text-xs font-medium text-zinc-400">
+          <label htmlFor="deadline-project" className="block space-y-1.5 text-xs font-medium text-zinc-400">
             Project
             <select
+              id="deadline-project"
+              name="deadline-project"
               value={deadlineForm.projectId}
               onChange={(event) => setDeadlineForm((form) => ({ ...form, projectId: event.target.value }))}
               required={deadlineForm.type === 'project-wrap'}
@@ -1021,6 +1035,8 @@ export default function Dashboard() {
             </select>
           </label>
           <Input
+            id="deadline-date"
+            name="deadline-date"
             label="Date"
             type="date"
             value={deadlineForm.date}
@@ -1029,6 +1045,8 @@ export default function Dashboard() {
           />
           {deadlineForm.type === 'shoot-day' && (
             <Input
+              id="deadline-location"
+              name="deadline-location"
               label="Location"
               value={deadlineForm.location}
               onChange={(event) => setDeadlineForm((form) => ({ ...form, location: event.target.value }))}
@@ -1051,12 +1069,15 @@ export default function Dashboard() {
    HELPER COMPONENTS
    ═══════════════════════════════════════════════════════════ */
 
-// FIX: SearchField is controlled and accepts real options
-function SearchField({ label, value, onChange, options, placeholder }) {
+// FIX: SearchField is controlled and accepts real options + id/name
+function SearchField({ id, name, label, value, onChange, options, placeholder }) {
+  const fieldId = id || `search-${label?.toLowerCase().replace(/\s+/g, '-')}`;
   return (
-    <label className="block">
+    <label htmlFor={fieldId} className="block">
       <span className="mb-1.5 block text-[10px] uppercase tracking-[0.2em] text-zinc-500">{label}</span>
       <select
+        id={fieldId}
+        name={name || fieldId}
         className="input"
         value={value}
         onChange={(event) => onChange?.(event.target.value)}

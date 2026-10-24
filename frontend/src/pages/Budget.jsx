@@ -195,7 +195,6 @@ export default function Budget() {
 
   const saveExpense = async (e) => {
     e.preventDefault();
-    const amount = Number(newExpense.amount);
     setSaving(true);
     try {
       const payload = serializeTransaction(newExpense);
@@ -213,7 +212,6 @@ export default function Budget() {
       toast(editingTransaction ? 'Expense updated' : 'Expense added', 'success');
     } catch (error) {
       toast(getApiErrorMessage(error, 'Could not save expense. Check console for details.'), 'error');
-      // Log the exact backend error so you can fix any remaining field mismatches
       console.error('BudgetTransaction POST/PUT failed:', {
         payload: serializeTransaction(newExpense),
         response: error.response?.data,
@@ -225,6 +223,7 @@ export default function Budget() {
 
   /* ─────────── Planned budget edit ─────────── */
   const openEditDepartment = (department) => {
+    if (!department?.name) return;
     setEditingDepartment(department.name);
     setPlannedAmount(String(department.budget ?? 0));
   };
@@ -237,16 +236,11 @@ export default function Budget() {
       toast('Enter a valid planned budget.', 'error');
       return;
     }
+    // FIX: rely on useLocalStorage's internal persistence — no manual setItem here
     const exists = plannedBudgets.some((d) => d.name === editingDepartment);
     const updatedBudgets = exists
       ? plannedBudgets.map((d) => d.name === editingDepartment ? { ...d, budget: amount } : d)
       : [...plannedBudgets, { name: editingDepartment, budget: amount, actual: 0 }];
-    try {
-      localStorage.setItem('chuttee-budget-departments', JSON.stringify(updatedBudgets));
-    } catch {
-      toast('Could not save the planned budget in this browser.', 'error');
-      return;
-    }
     setPlannedBudgets(updatedBudgets);
     closeDepartmentModal();
     toast('Planned budget updated', 'success');
@@ -323,16 +317,32 @@ export default function Budget() {
         </div>
 
         <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          <label className="block lg:col-span-2">
+          <label htmlFor="budget-search" className="block lg:col-span-2">
             <span className="mb-1.5 block text-[10px] uppercase tracking-[0.2em] text-zinc-500">Search</span>
             <div className="relative">
               <FiSearch className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
-              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Description or category…" className="input pl-10" />
+              <input
+                id="budget-search"
+                name="budget-search"
+                type="search"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Description or category…"
+                className="input pl-10"
+                aria-label="Search expenses"
+              />
             </div>
           </label>
-          <label className="block">
+          <label htmlFor="budget-department-filter" className="block">
             <span className="mb-1.5 block text-[10px] uppercase tracking-[0.2em] text-zinc-500">Department</span>
-            <select value={departmentFilter} onChange={(e) => { setDepartmentFilter(e.target.value); scrollToTable(); }} className="input">
+            <select
+              id="budget-department-filter"
+              name="budget-department-filter"
+              value={departmentFilter}
+              onChange={(e) => { setDepartmentFilter(e.target.value); scrollToTable(); }}
+              className="input"
+              aria-label="Filter by department"
+            >
               <option value="">All Departments</option>
               {POPULAR_DEPARTMENTS.map((d) => <option key={d} value={d}>{d}</option>)}
             </select>
@@ -485,10 +495,34 @@ export default function Budget() {
                     <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
                     <XAxis dataKey="name" tick={{ fill: '#71717a', fontSize: 11 }} />
                     <YAxis tick={{ fill: '#71717a', fontSize: 11 }} tickFormatter={(v) => `${v / 1000}k`} />
-                    <Tooltip contentStyle={{ background: '#18181b', border: '1px solid #3f3f46', borderRadius: 8, fontSize: 12 }} formatter={(v) => formatCurrency(v)} />
+                    <Tooltip contentStyle={{ background: '#18181b', border: '1px solid #3f3f46', borderRadius: 8, fontSize: 12 }} formatter={(v) => formatCurrency(v)} isAnimationActive={false} />
                     <Legend wrapperStyle={{ fontSize: 12 }} />
-                    <Bar dataKey="budget" fill="#3f3f46" radius={[4, 4, 0, 0]} name="Planned" onClick={(entry) => openEditDepartment(entry.payload)} cursor="pointer" />
-                    <Bar dataKey="actual" fill="#d4af37" radius={[4, 4, 0, 0]} name="Actual" onClick={(entry) => setActualCategory(entry.payload.name)} cursor="pointer" />
+                    <Bar
+                      dataKey="budget"
+                      fill="#3f3f46"
+                      radius={[4, 4, 0, 0]}
+                      name="Planned"
+                      isAnimationActive={false}
+                      cursor="pointer"
+                      onClick={(entry) => {
+                        // FIX: entry is the row itself, not entry.payload
+                        const row = entry?.payload || entry;
+                        if (row) openEditDepartment(row);
+                      }}
+                    />
+                    <Bar
+                      dataKey="actual"
+                      fill="#d4af37"
+                      radius={[4, 4, 0, 0]}
+                      name="Actual"
+                      isAnimationActive={false}
+                      cursor="pointer"
+                      onClick={(entry) => {
+                        // FIX: entry is the row itself, not entry.payload
+                        const row = entry?.payload || entry;
+                        if (row) setActualCategory(row.name || 'Other');
+                      }}
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -627,32 +661,85 @@ export default function Budget() {
       <Modal open={addOpen} onClose={closeExpenseModal} title={editingTransaction ? 'Edit Expense' : 'Add Expense'} icon={FiDollarSign} size="sm">
         <form onSubmit={saveExpense} className="space-y-4">
           {projects.length > 0 && (
-            <label className="block space-y-1.5 text-xs font-medium text-zinc-400">
+            <label htmlFor="expense-project" className="block space-y-1.5 text-xs font-medium text-zinc-400">
               <span>Project</span>
-              <select value={newExpense.project} onChange={(e) => setNewExpense({ ...newExpense, project: e.target.value })} className="input" required>
+              <select
+                id="expense-project"
+                name="expense-project"
+                value={newExpense.project}
+                onChange={(e) => setNewExpense({ ...newExpense, project: e.target.value })}
+                className="input"
+                required
+              >
                 <option value="">Select project…</option>
                 {projects.map((p) => <option key={p.id} value={p.id}>{p.title || p.name}</option>)}
               </select>
             </label>
           )}
-          <Input label="Description" value={newExpense.description} onChange={(e) => setNewExpense({ ...newExpense, description: e.target.value })} required />
-          <label className="block space-y-1.5 text-xs font-medium text-zinc-400">
+          <Input
+            id="expense-description"
+            name="expense-description"
+            label="Description"
+            value={newExpense.description}
+            onChange={(e) => setNewExpense({ ...newExpense, description: e.target.value })}
+            required
+          />
+          <label htmlFor="expense-category" className="block space-y-1.5 text-xs font-medium text-zinc-400">
             <span>Department or category</span>
-            <select value={newExpense.category} onChange={(e) => setNewExpense({ ...newExpense, category: e.target.value })} className="input" required>
+            <select
+              id="expense-category"
+              name="expense-category"
+              value={newExpense.category}
+              onChange={(e) => setNewExpense({ ...newExpense, category: e.target.value })}
+              className="input"
+              required
+            >
               {POPULAR_DEPARTMENTS.map((d) => <option key={d} value={d}>{d}</option>)}
             </select>
           </label>
-          <Input label="Amount" type="number" min="0.01" step="0.01" value={newExpense.amount} onChange={(e) => setNewExpense({ ...newExpense, amount: e.target.value })} required />
-          <Input label="Date" type="date" value={newExpense.date} onChange={(e) => setNewExpense({ ...newExpense, date: e.target.value })} required />
-          <label className="block space-y-1.5 text-xs font-medium text-zinc-400">
+          <Input
+            id="expense-amount"
+            name="expense-amount"
+            label="Amount"
+            type="number"
+            min="0.01"
+            step="0.01"
+            value={newExpense.amount}
+            onChange={(e) => setNewExpense({ ...newExpense, amount: e.target.value })}
+            required
+          />
+          <Input
+            id="expense-date"
+            name="expense-date"
+            label="Date"
+            type="date"
+            value={newExpense.date}
+            onChange={(e) => setNewExpense({ ...newExpense, date: e.target.value })}
+            required
+          />
+          <label htmlFor="expense-status" className="block space-y-1.5 text-xs font-medium text-zinc-400">
             <span>Status</span>
-            <select value={newExpense.payment_status} onChange={(e) => setNewExpense({ ...newExpense, payment_status: e.target.value })} className="input" required>
+            <select
+              id="expense-status"
+              name="expense-status"
+              value={newExpense.payment_status}
+              onChange={(e) => setNewExpense({ ...newExpense, payment_status: e.target.value })}
+              className="input"
+              required
+            >
               <option value="pending">Pending</option>
               <option value="paid">Paid</option>
               <option value="overdue">Overdue</option>
             </select>
           </label>
-          <Input label="Notes (optional)" value={newExpense.notes} onChange={(e) => setNewExpense({ ...newExpense, notes: e.target.value })} placeholder="Vendor, invoice #, etc." />
+          <Input
+            id="expense-notes"
+            name="expense-notes"
+            label="Notes (optional)"
+            value={newExpense.notes}
+            onChange={(e) => setNewExpense({ ...newExpense, notes: e.target.value })}
+            placeholder="Vendor, invoice #, etc."
+          />
           <div className="flex justify-end gap-2">
             <Button type="button" variant="ghost" onClick={closeExpenseModal}>Cancel</Button>
             <Button type="submit" variant="primary" disabled={saving}>{saving ? 'Saving…' : editingTransaction ? 'Save changes' : 'Add Expense'}</Button>
@@ -662,7 +749,17 @@ export default function Budget() {
 
       <Modal open={Boolean(editingDepartment)} onClose={closeDepartmentModal} title={`Edit Planned Budget${editingDepartment ? ` — ${editingDepartment}` : ''}`} icon={FiDollarSign} size="sm">
         <form onSubmit={saveDepartmentBudget} className="space-y-4">
-          <Input label="Planned amount" type="number" min="0" step="0.01" value={plannedAmount} onChange={(e) => setPlannedAmount(e.target.value)} required />
+          <Input
+            id="department-planned-amount"
+            name="department-planned-amount"
+            label="Planned amount"
+            type="number"
+            min="0"
+            step="0.01"
+            value={plannedAmount}
+            onChange={(e) => setPlannedAmount(e.target.value)}
+            required
+          />
           <div className="flex justify-end gap-2">
             <Button type="button" variant="ghost" onClick={closeDepartmentModal}>Cancel</Button>
             <Button type="submit" variant="primary">Save budget</Button>

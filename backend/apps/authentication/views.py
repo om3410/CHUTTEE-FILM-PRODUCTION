@@ -10,7 +10,9 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout, authenticate
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.utils.decorators import method_decorator
 from django.views import View
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -64,6 +66,7 @@ class LogoutView(View):
 class RegisterAPIView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
     permission_classes = [permissions.AllowAny]
+    authentication_classes = []  # FIX: allow anonymous POST without CSRF check
 
     def perform_create(self, serializer):
         user = serializer.save()
@@ -71,6 +74,7 @@ class RegisterAPIView(generics.CreateAPIView):
 
 class AccountRecoveryAPIView(APIView):
     permission_classes = [permissions.AllowAny]
+    authentication_classes = []  # FIX: allow anonymous POST without CSRF check
 
     def post(self, request):
         serializer = AccountRecoverySerializer(data=request.data)
@@ -104,6 +108,7 @@ class AccountRecoveryAPIView(APIView):
 
 class PasswordResetConfirmAPIView(APIView):
     permission_classes = [permissions.AllowAny]
+    authentication_classes = []  # FIX: allow anonymous POST without CSRF check
 
     def post(self, request):
         serializer = PasswordResetConfirmSerializer(data=request.data)
@@ -134,17 +139,22 @@ class MeView(generics.RetrieveUpdateAPIView):
     def get_object(self):
         return self.request.user
 
+@method_decorator(csrf_exempt, name='dispatch')  # FIX: session login POST needs CSRF exemption
 class SessionLoginView(APIView):
     permission_classes = [permissions.AllowAny]
+    authentication_classes = []  # FIX: no authentication on the login endpoint itself
+
     def post(self, request):
         user = authenticate(request, username=request.data.get('username'), password=request.data.get('password'))
         if user:
             login(request, user)
-            return Response({"detail": "Logged in", "user":UserSerializer(user).data})
+            return Response({"detail": "Logged in", "user": UserSerializer(user).data})
         return Response({"detail": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
 
+@method_decorator(csrf_exempt, name='dispatch')  # FIX: session logout POST needs CSRF exemption
 class SessionLogoutView(APIView):
     permission_classes = [permissions.IsAuthenticated]
+
     def post(self, request):
         logout(request)
         return Response({"detail": "Logged out"})

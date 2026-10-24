@@ -340,7 +340,7 @@ export default function AIInsights() {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   CLIENT-SIDE AI TABS (preserved from original)
+   CLIENT-SIDE AI TABS
    ═══════════════════════════════════════════════════════════ */
 
 function OverviewTab({ risks, festival }) {
@@ -393,6 +393,8 @@ function OverviewTab({ risks, festival }) {
 }
 
 function BudgetTab({ budgetData, runway, anomalies, spikes, stats }) {
+  // FIX: guard against stats === null → avoids ₹NaNk render
+  const meanAmount = stats?.mean ?? 0;
   return (
     <div className="grid gap-6 lg:grid-cols-2">
       <Card className="lg:col-span-2">
@@ -404,10 +406,14 @@ function BudgetTab({ budgetData, runway, anomalies, spikes, stats }) {
                 <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
                 <XAxis dataKey="name" tick={{ fill: '#71717a', fontSize: 11 }} />
                 <YAxis tick={{ fill: '#71717a', fontSize: 11 }} tickFormatter={(value) => `₹${value / 100000}L`} />
-                <Tooltip contentStyle={{ background: '#18181b', border: '1px solid #3f3f46', borderRadius: 8, fontSize: 12 }} formatter={(value) => formatCurrency(value)} />
+                <Tooltip
+                  contentStyle={{ background: '#18181b', border: '1px solid #3f3f46', borderRadius: 8, fontSize: 12 }}
+                  formatter={(value) => formatCurrency(value)}
+                  isAnimationActive={false}
+                />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Bar dataKey="budget" fill="#3f3f46" radius={[4, 4, 0, 0]} name="Planned" />
-                <Bar dataKey="actual" fill="#d4af37" radius={[4, 4, 0, 0]} name="Actual" />
+                <Bar dataKey="budget" fill="#3f3f46" radius={[4, 4, 0, 0]} name="Planned" isAnimationActive={false} />
+                <Bar dataKey="actual" fill="#d4af37" radius={[4, 4, 0, 0]} name="Actual" isAnimationActive={false} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -420,12 +426,12 @@ function BudgetTab({ budgetData, runway, anomalies, spikes, stats }) {
           <div className="grid grid-cols-3 gap-3">
             <Stat label="Days left" value={runway.daysLeft} accent />
             <Stat label="Weeks" value={runway.weeksLeft} />
-            <Stat label="Avg tx" value={`₹${(stats?.mean / 1000).toFixed(0)}k`} />
+            <Stat label="Avg tx" value={`₹${(meanAmount / 1000).toFixed(0)}k`} />
           </div>
           <div>
             <div className="flex items-center justify-between text-xs mb-1">
               <span className="text-zinc-400">Burn rate</span>
-              <span className="text-zinc-300">₹{runway.dailyBurn.toLocaleString('en-IN')}/day</span>
+              <span className="text-zinc-300">₹{(runway.dailyBurn ?? 0).toLocaleString('en-IN')}/day</span>
             </div>
             <div className="h-2 overflow-hidden rounded-full bg-zinc-800">
               <div className={`h-full rounded-full ${runway.status === 'critical' ? 'bg-red-500' : runway.status === 'warning' ? 'bg-amber-500' : 'bg-emerald-500'}`} style={{ width: `${Math.min(100, (runway.daysLeft / 60) * 100)}%` }} />
@@ -564,7 +570,7 @@ function CastTab({ scene, castMatches }) {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   LIVE GENAI STUDIO (calls real backend)
+   LIVE GENAI STUDIO
    ═══════════════════════════════════════════════════════════ */
 
 function LiveStudio({ toast }) {
@@ -642,13 +648,18 @@ function TextToSQLPanel({ toast }) {
           <CardBody>
             <form onSubmit={ask} className="space-y-3">
               <div className="relative">
+                <label htmlFor="sql-question" className="sr-only">Ask the database</label>
                 <FiSearch className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
                 <input
+                  id="sql-question"
+                  name="sql-question"
+                  type="text"
                   value={question}
                   onChange={(e) => setQuestion(e.target.value)}
                   placeholder="e.g., Show the first 3 film projects with their title and total_budget"
                   className="input pl-10"
                   disabled={loading}
+                  aria-label="Ask the database in plain English"
                 />
               </div>
               <div className="flex justify-end">
@@ -745,13 +756,16 @@ function ScriptAnalyzePanel({ toast }) {
         <CardHeader title="Upload Screenplay" subtitle=".txt file — parser extracts structure" icon={FiUploadCloud} />
         <CardBody>
           <form onSubmit={upload} className="space-y-3">
-            <label className="block">
+            <label htmlFor="script-file" className="block">
               <span className="mb-1.5 block text-[10px] uppercase tracking-[0.2em] text-zinc-500">Screenplay File</span>
               <input
+                id="script-file"
+                name="script-file"
                 type="file"
                 accept=".txt"
                 onChange={(e) => setFile(e.target.files?.[0] || null)}
                 className="input file:mr-3 file:rounded file:border-0 file:bg-gold-500/20 file:px-3 file:py-1 file:text-xs file:text-gold-400"
+                aria-label="Upload screenplay file"
               />
             </label>
             <div className="flex justify-end">
@@ -843,13 +857,30 @@ function SummarizePanel({ toast }) {
         <CardHeader title="Summarize Screenplay" subtitle="Choose a length and tone" icon={FiFileText} />
         <CardBody>
           <form onSubmit={summarize} className="space-y-3">
-            <label className="block">
+            <label htmlFor="summarize-text" className="block">
               <span className="mb-1.5 block text-[10px] uppercase tracking-[0.2em] text-zinc-500">Screenplay Text</span>
-              <textarea value={text} onChange={(e) => setText(e.target.value)} rows={8} placeholder="Paste your screenplay or scene text here…" className="input w-full resize-none" disabled={loading} />
+              <textarea
+                id="summarize-text"
+                name="summarize-text"
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                rows={8}
+                placeholder="Paste your screenplay or scene text here…"
+                className="input w-full resize-none"
+                disabled={loading}
+                aria-label="Screenplay text to summarize"
+              />
             </label>
-            <label className="block sm:w-64">
+            <label htmlFor="summarize-style" className="block sm:w-64">
               <span className="mb-1.5 block text-[10px] uppercase tracking-[0.2em] text-zinc-500">Style</span>
-              <select value={style} onChange={(e) => setStyle(e.target.value)} className="input">
+              <select
+                id="summarize-style"
+                name="summarize-style"
+                value={style}
+                onChange={(e) => setStyle(e.target.value)}
+                className="input"
+                aria-label="Summary style"
+              >
                 <option value="short">Short (one paragraph)</option>
                 <option value="producer">Producer pitch</option>
                 <option value="ott">OTT pitch</option>
@@ -904,9 +935,19 @@ function MoodPanel({ toast }) {
         <CardHeader title="Mood & Genre Classifier" subtitle="Detect dominant genres with percentage confidence" icon={FiZap} />
         <CardBody>
           <form onSubmit={classify} className="space-y-3">
-            <label className="block">
+            <label htmlFor="mood-text" className="block">
               <span className="mb-1.5 block text-[10px] uppercase tracking-[0.2em] text-zinc-500">Screenplay Text</span>
-              <textarea value={text} onChange={(e) => setText(e.target.value)} rows={8} placeholder="Paste your screenplay or scene text here…" className="input w-full resize-none" disabled={loading} />
+              <textarea
+                id="mood-text"
+                name="mood-text"
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                rows={8}
+                placeholder="Paste your screenplay or scene text here…"
+                className="input w-full resize-none"
+                disabled={loading}
+                aria-label="Screenplay text for mood classification"
+              />
             </label>
             <div className="flex justify-end">
               <Button type="submit" variant="primary" icon={loading ? FiRefreshCw : FiZap} disabled={loading || !text.trim()}>
