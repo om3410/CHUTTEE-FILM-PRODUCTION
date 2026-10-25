@@ -41,7 +41,7 @@ export default function Sidebar({ collapsed, onToggle }) {
   return (
     <aside
       className={cn(
-        'sticky top-0 hidden lg:flex h-screen flex-col border-r border-zinc-800 bg-zinc-900 transition-[width] duration-300',
+        'sticky top-0 hidden md:flex h-screen flex-col border-r border-zinc-800 bg-zinc-900 transition-[width] duration-300',
         collapsed ? 'w-[76px]' : 'w-[260px]'
       )}
     >
@@ -59,7 +59,7 @@ export default function Sidebar({ collapsed, onToggle }) {
         )}
       </div>
 
-      <nav className="mt-4 flex-1 space-y-1 px-2 overflow-y-auto">
+      <nav className="mt-4 flex-1 min-h-0 space-y-1 px-2 overflow-y-auto">
         {NAV.map(({ to, label, icon: Icon, end }) => (
           <NavLink
             key={to}

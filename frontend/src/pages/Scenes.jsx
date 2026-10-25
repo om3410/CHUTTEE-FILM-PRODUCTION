@@ -278,7 +278,7 @@ export default function Scenes() {
       {/* 3. STATS STRIP */}
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatNumber value={scenes.length} label="Total scenes" note="In the current production" />
-        <StatNumber value={counts['Shot'] + counts['Cut'] + counts['Locked']} label="Completed" note="Shot, cut or locked" />
+        <StatNumber value={(counts['Shot'] || 0) + (counts['Cut'] || 0) + (counts['Locked'] || 0)} label="Completed" note="Shot, cut or locked" />
         <StatNumber value={totalLocations} label="Locations" note="Across all scenes" />
         <StatNumber value={totalTags} label="Story tags" note="Themes and threads" />
       </section>

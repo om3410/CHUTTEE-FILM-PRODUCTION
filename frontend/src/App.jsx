@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route , Navigate } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { ToastProvider } from './context/ToastContext';
 import { AuthProvider } from './context/AuthContext';
@@ -63,6 +63,7 @@ export default function App() {
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/help" element={<Help />} />
               </Route>
+              <Route path="/projects" element={<Navigate to="/scenes" replace />} />
 
               <Route path="*" element={<NotFound />} />
             </Routes>

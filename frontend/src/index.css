@@ -241,3 +241,5 @@ html:not(.dark) [class*="divide-zinc-800"] { border-color: #e4e4e7 !important; }
     transition-duration: 0.001ms !important;
   }
 }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

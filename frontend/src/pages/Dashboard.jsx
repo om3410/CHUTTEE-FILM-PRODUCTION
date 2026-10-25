@@ -126,7 +126,7 @@ export default function Dashboard() {
   ];
 
   const handleSearch = () => {
-    navigate('/projects', { state: { filters: searchFilters } });
+    navigate('/scenes', { state: { filters: searchFilters } });
   };
 
   // Filter projects by search criteria — MUST stay above `if (loading)` for hook ordering

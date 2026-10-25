@@ -3,7 +3,7 @@ export const APP_TAGLINE = 'Film Production Suite';
 export const APP_VERSION = '1.0.0';
 
 export const DEPARTMENTS = ['Camera', 'Sound', 'Art', 'Wardrobe', 'Production', 'Post'];
-export const SCENE_STATUSES = ['Not Started', 'In Progress', 'Shot', 'Cut'];
+export const SCENE_STATUSES = ['Not Started', 'In Progress', 'Ready', 'Shot', 'Cut', 'Locked'];
 
 export const MOCK = {
   dashboard: [
