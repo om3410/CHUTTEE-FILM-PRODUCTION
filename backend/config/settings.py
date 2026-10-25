@@ -1,5 +1,9 @@
 import os
+import sys
 from datetime import timedelta
+
+import dj_database_url
+from corsheaders.defaults import default_headers
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -9,11 +13,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # ============================================================
 # SECURITY
 # ============================================================
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'change-me-in-production')
-DEBUG = os.getenv('DEBUG', 'True') == 'True'
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "change-me-in-production")
+DEBUG = os.getenv("DEBUG", "True") == "True"
 
 ALLOWED_HOSTS = [
-    h.strip() for h in os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+    h.strip()
+    for h in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
     if h.strip()
 ]
 
@@ -21,98 +26,109 @@ ALLOWED_HOSTS = [
 # INSTALLED APPS
 # ============================================================
 INSTALLED_APPS = [
-    'daphne',                                  # must be before staticfiles
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'django.contrib.postgres',
+    "daphne",
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "django.contrib.postgres",
 
     # Third-party
-    'rest_framework',
-    'rest_framework_simplejwt',
-    'corsheaders',
-    'django_filters',
-    'drf_yasg',
-    'django_celery_beat',
-    'channels',
-    'cloudinary',
-    'cloudinary_storage',
+    "rest_framework",
+    "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",   # FIX: missing comma
+    "axes",                                       # FIX: added for suspicious login detection
+    "corsheaders",
+    "django_filters",
+    "drf_yasg",
+    "django_celery_beat",
+    "channels",
+    "cloudinary",
+    "cloudinary_storage",
 
     # Core apps
-    'apps.authentication',
-    'apps.production',
-    'apps.analytics',
-    'apps.ml_engine',
+    "apps.authentication",
+    "apps.production",
+    "apps.analytics",
+    "apps.ml_engine",
 
     # Feature pack
-    'apps.notifications',
-    'apps.exports',
-    'apps.collaboration',
-    'apps.security_extras',
+    "apps.notifications",
+    "apps.exports",
+    "apps.collaboration",
+    "apps.security_extras",
 ]
 
 # ============================================================
 # MIDDLEWARE
 # ============================================================
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'config.middleware.RequestLoggingMiddleware',
-    'apps.collaboration.middleware.AuditLogMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.security.SecurityMiddleware",
+    "axes.middleware.AxesMiddleware",              # FIX: added
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "config.middleware.RequestLoggingMiddleware",
+    "apps.collaboration.middleware.AuditLogMiddleware",
 ]
 
-ROOT_URLCONF = 'config.urls'
+# ============================================================
+# AUTH BACKENDS
+# ============================================================
+AUTHENTICATION_BACKENDS = [                        # FIX: added
+    "axes.backends.AxesStandaloneBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
+
+ROOT_URLCONF = "config.urls"
 
 # ============================================================
 # TEMPLATES
 # ============================================================
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [os.path.join(BASE_DIR, "templates")],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'config.wsgi.application'
-ASGI_APPLICATION = 'config.asgi.application'
+WSGI_APPLICATION = "config.wsgi.application"
+ASGI_APPLICATION = "config.asgi.application"
 
 # ============================================================
-# DATABASE (Fixed for Render deployment)
+# DATABASE
 # ============================================================
-import dj_database_url
-
-DATABASE_URL = os.getenv('DATABASE_URL')
+DATABASE_URL = os.getenv("DATABASE_URL")
 if DATABASE_URL:
     DATABASES = {
-        'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600, ssl_require=True)
+        "default": dj_database_url.parse(
+            DATABASE_URL, conn_max_age=600, ssl_require=True
+        )
     }
 else:
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.getenv('DB_NAME', 'chuttee_production'),
-            'USER': os.getenv('DB_USER', 'postgres'),
-            'PASSWORD': os.getenv('DB_PASSWORD', 'postgres'),
-            'HOST': os.getenv('DB_HOST', 'localhost'),
-            'PORT': os.getenv('DB_PORT', '5432'),
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.getenv("DB_NAME", "chuttee_production"),
+            "USER": os.getenv("DB_USER", "postgres"),
+            "PASSWORD": os.getenv("DB_PASSWORD", "postgres"),
+            "HOST": os.getenv("DB_HOST", "localhost"),
+            "PORT": os.getenv("DB_PORT", "5432"),
         }
     }
 
@@ -120,64 +136,61 @@ else:
 # PASSWORD VALIDATORS
 # ============================================================
 AUTH_PASSWORD_VALIDATORS = [
-    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
 # ============================================================
 # INTERNATIONALIZATION
 # ============================================================
-LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'Asia/Kolkata'
+LANGUAGE_CODE = "en-us"
+TIME_ZONE = "Asia/Kolkata"
 USE_I18N = True
 USE_TZ = True
 
 # ============================================================
 # STATIC / MEDIA
 # ============================================================
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_URL = "/static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
-# Upload limits — 100 MB per file
 DATA_UPLOAD_MAX_MEMORY_SIZE = 100 * 1024 * 1024
 FILE_UPLOAD_MAX_MEMORY_SIZE = 100 * 1024 * 1024
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # ============================================================
 # CUSTOM USER MODEL
 # ============================================================
-AUTH_USER_MODEL = 'authentication.User'
+AUTH_USER_MODEL = "authentication.User"
 
 # ============================================================
 # CORS / CSRF
 # ============================================================
-from corsheaders.defaults import default_headers
-
 CORS_ALLOWED_ORIGINS = [
-    o.strip() for o in os.getenv(
-        'CORS_ALLOWED_ORIGINS',
-        'http://localhost:5173,http://127.0.0.1:5173,'
-        'http://localhost:5174,http://127.0.0.1:5174,'
-        'http://localhost:3000,http://127.0.0.1:3000'
-    ).split(',') if o.strip()
+    o.strip()
+    for o in os.getenv(
+        "CORS_ALLOWED_ORIGINS",
+        "http://localhost:5173,http://127.0.0.1:5173,"
+        "http://localhost:5174,http://127.0.0.1:5174,"
+        "http://localhost:3000,http://127.0.0.1:3000",
+    ).split(",")
+    if o.strip()
 ]
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_HEADERS = list(default_headers) + [
-    'authorization',
-]
+CORS_ALLOW_HEADERS = list(default_headers) + ["authorization"]
 CSRF_TRUSTED_ORIGINS = CORS_ALLOWED_ORIGINS
 
-# FIX: cookie settings so session-auth fallback works with CORS credentials
-SESSION_COOKIE_SAMESITE = 'Lax'
-CSRF_COOKIE_SAMESITE = 'Lax'
+# Session/CSRF cookies kept for Django admin only; the API is JWT-only.
+SESSION_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SAMESITE = "Lax"
 SESSION_COOKIE_HTTPONLY = True
-CSRF_COOKIE_HTTPONLY = False  # must be False so JS can read it for CSRF
+CSRF_COOKIE_HTTPONLY = False
 if not DEBUG:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
@@ -186,193 +199,212 @@ if not DEBUG:
 # DJANGO REST FRAMEWORK
 # ============================================================
 REST_FRAMEWORK = {
-    # FIX: removed SessionAuthentication — JWT-only API, no CSRF on POST
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        # FIX: custom auth enforces token_version + session revocation
+        "apps.authentication.authentication.SessionAwareJWTAuthentication",
     ),
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.IsAuthenticated",
     ),
-    'DEFAULT_FILTER_BACKENDS': (
-        'django_filters.rest_framework.DjangoFilterBackend',
-        'rest_framework.filters.SearchFilter',
-        'rest_framework.filters.OrderingFilter',
+    "DEFAULT_FILTER_BACKENDS": (
+        "django_filters.rest_framework.DjangoFilterBackend",
+        "rest_framework.filters.SearchFilter",
+        "rest_framework.filters.OrderingFilter",
     ),
-    'DEFAULT_PAGINATION_CLASS': 'config.pagination.StandardResultsSetPagination',
-    'PAGE_SIZE': 20,
-    'DEFAULT_THROTTLE_CLASSES': [
-        'rest_framework.throttling.AnonRateThrottle',
-        'rest_framework.throttling.UserRateThrottle',
+    "DEFAULT_PAGINATION_CLASS": "config.pagination.StandardResultsSetPagination",
+    "PAGE_SIZE": 20,
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
     ],
-    'DEFAULT_THROTTLE_RATES': {
-        'anon': '30/min',
-        'user': '300/min',
-        'ai': '20/min',
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "30/min",
+        "user": "300/min",
+        "ai": "20/min",
+        "login": "10/min",         # NEW: throttle login endpoint
+        "refresh": "30/min",       # NEW: throttle refresh endpoint
     },
-    'EXCEPTION_HANDLER': 'apps.production.exceptions.custom_exception_handler',
+    "EXCEPTION_HANDLER": "apps.production.exceptions.custom_exception_handler",
 }
 
 # ============================================================
 # SIMPLE JWT
 # ============================================================
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=int(os.getenv('JWT_EXPIRE_MINUTES', 60))),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
-    'SIGNING_KEY': os.getenv('JWT_SIGNING_KEY') or SECRET_KEY,
-    'AUTH_HEADER_TYPES': ('Bearer',),
+    # Keep access tokens short so revocation takes effect quickly.
+    "ACCESS_TOKEN_LIFETIME": timedelta(
+        minutes=int(os.getenv("JWT_EXPIRE_MINUTES", 15))   # FIX: 60 -> 15
+    ),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": True,                         # FIX: required
+    "BLACKLIST_AFTER_ROTATION": True,                      # FIX: required
+    "UPDATE_LAST_LOGIN": True,                             # FIX: audit
+    "SIGNING_KEY": os.getenv("JWT_SIGNING_KEY") or SECRET_KEY,
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    "USER_ID_FIELD": "id",
+    "USER_ID_CLAIM": "user_id",
 }
+
+# ============================================================
+# DJANGO-AXES (suspicious login detection)
+# ============================================================
+AXES_FAILURE_LIMIT = int(os.getenv("AXES_FAILURE_LIMIT", 5))
+AXES_COOLOFF_TIME = int(os.getenv("AXES_COOLOFF_TIME", 1))  # hours
+AXES_LOCKOUT_PARAMETERS = [["ip_address", "username"]]
+AXES_RESET_ON_SUCCESS = True
+AXES_ENABLE_ADMIN = True
 
 # ============================================================
 # EMAIL
 # ============================================================
-EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
-EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
-EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
-EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
-FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:5173').rstrip('/')
+EMAIL_BACKEND = os.getenv(
+    "EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend"
+)
+EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True") == "True"
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER)
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173").rstrip("/")
 
-ADMIN_NOTIFICATION_EMAIL = os.getenv('ADMIN_NOTIFICATION_EMAIL', 'omrewaskar4@gmail.com')
-
-# ============================================================
-# CELERY (Fixed for Render deployment)
-# ============================================================
-CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'memory://')
-CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'cache+memory://')
-CELERY_ACCEPT_CONTENT = ['application/json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'Asia/Kolkata'
-CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
-CELERY_TASK_ALWAYS_EAGER = True
-CELERY_TASK_EAGER_PROPAGATES = True
+ADMIN_NOTIFICATION_EMAIL = os.getenv(
+    "ADMIN_NOTIFICATION_EMAIL", "omrewaskar4@gmail.com"
+)
 
 # ============================================================
-# CHANNELS (WebSockets) (Fixed for Render deployment)
+# CELERY
 # ============================================================
-REDIS_URL = os.getenv('REDIS_URL')
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "memory://")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "cache+memory://")
+CELERY_ACCEPT_CONTENT = ["application/json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = "Asia/Kolkata"
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+
+# FIX: only run tasks inline in development. In production this would
+# block every HTTP request until the task finishes.
+CELERY_TASK_ALWAYS_EAGER = DEBUG
+CELERY_TASK_EAGER_PROPAGATES = DEBUG
+
+# ============================================================
+# CHANNELS
+# ============================================================
+REDIS_URL = os.getenv("REDIS_URL")
 if REDIS_URL:
     CHANNEL_LAYERS = {
-        'default': {
-            'BACKEND': 'channels_redis.core.RedisChannelLayer',
-            'CONFIG': {
-                'hosts': [REDIS_URL],
-            },
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {"hosts": [REDIS_URL]},
         },
     }
 else:
     CHANNEL_LAYERS = {
-        'default': {
-            'BACKEND': 'channels.layers.InMemoryChannelLayer',
+        "default": {
+            "BACKEND": "channels.layers.InMemoryChannelLayer",
         },
     }
 
 # ============================================================
-# CLOUDINARY (Media storage)
+# CLOUDINARY
 # ============================================================
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME'),
-    'API_KEY': os.getenv('CLOUDINARY_API_KEY'),
-    'API_SECRET': os.getenv('CLOUDINARY_API_SECRET'),
+    "CLOUD_NAME": os.getenv("CLOUDINARY_CLOUD_NAME"),
+    "API_KEY": os.getenv("CLOUDINARY_API_KEY"),
+    "API_SECRET": os.getenv("CLOUDINARY_API_SECRET"),
 }
 
-# Django 5.0+ STORAGES setting (replaces deprecated DEFAULT_FILE_STORAGE).
-# Only enable Cloudinary if keys are set; otherwise use local media.
-if os.getenv('CLOUDINARY_CLOUD_NAME'):
+if os.getenv("CLOUDINARY_CLOUD_NAME"):
     STORAGES = {
-        'default': {
-            'BACKEND': 'cloudinary_storage.storage.MediaCloudinaryStorage',
+        "default": {
+            "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
         },
-        'staticfiles': {
-            'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
         },
     }
 else:
     STORAGES = {
-        'default': {
-            'BACKEND': 'django.core.files.storage.FileSystemStorage',
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
         },
-        'staticfiles': {
-            'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
         },
     }
 
 # ============================================================
 # AI PROVIDERS (8 FREE)
 # ============================================================
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
-GROQ_API_KEY = os.getenv('GROQ_API_KEY')
-CEREBRAS_API_KEY = os.getenv('CEREBRAS_API_KEY')
-OPENROUTER_API_KEY = os.getenv('OPENROUTER_API_KEY')
-MISTRAL_API_KEY = os.getenv('MISTRAL_API_KEY')
-DEEPSEEK_API_KEY = os.getenv('DEEPSEEK_API_KEY')
-HUGGINGFACE_API_KEY = os.getenv('HUGGINGFACE_API_KEY')
-COHERE_API_KEY = os.getenv('COHERE_API_KEY')
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+CEREBRAS_API_KEY = os.getenv("CEREBRAS_API_KEY")
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
+DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
+HUGGINGFACE_API_KEY = os.getenv("HUGGINGFACE_API_KEY")
+COHERE_API_KEY = os.getenv("COHERE_API_KEY")
 
 AI_PROVIDER_ORDER = os.getenv(
-    'AI_PROVIDER_ORDER',
-    'gemini,groq,cerebras,openrouter,mistral,deepseek,cohere,huggingface'
-).split(',')
+    "AI_PROVIDER_ORDER",
+    "gemini,groq,cerebras,openrouter,mistral,deepseek,cohere,huggingface",
+).split(",")
 
-# NOTE: Model names below are real, currently-supported identifiers.
-# Verify against each provider's docs before deployment — providers
-# deprecate and rename models frequently.
-DEFAULT_GEMINI_MODEL = os.getenv('DEFAULT_GEMINI_MODEL', 'gemini-1.5-flash')
-DEFAULT_GROQ_MODEL = os.getenv('DEFAULT_GROQ_MODEL', 'llama-3.3-70b-versatile')
-DEFAULT_CEREBRAS_MODEL = os.getenv('DEFAULT_CEREBRAS_MODEL', 'llama3.1-70b')
-DEFAULT_OPENROUTER_MODEL = os.getenv('DEFAULT_OPENROUTER_MODEL', 'meta-llama/llama-3.1-8b-instruct:free')
-DEFAULT_MISTRAL_MODEL = os.getenv('DEFAULT_MISTRAL_MODEL', 'mistral-large-latest')
-DEFAULT_DEEPSEEK_MODEL = os.getenv('DEFAULT_DEEPSEEK_MODEL', 'deepseek-chat')
-DEFAULT_COHERE_MODEL = os.getenv('DEFAULT_COHERE_MODEL', 'command-r-plus-08-2024')
-DEFAULT_HF_MODEL = os.getenv('DEFAULT_HF_MODEL', 'meta-llama/Llama-3.3-70B-Instruct')
+DEFAULT_GEMINI_MODEL = os.getenv("DEFAULT_GEMINI_MODEL", "gemini-1.5-flash")
+DEFAULT_GROQ_MODEL = os.getenv("DEFAULT_GROQ_MODEL", "llama-3.3-70b-versatile")
+DEFAULT_CEREBRAS_MODEL = os.getenv("DEFAULT_CEREBRAS_MODEL", "llama3.1-70b")
+DEFAULT_OPENROUTER_MODEL = os.getenv(
+    "DEFAULT_OPENROUTER_MODEL", "meta-llama/llama-3.1-8b-instruct:free"
+)
+DEFAULT_MISTRAL_MODEL = os.getenv("DEFAULT_MISTRAL_MODEL", "mistral-large-latest")
+DEFAULT_DEEPSEEK_MODEL = os.getenv("DEFAULT_DEEPSEEK_MODEL", "deepseek-chat")
+DEFAULT_COHERE_MODEL = os.getenv("DEFAULT_COHERE_MODEL", "command-r-plus-08-2024")
+DEFAULT_HF_MODEL = os.getenv(
+    "DEFAULT_HF_MODEL", "meta-llama/Llama-3.3-70B-Instruct"
+)
 
 # ============================================================
 # EXTERNAL APIs (FREE)
 # ============================================================
-OPENWEATHER_API_KEY = os.getenv('OPENWEATHER_API_KEY')
-GOOGLE_MAPS_API_KEY = os.getenv('GOOGLE_MAPS_API_KEY')
-SERPAPI_KEY = os.getenv('SERPAPI_KEY')
+OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")
+GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
+SERPAPI_KEY = os.getenv("SERPAPI_KEY")
 
 # ============================================================
 # FIREBASE
 # ============================================================
-FIREBASE_SERVER_KEY = os.getenv('FIREBASE_SERVER_KEY')
-FIREBASE_PROJECT_ID = os.getenv('FIREBASE_PROJECT_ID')
+FIREBASE_SERVER_KEY = os.getenv("FIREBASE_SERVER_KEY")
+FIREBASE_PROJECT_ID = os.getenv("FIREBASE_PROJECT_ID")
 
 # ============================================================
 # LOGGING
 # ============================================================
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': '{levelname} {asctime} {module} {message}',
-            'style': '{',
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {module} {message}",
+            "style": "{",
         },
     },
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
         },
     },
-    'root': {
-        'handlers': ['console'],
-        'level': 'INFO',
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
     },
 }
 
-import sys
-if 'test' in sys.argv:
-    MIGRATION_MODULES = {
-        'production': None,
-        'ml_engine': None,
-        'analytics': None,
-        'collaboration': None,
-        'notifications': None,
-        'exports': None,
-        'security_extras': None,
-    }
+# ============================================================
+# TEST-SPECIFIC OVERRIDES
+# ============================================================
+DATABASES["default"]["TEST"] = {
+    "NAME": "test_chuttee_production",
+    "TEMPLATE": "chuttee_test_template",
+}

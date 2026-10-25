@@ -1,28 +1,33 @@
 from django.urls import path
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-    TokenVerifyView,
-)
+from rest_framework_simplejwt.views import TokenVerifyView
+
 from . import views
 
 urlpatterns = [
-    # HTML pages (browser)
-    path('', views.HomeView.as_view(), name='home'),
-    path('register/', views.RegisterView.as_view(), name='register'),
-    path('html-login/', views.LoginView.as_view(), name='html-login'),   # ← RENAMED (was 'login/')
-    path('logout/', views.LogoutView.as_view(), name='logout'),
+    # HTML pages
+    path("", views.HomeView.as_view(), name="home"),
+    path("register/", views.RegisterView.as_view(), name="register"),
+    path("html-login/", views.LoginView.as_view(), name="html-login"),
+    path("html-logout/", views.LogoutView.as_view(), name="html-logout"),
 
-    # JWT auth endpoints (for React frontend)
-    path('login/', TokenObtainPairView.as_view(), name='api-login'),      # → /api/auth/login/
-    path('refresh/', TokenRefreshView.as_view(), name='api-refresh'),     # → /api/auth/refresh/
-    path('verify/', TokenVerifyView.as_view(), name='api-verify'),        # → /api/auth/verify/
+    # JWT auth (relative — outer include supplies 'api/auth/')
+    path("login/", views.JWTLoginView.as_view(), name="jwt-login"),
+    path("refresh/", views.JWTRefreshView.as_view(), name="jwt-refresh"),
+    path("verify/", TokenVerifyView.as_view(), name="jwt-verify"),
+    path("logout/", views.JWTLogoutView.as_view(), name="jwt-logout"),
+    path("logout-all/", views.JWTLogoutAllView.as_view(), name="jwt-logout-all"),
+    path("sessions/", views.SessionListView.as_view(), name="jwt-sessions"),
+    path(
+        "sessions/<uuid:session_id>/revoke/",
+        views.SessionRevokeView.as_view(),
+        name="jwt-session-revoke",
+    ),
 
-    # Auth API endpoints (DRF, for curl/React)
-    path('api/register/', views.RegisterAPIView.as_view(), name='api-register'),
-    path('api/account-recovery/', views.AccountRecoveryAPIView.as_view(), name='api-account-recovery'),
-    path('api/password-reset/confirm/', views.PasswordResetConfirmAPIView.as_view(), name='api-password-reset-confirm'),
-    path('api/me/', views.MeView.as_view(), name='api-me'),
-    path('api/session-login/', views.SessionLoginView.as_view(), name='api-session-login'),
-    path('api/session-logout/', views.SessionLogoutView.as_view(), name='api-session-logout'),
+    # Other APIs (relative)
+    path("register-api/", views.RegisterAPIView.as_view(), name="api-register"),
+    path("account-recovery/", views.AccountRecoveryAPIView.as_view(), name="api-account-recovery"),
+    path("password-reset/confirm/", views.PasswordResetConfirmAPIView.as_view(), name="api-password-reset-confirm"),
+    path("me/", views.MeView.as_view(), name="api-me"),
+    path("session-login/", views.SessionLoginView.as_view(), name="api-session-login"),
+    path("session-logout/", views.SessionLogoutView.as_view(), name="api-session-logout"),
 ]

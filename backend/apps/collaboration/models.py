@@ -1,4 +1,4 @@
-﻿import uuid
+import uuid
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
@@ -41,6 +41,7 @@ class Comment(models.Model):
 
     class Meta:
         managed = False
+
         db_table = 'collab_comments'
         ordering = ['-created_at']
 
@@ -67,6 +68,7 @@ class AuditLog(models.Model):
 
     class Meta:
         managed = False
+
         db_table = 'collab_audit_logs'
         ordering = ['-timestamp']
 
