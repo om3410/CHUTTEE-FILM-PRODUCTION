@@ -8,7 +8,7 @@ import {
 import { useAuthStore } from '../../store/authStore';
 import { cn } from '../../lib/utils';
 
-// Single source of truth â€” change here, not in 20 places
+// Single source of truth ├óΓé¼ΓÇ¥ change here, not in 20 places
 const DEFAULT_EMAIL = 'omrewaskar4@gmail.com';
 const DEFAULT_NAME  = 'Producer';
 
