@@ -117,7 +117,7 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 if DATABASE_URL:
     DATABASES = {
         "default": dj_database_url.parse(
-            DATABASE_URL, conn_max_age=600, ssl_require=True
+            DATABASE_URL, conn_max_age=600, ssl_require=False
         )
     }
 else:
@@ -129,6 +129,7 @@ else:
             "PASSWORD": os.getenv("DB_PASSWORD", "postgres"),
             "HOST": os.getenv("DB_HOST", "localhost"),
             "PORT": os.getenv("DB_PORT", "5432"),
+            "OPTIONS": {"sslmode": "disable"},
         }
     }
 

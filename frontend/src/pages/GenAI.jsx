@@ -11,10 +11,11 @@ import Button from '../components/ui/Button';
 import PageHero from '../components/ui/PageHero';
 import FeatureRunner from '../components/genai/FeatureRunner';
 import PipelineViewer from '../components/genai/PipelineViewer';
+import api from '../api/client';
 
-/* ────────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    28 features · 8 stages · P0/P1/P2
-   ──────────────────────────────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const STAGES = ['All', 'Script', 'Pre-Viz', 'Casting', 'Planning', 'Post', 'Marketing', 'Analytics', 'Knowledge'];
 
 const FEATURES = [
@@ -101,10 +102,39 @@ export default function GenAI() {
   const stageCount = (s) => FEATURES.filter((f) => f.stage === s).length;
   const p0Count = FEATURES.filter((f) => f.priority === 'P0').length;
 
+  const handleRun = async (feature, input) => {
+    const ROUTES = {
+      sceneweaver: '/api/ml/script/summarize/',
+      characterforge: '/api/ml/script/summarize/',
+      scriptcoverage: '/api/ml/script/summarize/',
+      loglinelab: '/api/ml/script/summarize/',
+      scriptqa: '/api/ml/query/sql/',
+      budgetbot: '/api/ml/forecast/budget/',
+      riskradar: '/api/ml/ai/risk-forecast/',
+      castmatch: '/api/ml/ai/cast-recommendation/',
+      boxofficeoracle: '/api/ml/predict/festival/'
+    };
+    const route = ROUTES[feature.id];
+    if (!route) {
+      throw new Error('Backend route for "' + feature.name + '" has not been built yet.');
+    }
+    const payload = { prompt: input, text: input, question: input };
+    try {
+      const res = await api.post(route, payload);
+      return JSON.stringify(res.data, null, 2);
+    } catch (err) {
+      const status = (err && err.response && err.response.status) || '?';
+      const detail = err && err.response && err.response.data
+        ? JSON.stringify(err.response.data, null, 2)
+        : (err && err.message) || 'Request failed';
+      throw new Error(feature.name + ' failed (' + status + '): ' + detail);
+    }
+  };
+
   return (
     <div className="space-y-16 animate-fade-in">
 
-      {/* ───────── Hero ───────── */}
+      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€ Hero â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <PageHero
         image="/images/hero/hero-bg.jpg"
         eyebrow="GenAI Studio"
@@ -114,7 +144,7 @@ export default function GenAI() {
         slogan="AI does not replace the crew. It shortens the distance between a decision and its first draft — so the people on set can spend their time on the work only they can do."
       />
 
-      {/* ───────── Headline stats ───────── */}
+      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€ Headline stats â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <section>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatNumber value={FEATURES.length} label="GenAI features" note="Across every production stage" />
@@ -131,7 +161,7 @@ export default function GenAI() {
         "The best AI tool is the one the crew forgets is there — because it already did the boring part before anyone asked."
       </Quote>
 
-      {/* ───────── New intelligence strip ───────── */}
+      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€ New intelligence strip â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <section>
         <div className="max-w-3xl">
           <p className="text-[11px] uppercase tracking-[0.25em] text-gold-400">New Intelligence Tools</p>
@@ -176,7 +206,7 @@ export default function GenAI() {
         </div>
       </section>
 
-      {/* ───────── Pipeline viewer ───────── */}
+      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€ Pipeline viewer â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <section>
         <div className="max-w-3xl">
           <p className="text-[11px] uppercase tracking-[0.25em] text-gold-400">Production Pipeline</p>
@@ -197,7 +227,7 @@ export default function GenAI() {
         </div>
       </section>
 
-      {/* ───────── Explore by stage ───────── */}
+      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€ Explore by stage â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <section>
         <div className="max-w-3xl">
           <p className="text-[11px] uppercase tracking-[0.25em] text-gold-400">Explore by Stage</p>
@@ -229,7 +259,7 @@ export default function GenAI() {
         "A prompt is a decision in disguise. Shield it before it is sent, and the production stays yours."
       </Quote>
 
-      {/* ───────── The full catalog ───────── */}
+      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€ The full catalog â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <section id="catalog" className="scroll-mt-24">
         <div className="max-w-3xl">
           <p className="text-[11px] uppercase tracking-[0.25em] text-gold-400">The Full Catalog</p>
@@ -326,7 +356,7 @@ export default function GenAI() {
         "AI does not replace the crew. It shortens the distance between a decision and its first draft. The craft still belongs to the people on set."
       </Quote>
 
-      {/* ───────── Guardrails ───────── */}
+      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€ Guardrails â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <section>
         <div className="max-w-3xl">
           <p className="text-[11px] uppercase tracking-[0.25em] text-gold-400">Guardrails</p>
@@ -358,7 +388,7 @@ export default function GenAI() {
         </div>
       </section>
 
-      {/* ───────── Ready to shoot ───────── */}
+      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€ Ready to shoot â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <section>
         <div className="max-w-3xl">
           <p className="text-[11px] uppercase tracking-[0.25em] text-gold-400">Ready to Shoot?</p>
@@ -389,7 +419,7 @@ export default function GenAI() {
         </div>
       </section>
 
-      {/* ───────── Why CHUTTEE ───────── */}
+      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€ Why CHUTTEE â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <section>
         <div className="max-w-3xl">
           <p className="text-[11px] uppercase tracking-[0.25em] text-gold-400">Why CHUTTEE</p>
@@ -414,7 +444,7 @@ export default function GenAI() {
         "The films that endure are not the ones with the fewest problems. They are the ones where the people behind them saw the problems early — and solved them together."
       </Quote>
 
-      {/* ───────── Contact ───────── */}
+      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€ Contact â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <section className="premium-card relative overflow-hidden p-8 sm:p-10">
         <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-gold-500/10 blur-3xl" />
         <div className="relative grid gap-8 lg:grid-cols-3">
@@ -457,19 +487,20 @@ export default function GenAI() {
         </div>
       </section>
 
-      {/* ───────── Runner modal ───────── */}
+      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€ Runner modal â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <FeatureRunner
         feature={runnerFeature}
         open={Boolean(runnerFeature)}
         onClose={() => setRunnerFeature(null)}
+        onRun={handleRun}
       />
     </div>
   );
 }
 
-/* ────────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    Helper components
-   ──────────────────────────────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 function StatNumber({ value, label, note }) {
   return (

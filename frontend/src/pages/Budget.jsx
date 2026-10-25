@@ -24,9 +24,9 @@ import {
 } from '../api/production';
 import { getApiErrorMessage } from '../api/auth';
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+/* ═══════════════════════════════════════════════════════════
    HELPERS & CONSTANTS
-   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+   ═══════════════════════════════════════════════════════════ */
 
 const getBudgetBreakdown = (departments, transactions) => {
   const actualByCategory = transactions.reduce((totals, transaction) => {
@@ -82,9 +82,9 @@ const CATEGORY_ROUTES = [
 
 const POPULAR_DEPARTMENTS = ['Cast', 'Crew', 'Locations', 'Equipment', 'Post', 'Music', 'Other'];
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+/* ═══════════════════════════════════════════════════════════
    MAIN COMPONENT
-   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+   ═══════════════════════════════════════════════════════════ */
 
 export default function Budget() {
   const { toast } = useToast();
@@ -127,7 +127,7 @@ export default function Budget() {
     let cancelled = false;
     Promise.all([
       fetchBudgetTransactions(),
-      fetchAllPages('/api/production/projects/').catch(() => []),
+      fetchAllPages('/production/projects/').catch(() => []),
     ])
       .then(([transactions, fetchedProjects]) => {
         if (cancelled) return;
@@ -143,7 +143,7 @@ export default function Budget() {
     return () => { cancelled = true; };
   }, [toast]);
 
-  /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Derived Data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  /* ─────────── Derived Data ─────────── */
   const totalSpent = data.transactions.reduce((s, t) => s + Number(t.amount || 0), 0);
   const totalPlanned = plannedBudgets.reduce((s, d) => s + Number(d.budget || 0), 0);
   const remaining = Math.max(totalPlanned - totalSpent, 0);
@@ -161,7 +161,7 @@ export default function Budget() {
   const clearFilters = () => { setSearch(''); setDepartmentFilter(''); };
   const scrollToTable = () => setTimeout(() => document.getElementById('budget-table')?.scrollIntoView({ behavior: 'smooth' }), 100);
 
-  /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Actions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  /* ─────────── Actions ─────────── */
   const openAddExpense = () => {
     setEditingTransaction(null);
     setNewExpense({
@@ -195,6 +195,7 @@ export default function Budget() {
 
   const saveExpense = async (e) => {
     e.preventDefault();
+    const amount = Number(newExpense.amount);
     setSaving(true);
     try {
       const payload = serializeTransaction(newExpense);
@@ -212,6 +213,7 @@ export default function Budget() {
       toast(editingTransaction ? 'Expense updated' : 'Expense added', 'success');
     } catch (error) {
       toast(getApiErrorMessage(error, 'Could not save expense. Check console for details.'), 'error');
+      // Log the exact backend error so you can fix any remaining field mismatches
       console.error('BudgetTransaction POST/PUT failed:', {
         payload: serializeTransaction(newExpense),
         response: error.response?.data,
@@ -221,9 +223,8 @@ export default function Budget() {
     }
   };
 
-  /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Planned budget edit â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  /* ─────────── Planned budget edit ─────────── */
   const openEditDepartment = (department) => {
-    if (!department?.name) return;
     setEditingDepartment(department.name);
     setPlannedAmount(String(department.budget ?? 0));
   };
@@ -236,17 +237,22 @@ export default function Budget() {
       toast('Enter a valid planned budget.', 'error');
       return;
     }
-    // FIX: rely on useLocalStorage's internal persistence â€” no manual setItem here
     const exists = plannedBudgets.some((d) => d.name === editingDepartment);
     const updatedBudgets = exists
       ? plannedBudgets.map((d) => d.name === editingDepartment ? { ...d, budget: amount } : d)
       : [...plannedBudgets, { name: editingDepartment, budget: amount, actual: 0 }];
+    try {
+      localStorage.setItem('chuttee-budget-departments', JSON.stringify(updatedBudgets));
+    } catch {
+      toast('Could not save the planned budget in this browser.', 'error');
+      return;
+    }
     setPlannedBudgets(updatedBudgets);
     closeDepartmentModal();
     toast('Planned budget updated', 'success');
   };
 
-  /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Export â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  /* ─────────── Export ─────────── */
   const exportExpenses = () => {
     if (!data.transactions.length) { toast('There are no expenses to export.', 'info'); return; }
     try {
@@ -300,7 +306,7 @@ export default function Budget() {
         eyebrow="The Money, the Ledger and the Story Behind Every Rupee"
         title="Every Rupee, Accounted For."
         subtitle="Every Cost, Under Control."
-        lead="Track planned versus actual spend across every department. Log expenses with receipts. Monitor payments, approvals and forecasts. Generate GST-ready invoices. See exactly where your production stands â€” financially, at every step of the journey."
+        lead="Track planned versus actual spend across every department. Log expenses with receipts. Monitor payments, approvals and forecasts. Generate GST-ready invoices. See exactly where your production stands — financially, at every step of the journey."
         slogan="Every rupee has a reason. Every expense tells a story. The right budget, the right tracking and the right oversight can turn a production into something that respects both the craft and the capital."
       />
 
@@ -317,32 +323,16 @@ export default function Budget() {
         </div>
 
         <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          <label htmlFor="budget-search" className="block lg:col-span-2">
+          <label className="block lg:col-span-2">
             <span className="mb-1.5 block text-[10px] uppercase tracking-[0.2em] text-zinc-500">Search</span>
             <div className="relative">
               <FiSearch className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
-              <input
-                id="budget-search"
-                name="budget-search"
-                type="search"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Description or categoryâ€¦"
-                className="input pl-10"
-                aria-label="Search expenses"
-              />
+              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Description or category…" className="input pl-10" />
             </div>
           </label>
-          <label htmlFor="budget-department-filter" className="block">
+          <label className="block">
             <span className="mb-1.5 block text-[10px] uppercase tracking-[0.2em] text-zinc-500">Department</span>
-            <select
-              id="budget-department-filter"
-              name="budget-department-filter"
-              value={departmentFilter}
-              onChange={(e) => { setDepartmentFilter(e.target.value); scrollToTable(); }}
-              className="input"
-              aria-label="Filter by department"
-            >
+            <select value={departmentFilter} onChange={(e) => { setDepartmentFilter(e.target.value); scrollToTable(); }} className="input">
               <option value="">All Departments</option>
               {POPULAR_DEPARTMENTS.map((d) => <option key={d} value={d}>{d}</option>)}
             </select>
@@ -396,7 +386,7 @@ export default function Budget() {
                 description={route.description}
                 count={formatShortCurrency(dataForDept.actual)}
                 isActive={departmentFilter === route.dept}
-                action={departmentFilter === route.dept ? 'Clear filter' : 'View expenses â†’'}
+                action={departmentFilter === route.dept ? 'Clear filter' : 'View expenses →'}
                 onAction={() => {
                   if (departmentFilter === route.dept) setDepartmentFilter('');
                   else { setDepartmentFilter(route.dept); scrollToTable(); }
@@ -446,7 +436,7 @@ export default function Budget() {
             A Producer Wants Control. An Accountant Wants Clarity.
           </h2>
           <p className="mt-3 text-sm text-zinc-400 leading-relaxed">
-            CHUTTEE supports both journeys â€” one for the person making the spend, one for the person tracking it.
+            CHUTTEE supports both journeys — one for the person making the spend, one for the person tracking it.
           </p>
         </div>
 
@@ -495,34 +485,10 @@ export default function Budget() {
                     <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
                     <XAxis dataKey="name" tick={{ fill: '#71717a', fontSize: 11 }} />
                     <YAxis tick={{ fill: '#71717a', fontSize: 11 }} tickFormatter={(v) => `${v / 1000}k`} />
-                    <Tooltip contentStyle={{ background: '#18181b', border: '1px solid #3f3f46', borderRadius: 8, fontSize: 12 }} formatter={(v) => formatCurrency(v)} isAnimationActive={false} />
+                    <Tooltip contentStyle={{ background: '#18181b', border: '1px solid #3f3f46', borderRadius: 8, fontSize: 12 }} formatter={(v) => formatCurrency(v)} />
                     <Legend wrapperStyle={{ fontSize: 12 }} />
-                    <Bar
-                      dataKey="budget"
-                      fill="#3f3f46"
-                      radius={[4, 4, 0, 0]}
-                      name="Planned"
-                      isAnimationActive={false}
-                      cursor="pointer"
-                      onClick={(entry) => {
-                        // FIX: entry is the row itself, not entry.payload
-                        const row = entry?.payload || entry;
-                        if (row) openEditDepartment(row);
-                      }}
-                    />
-                    <Bar
-                      dataKey="actual"
-                      fill="#d4af37"
-                      radius={[4, 4, 0, 0]}
-                      name="Actual"
-                      isAnimationActive={false}
-                      cursor="pointer"
-                      onClick={(entry) => {
-                        // FIX: entry is the row itself, not entry.payload
-                        const row = entry?.payload || entry;
-                        if (row) setActualCategory(row.name || 'Other');
-                      }}
-                    />
+                    <Bar dataKey="budget" fill="#3f3f46" radius={[4, 4, 0, 0]} name="Planned" onClick={(entry) => openEditDepartment(entry.payload)} cursor="pointer" />
+                    <Bar dataKey="actual" fill="#d4af37" radius={[4, 4, 0, 0]} name="Actual" onClick={(entry) => setActualCategory(entry.payload.name)} cursor="pointer" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -541,7 +507,7 @@ export default function Budget() {
                     <div className="flex min-w-0 items-center gap-2">
                       <div className="min-w-0">
                         <p className="truncate text-sm text-zinc-200">{tx.description}</p>
-                        <p className="text-xs text-zinc-500">{tx.category} Â· {tx.date}</p>
+                        <p className="text-xs text-zinc-500">{tx.category} · {tx.date}</p>
                       </div>
                       <button onClick={() => openEditExpense(tx)} title={`Edit ${tx.description}`} aria-label={`Edit ${tx.description}`} className="shrink-0 rounded-lg p-1.5 text-zinc-500 hover:bg-zinc-800 hover:text-gold-400">
                         <FiEdit2 className="h-3.5 w-3.5" />
@@ -565,7 +531,7 @@ export default function Budget() {
           <h2 className="mt-3 font-serif text-3xl font-bold text-zinc-100 sm:text-4xl">Every Expense, in One Place.</h2>
           <p className="mt-3 text-sm text-zinc-400 leading-relaxed">
             {filteredTransactions.length} of {data.transactions.length} expenses shown
-            {departmentFilter && ` â€” ${departmentFilter}`}.
+            {departmentFilter && ` — ${departmentFilter}`}.
           </p>
         </div>
 
@@ -656,110 +622,47 @@ export default function Budget() {
         </div>
       </section>
 
-      {/* â•â•â•â•â•â•â•â•â•â•â• MODALS â•â•â•â•â•â•â•â•â•â•â• */}
+      {/* ═══════════ MODALS ═══════════ */}
 
       <Modal open={addOpen} onClose={closeExpenseModal} title={editingTransaction ? 'Edit Expense' : 'Add Expense'} icon={FiDollarSign} size="sm">
         <form onSubmit={saveExpense} className="space-y-4">
           {projects.length > 0 && (
-            <label htmlFor="expense-project" className="block space-y-1.5 text-xs font-medium text-zinc-400">
+            <label className="block space-y-1.5 text-xs font-medium text-zinc-400">
               <span>Project</span>
-              <select
-                id="expense-project"
-                name="expense-project"
-                value={newExpense.project}
-                onChange={(e) => setNewExpense({ ...newExpense, project: e.target.value })}
-                className="input"
-                required
-              >
-                <option value="">Select projectâ€¦</option>
+              <select value={newExpense.project} onChange={(e) => setNewExpense({ ...newExpense, project: e.target.value })} className="input" required>
+                <option value="">Select project…</option>
                 {projects.map((p) => <option key={p.id} value={p.id}>{p.title || p.name}</option>)}
               </select>
             </label>
           )}
-          <Input
-            id="expense-description"
-            name="expense-description"
-            label="Description"
-            value={newExpense.description}
-            onChange={(e) => setNewExpense({ ...newExpense, description: e.target.value })}
-            required
-          />
-          <label htmlFor="expense-category" className="block space-y-1.5 text-xs font-medium text-zinc-400">
+          <Input label="Description" value={newExpense.description} onChange={(e) => setNewExpense({ ...newExpense, description: e.target.value })} required />
+          <label className="block space-y-1.5 text-xs font-medium text-zinc-400">
             <span>Department or category</span>
-            <select
-              id="expense-category"
-              name="expense-category"
-              value={newExpense.category}
-              onChange={(e) => setNewExpense({ ...newExpense, category: e.target.value })}
-              className="input"
-              required
-            >
+            <select value={newExpense.category} onChange={(e) => setNewExpense({ ...newExpense, category: e.target.value })} className="input" required>
               {POPULAR_DEPARTMENTS.map((d) => <option key={d} value={d}>{d}</option>)}
             </select>
           </label>
-          <Input
-            id="expense-amount"
-            name="expense-amount"
-            label="Amount"
-            type="number"
-            min="0.01"
-            step="0.01"
-            value={newExpense.amount}
-            onChange={(e) => setNewExpense({ ...newExpense, amount: e.target.value })}
-            required
-          />
-          <Input
-            id="expense-date"
-            name="expense-date"
-            label="Date"
-            type="date"
-            value={newExpense.date}
-            onChange={(e) => setNewExpense({ ...newExpense, date: e.target.value })}
-            required
-          />
-          <label htmlFor="expense-status" className="block space-y-1.5 text-xs font-medium text-zinc-400">
+          <Input label="Amount" type="number" min="0.01" step="0.01" value={newExpense.amount} onChange={(e) => setNewExpense({ ...newExpense, amount: e.target.value })} required />
+          <Input label="Date" type="date" value={newExpense.date} onChange={(e) => setNewExpense({ ...newExpense, date: e.target.value })} required />
+          <label className="block space-y-1.5 text-xs font-medium text-zinc-400">
             <span>Status</span>
-            <select
-              id="expense-status"
-              name="expense-status"
-              value={newExpense.payment_status}
-              onChange={(e) => setNewExpense({ ...newExpense, payment_status: e.target.value })}
-              className="input"
-              required
-            >
+            <select value={newExpense.payment_status} onChange={(e) => setNewExpense({ ...newExpense, payment_status: e.target.value })} className="input" required>
               <option value="pending">Pending</option>
               <option value="paid">Paid</option>
               <option value="overdue">Overdue</option>
             </select>
           </label>
-          <Input
-            id="expense-notes"
-            name="expense-notes"
-            label="Notes (optional)"
-            value={newExpense.notes}
-            onChange={(e) => setNewExpense({ ...newExpense, notes: e.target.value })}
-            placeholder="Vendor, invoice #, etc."
-          />
+          <Input label="Notes (optional)" value={newExpense.notes} onChange={(e) => setNewExpense({ ...newExpense, notes: e.target.value })} placeholder="Vendor, invoice #, etc." />
           <div className="flex justify-end gap-2">
             <Button type="button" variant="ghost" onClick={closeExpenseModal}>Cancel</Button>
-            <Button type="submit" variant="primary" disabled={saving}>{saving ? 'Savingâ€¦' : editingTransaction ? 'Save changes' : 'Add Expense'}</Button>
+            <Button type="submit" variant="primary" disabled={saving}>{saving ? 'Saving…' : editingTransaction ? 'Save changes' : 'Add Expense'}</Button>
           </div>
         </form>
       </Modal>
 
-      <Modal open={Boolean(editingDepartment)} onClose={closeDepartmentModal} title={`Edit Planned Budget${editingDepartment ? ` â€” ${editingDepartment}` : ''}`} icon={FiDollarSign} size="sm">
+      <Modal open={Boolean(editingDepartment)} onClose={closeDepartmentModal} title={`Edit Planned Budget${editingDepartment ? ` — ${editingDepartment}` : ''}`} icon={FiDollarSign} size="sm">
         <form onSubmit={saveDepartmentBudget} className="space-y-4">
-          <Input
-            id="department-planned-amount"
-            name="department-planned-amount"
-            label="Planned amount"
-            type="number"
-            min="0"
-            step="0.01"
-            value={plannedAmount}
-            onChange={(e) => setPlannedAmount(e.target.value)}
-            required
-          />
+          <Input label="Planned amount" type="number" min="0" step="0.01" value={plannedAmount} onChange={(e) => setPlannedAmount(e.target.value)} required />
           <div className="flex justify-end gap-2">
             <Button type="button" variant="ghost" onClick={closeDepartmentModal}>Cancel</Button>
             <Button type="submit" variant="primary">Save budget</Button>
@@ -767,7 +670,7 @@ export default function Budget() {
         </form>
       </Modal>
 
-      <Modal open={Boolean(actualCategory)} onClose={() => setActualCategory(null)} title={`Edit Actual Expenses${actualCategory ? ` â€” ${actualCategory}` : ''}`} icon={FiDollarSign} size="sm">
+      <Modal open={Boolean(actualCategory)} onClose={() => setActualCategory(null)} title={`Edit Actual Expenses${actualCategory ? ` — ${actualCategory}` : ''}`} icon={FiDollarSign} size="sm">
         <div className="space-y-2">
           {data.transactions.filter((transaction) => (transaction.category || 'Other') === actualCategory).map((transaction) => (
             <button
@@ -795,9 +698,9 @@ export default function Budget() {
   );
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+/* ═══════════════════════════════════════════════════════════
    HELPER COMPONENTS
-   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+   ═══════════════════════════════════════════════════════════ */
 
 function StatNumber({ value, label, note, icon: Icon }) {
   return (
@@ -836,7 +739,7 @@ function RouteCard({ number, icon: Icon, eyebrow, title, description, action, on
           <span className="grid h-10 w-10 place-items-center rounded-premium bg-gold-500/10 text-gold-400">
             <Icon className="h-4 w-4" />
           </span>
-          <p className="text-[10px] uppercase tracking-[0.25em] text-gold-400">{number} Â· {eyebrow}</p>
+          <p className="text-[10px] uppercase tracking-[0.25em] text-gold-400">{number} · {eyebrow}</p>
         </div>
         {count !== undefined && (
           <span className="rounded-full border border-zinc-800 bg-zinc-900/60 px-2.5 py-0.5 text-[10px] font-medium text-zinc-400">{count}</span>

@@ -10,6 +10,7 @@ import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import PageHero from '../components/ui/PageHero';
 import FeatureRunner from '../components/genai/FeatureRunner';
+import api from '../api/client';
 import PipelineViewer from '../components/genai/PipelineViewer';
 
 /* ────────────────────────────────────────────────────────────────
@@ -94,8 +95,38 @@ export default function StudioPage() {
   const stageCount = (s) => FEATURES.filter((f) => f.stage === s).length;
   const p0Count = FEATURES.filter((f) => f.priority === 'P0').length;
 
+  const handleRun = async (feature, input) => {
+    const ROUTES = {
+      sceneweaver: '/api/ml/script/summarize/',
+      characterforge: '/api/ml/script/summarize/',
+      scriptcoverage: '/api/ml/script/summarize/',
+      loglinelab: '/api/ml/script/summarize/',
+      scriptqa: '/api/ml/query/sql/',
+      budgetbot: '/api/ml/forecast/budget/',
+      riskradar: '/api/ml/ai/risk-forecast/',
+      castmatch: '/api/ml/ai/cast-recommendation/',
+      boxofficeoracle: '/api/ml/predict/festival/'
+    };
+    const route = ROUTES[feature.id];
+    if (!route) {
+      throw new Error('Backend route for "' + feature.name + '" has not been built yet.');
+    }
+    const payload = { prompt: input, text: input, question: input };
+    try {
+      const res = await api.post(route, payload);
+      return JSON.stringify(res.data, null, 2);
+    } catch (err) {
+      const status = (err && err.response && err.response.status) || '?';
+      const detail = err && err.response && err.response.data
+        ? JSON.stringify(err.response.data, null, 2)
+        : (err && err.message) || 'Request failed';
+      throw new Error(feature.name + ' failed (' + status + '): ' + detail);
+    }
+  };
+
   return (
     <div className="space-y-16 animate-fade-in">
+
       <PageHero
         image="/images/hero/hero-bg.jpg"
         eyebrow="GenAI Studio"
@@ -383,6 +414,7 @@ export default function StudioPage() {
           setSelected(null);
           if (featureId) navigate('/studio', { replace: true });
         }}
+        onRun={handleRun}
       />
     </div>
   );
