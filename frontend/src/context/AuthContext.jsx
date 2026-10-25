@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { logout as clearTokens } from '../api/auth';
+import { useAuthStore } from '../store/authStore';
 
 const AuthContext = createContext(null);
 
@@ -30,6 +31,16 @@ export function AuthProvider({ children }) {
     setUser(newUser);
     localStorage.setItem('chuttee-token', newToken);
     localStorage.setItem('chuttee-user', JSON.stringify(newUser));
+    try {
+      useAuthStore.getState().setAuth({
+        user: newUser,
+        access: newToken,
+        refresh: localStorage.getItem('chuttee-refresh'),
+        sessionId: localStorage.getItem('chuttee-session-id'),
+      });
+    } catch (e) {
+      console.warn('Could not sync authStore:', e);
+    }
   };
 
   const logout = () => {

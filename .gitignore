@@ -84,3 +84,7 @@ backend/database.sql
 backend/import_log.txt
 backend/query
 
+
+*.bak
+frontend/src/**/*.bak
+

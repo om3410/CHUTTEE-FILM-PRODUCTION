@@ -8,7 +8,7 @@ import {
 import { useAuthStore } from '../../store/authStore';
 import { cn } from '../../lib/utils';
 
-// Single source of truth — change here, not in 20 places
+// Single source of truth â€” change here, not in 20 places
 const DEFAULT_EMAIL = 'omrewaskar4@gmail.com';
 const DEFAULT_NAME  = 'Producer';
 
@@ -32,8 +32,11 @@ const NAV = [
 export default function Sidebar({ collapsed, onToggle }) {
   const { user, logout } = useAuthStore();
 
-  const displayName  = user?.name  || DEFAULT_NAME;
-  const displayEmail = user?.email || DEFAULT_EMAIL;
+  const isJwt = (v) => typeof v === 'string' && v.startsWith('eyJ') && v.length > 100;
+  const rawEmail = user?.email;
+  const rawName = user?.name || user?.username;
+  const displayName  = (!isJwt(rawName)  && rawName)  || DEFAULT_NAME;
+  const displayEmail = (!isJwt(rawEmail) && rawEmail) || DEFAULT_EMAIL;
 
   return (
     <aside

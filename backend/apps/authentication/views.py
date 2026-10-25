@@ -239,7 +239,6 @@ class JWTLoginView(APIView):
         serializer.is_valid(raise_exception=True)
         return Response(serializer.validated_data, status=status.HTTP_200_OK)
 
-
 @method_decorator(csrf_exempt, name="dispatch")
 class JWTRefreshView(APIView):
     authentication_classes = []

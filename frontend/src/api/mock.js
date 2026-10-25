@@ -113,8 +113,8 @@ export const mockApi = {
       }
       return { data: { results: MOCK.projects, count: MOCK.projects.length } };
     }
-    if (path.startsWith('/production/crew/') || path.startsWith('/crew/')) {
-      const id = path.startsWith('/production/crew/') ? path.split('/')[3] : path.split('/')[2];
+    if (path.startsWith('/api/production/crew/') || path.startsWith('/crew/')) {
+      const id = path.startsWith('/api/production/crew/') ? path.split('/')[3] : path.split('/')[2];
       if (id) {
         const c = MOCK.crew.find((x) => x.id === id);
         if (c) return { data: c };
@@ -141,7 +141,7 @@ export const mockApi = {
       saveMockCollection(key, [...collection, item]);
       return { data: item };
     }
-    if (path.startsWith('/production/crew/')) {
+    if (path.startsWith('/api/production/crew/')) {
       const member = {
         id: `c-${Date.now()}`,
         name: payload.full_name,
@@ -185,7 +185,7 @@ export const mockApi = {
       saveMockCollection(key, collection.filter((item) => String(item.id) !== id));
       return { data: { ok: true } };
     }
-    if (path.startsWith('/production/crew/')) {
+    if (path.startsWith('/api/production/crew/')) {
       const id = path.split('/')[3];
       const index = MOCK.crew.findIndex((member) => member.id === id);
       if (index !== -1) MOCK.crew.splice(index, 1);

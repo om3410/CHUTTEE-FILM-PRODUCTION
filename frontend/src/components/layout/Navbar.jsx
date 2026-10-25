@@ -1,4 +1,4 @@
-﻿import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FiSearch, FiBell, FiSun, FiMoon, FiPlus, FiMenu } from 'react-icons/fi';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
@@ -6,6 +6,9 @@ import { useAuth } from '../../context/AuthContext';
 export default function Navbar({ onToggleSidebar }) {
   const { theme, toggleTheme } = useTheme();
   const { user } = useAuth();
+  const isJwt = (v) => typeof v === 'string' && v.startsWith('eyJ') && v.length > 100;
+  const safeName = isJwt(user?.name) ? null : user?.name;
+  const safeEmail = isJwt(user?.email) ? null : user?.email;
   const navigate = useNavigate();
 
   return (
@@ -89,7 +92,7 @@ export default function Navbar({ onToggleSidebar }) {
               {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
             </div>
             <span className="max-w-[100px] truncate text-xs">
-              {user?.name || user?.email || 'Producer'}
+              {safeName || safeEmail || 'Producer'}
             </span>
           </Link>
         ) : (

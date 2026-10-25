@@ -10,7 +10,7 @@ const mapCrewMember = (member) => ({
 });
 
 export const fetchCrew = async ({ search, department } = {}) => {
-  let results = (await fetchAllPages('/production/crew/')).map(mapCrewMember);
+  let results = (await fetchAllPages('/api/production/crew/')).map(mapCrewMember);
   if (search) {
     const q = search.toLowerCase();
     results = results.filter((c) => c.name.toLowerCase().includes(q));
@@ -20,12 +20,12 @@ export const fetchCrew = async ({ search, department } = {}) => {
 };
 
 export const fetchCrewMember = async (id) => {
-  const { data } = await api.get(`/production/crew/${id}/`);
+  const { data } = await api.get(`/api/production/crew/${id}/`);
   return mapCrewMember(data);
 };
 
 export const createCrewMember = async (crewMember) => {
-  const { data } = await api.post('/production/crew/', {
+  const { data } = await api.post('/api/production/crew/', {
     full_name: crewMember.name,
     role: crewMember.role,
     department: crewMember.department,
@@ -37,12 +37,12 @@ export const createCrewMember = async (crewMember) => {
 };
 
 export const updateCrewAvailability = async (id, available) => {
-  const { data } = await api.patch(`/production/crew/${id}/`, {
+  const { data } = await api.patch(`/api/production/crew/${id}/`, {
     is_available: available,
   });
   return mapCrewMember(data);
 };
 
 export const deleteCrewMember = async (id) => {
-  await api.delete(`/production/crew/${id}/`);
+  await api.delete(`/api/production/crew/${id}/`);
 };

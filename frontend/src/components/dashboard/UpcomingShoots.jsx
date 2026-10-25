@@ -8,7 +8,7 @@ export default function UpcomingShoots() {
   const { data } = useQuery({
     queryKey: ['upcoming-shoots'],
     queryFn: async () => {
-      const { data } = await api.get('/production/shoot-days/');
+      const { data } = await api.get('/api/production/shoot-days/');
       return data.results;
     },
   });

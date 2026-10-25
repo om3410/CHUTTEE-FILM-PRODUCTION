@@ -24,9 +24,9 @@ import {
 } from '../api/production';
 import { getApiErrorMessage } from '../api/auth';
 
-/* ═══════════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    HELPERS & CONSTANTS
-   ═══════════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 const getBudgetBreakdown = (departments, transactions) => {
   const actualByCategory = transactions.reduce((totals, transaction) => {
@@ -82,9 +82,9 @@ const CATEGORY_ROUTES = [
 
 const POPULAR_DEPARTMENTS = ['Cast', 'Crew', 'Locations', 'Equipment', 'Post', 'Music', 'Other'];
 
-/* ═══════════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    MAIN COMPONENT
-   ═══════════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 export default function Budget() {
   const { toast } = useToast();
@@ -127,7 +127,7 @@ export default function Budget() {
     let cancelled = false;
     Promise.all([
       fetchBudgetTransactions(),
-      fetchAllPages('/production/projects/').catch(() => []),
+      fetchAllPages('/api/production/projects/').catch(() => []),
     ])
       .then(([transactions, fetchedProjects]) => {
         if (cancelled) return;
@@ -143,7 +143,7 @@ export default function Budget() {
     return () => { cancelled = true; };
   }, [toast]);
 
-  /* ─────────── Derived Data ─────────── */
+  /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Derived Data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   const totalSpent = data.transactions.reduce((s, t) => s + Number(t.amount || 0), 0);
   const totalPlanned = plannedBudgets.reduce((s, d) => s + Number(d.budget || 0), 0);
   const remaining = Math.max(totalPlanned - totalSpent, 0);
@@ -161,7 +161,7 @@ export default function Budget() {
   const clearFilters = () => { setSearch(''); setDepartmentFilter(''); };
   const scrollToTable = () => setTimeout(() => document.getElementById('budget-table')?.scrollIntoView({ behavior: 'smooth' }), 100);
 
-  /* ─────────── Actions ─────────── */
+  /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Actions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   const openAddExpense = () => {
     setEditingTransaction(null);
     setNewExpense({
@@ -221,7 +221,7 @@ export default function Budget() {
     }
   };
 
-  /* ─────────── Planned budget edit ─────────── */
+  /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Planned budget edit â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   const openEditDepartment = (department) => {
     if (!department?.name) return;
     setEditingDepartment(department.name);
@@ -236,7 +236,7 @@ export default function Budget() {
       toast('Enter a valid planned budget.', 'error');
       return;
     }
-    // FIX: rely on useLocalStorage's internal persistence — no manual setItem here
+    // FIX: rely on useLocalStorage's internal persistence â€” no manual setItem here
     const exists = plannedBudgets.some((d) => d.name === editingDepartment);
     const updatedBudgets = exists
       ? plannedBudgets.map((d) => d.name === editingDepartment ? { ...d, budget: amount } : d)
@@ -246,7 +246,7 @@ export default function Budget() {
     toast('Planned budget updated', 'success');
   };
 
-  /* ─────────── Export ─────────── */
+  /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Export â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   const exportExpenses = () => {
     if (!data.transactions.length) { toast('There are no expenses to export.', 'info'); return; }
     try {
@@ -300,7 +300,7 @@ export default function Budget() {
         eyebrow="The Money, the Ledger and the Story Behind Every Rupee"
         title="Every Rupee, Accounted For."
         subtitle="Every Cost, Under Control."
-        lead="Track planned versus actual spend across every department. Log expenses with receipts. Monitor payments, approvals and forecasts. Generate GST-ready invoices. See exactly where your production stands — financially, at every step of the journey."
+        lead="Track planned versus actual spend across every department. Log expenses with receipts. Monitor payments, approvals and forecasts. Generate GST-ready invoices. See exactly where your production stands â€” financially, at every step of the journey."
         slogan="Every rupee has a reason. Every expense tells a story. The right budget, the right tracking and the right oversight can turn a production into something that respects both the craft and the capital."
       />
 
@@ -327,7 +327,7 @@ export default function Budget() {
                 type="search"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Description or category…"
+                placeholder="Description or categoryâ€¦"
                 className="input pl-10"
                 aria-label="Search expenses"
               />
@@ -396,7 +396,7 @@ export default function Budget() {
                 description={route.description}
                 count={formatShortCurrency(dataForDept.actual)}
                 isActive={departmentFilter === route.dept}
-                action={departmentFilter === route.dept ? 'Clear filter' : 'View expenses →'}
+                action={departmentFilter === route.dept ? 'Clear filter' : 'View expenses â†’'}
                 onAction={() => {
                   if (departmentFilter === route.dept) setDepartmentFilter('');
                   else { setDepartmentFilter(route.dept); scrollToTable(); }
@@ -446,7 +446,7 @@ export default function Budget() {
             A Producer Wants Control. An Accountant Wants Clarity.
           </h2>
           <p className="mt-3 text-sm text-zinc-400 leading-relaxed">
-            CHUTTEE supports both journeys — one for the person making the spend, one for the person tracking it.
+            CHUTTEE supports both journeys â€” one for the person making the spend, one for the person tracking it.
           </p>
         </div>
 
@@ -541,7 +541,7 @@ export default function Budget() {
                     <div className="flex min-w-0 items-center gap-2">
                       <div className="min-w-0">
                         <p className="truncate text-sm text-zinc-200">{tx.description}</p>
-                        <p className="text-xs text-zinc-500">{tx.category} · {tx.date}</p>
+                        <p className="text-xs text-zinc-500">{tx.category} Â· {tx.date}</p>
                       </div>
                       <button onClick={() => openEditExpense(tx)} title={`Edit ${tx.description}`} aria-label={`Edit ${tx.description}`} className="shrink-0 rounded-lg p-1.5 text-zinc-500 hover:bg-zinc-800 hover:text-gold-400">
                         <FiEdit2 className="h-3.5 w-3.5" />
@@ -565,7 +565,7 @@ export default function Budget() {
           <h2 className="mt-3 font-serif text-3xl font-bold text-zinc-100 sm:text-4xl">Every Expense, in One Place.</h2>
           <p className="mt-3 text-sm text-zinc-400 leading-relaxed">
             {filteredTransactions.length} of {data.transactions.length} expenses shown
-            {departmentFilter && ` — ${departmentFilter}`}.
+            {departmentFilter && ` â€” ${departmentFilter}`}.
           </p>
         </div>
 
@@ -656,7 +656,7 @@ export default function Budget() {
         </div>
       </section>
 
-      {/* ═══════════ MODALS ═══════════ */}
+      {/* â•â•â•â•â•â•â•â•â•â•â• MODALS â•â•â•â•â•â•â•â•â•â•â• */}
 
       <Modal open={addOpen} onClose={closeExpenseModal} title={editingTransaction ? 'Edit Expense' : 'Add Expense'} icon={FiDollarSign} size="sm">
         <form onSubmit={saveExpense} className="space-y-4">
@@ -671,7 +671,7 @@ export default function Budget() {
                 className="input"
                 required
               >
-                <option value="">Select project…</option>
+                <option value="">Select projectâ€¦</option>
                 {projects.map((p) => <option key={p.id} value={p.id}>{p.title || p.name}</option>)}
               </select>
             </label>
@@ -742,12 +742,12 @@ export default function Budget() {
           />
           <div className="flex justify-end gap-2">
             <Button type="button" variant="ghost" onClick={closeExpenseModal}>Cancel</Button>
-            <Button type="submit" variant="primary" disabled={saving}>{saving ? 'Saving…' : editingTransaction ? 'Save changes' : 'Add Expense'}</Button>
+            <Button type="submit" variant="primary" disabled={saving}>{saving ? 'Savingâ€¦' : editingTransaction ? 'Save changes' : 'Add Expense'}</Button>
           </div>
         </form>
       </Modal>
 
-      <Modal open={Boolean(editingDepartment)} onClose={closeDepartmentModal} title={`Edit Planned Budget${editingDepartment ? ` — ${editingDepartment}` : ''}`} icon={FiDollarSign} size="sm">
+      <Modal open={Boolean(editingDepartment)} onClose={closeDepartmentModal} title={`Edit Planned Budget${editingDepartment ? ` â€” ${editingDepartment}` : ''}`} icon={FiDollarSign} size="sm">
         <form onSubmit={saveDepartmentBudget} className="space-y-4">
           <Input
             id="department-planned-amount"
@@ -767,7 +767,7 @@ export default function Budget() {
         </form>
       </Modal>
 
-      <Modal open={Boolean(actualCategory)} onClose={() => setActualCategory(null)} title={`Edit Actual Expenses${actualCategory ? ` — ${actualCategory}` : ''}`} icon={FiDollarSign} size="sm">
+      <Modal open={Boolean(actualCategory)} onClose={() => setActualCategory(null)} title={`Edit Actual Expenses${actualCategory ? ` â€” ${actualCategory}` : ''}`} icon={FiDollarSign} size="sm">
         <div className="space-y-2">
           {data.transactions.filter((transaction) => (transaction.category || 'Other') === actualCategory).map((transaction) => (
             <button
@@ -795,9 +795,9 @@ export default function Budget() {
   );
 }
 
-/* ═══════════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    HELPER COMPONENTS
-   ═══════════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 function StatNumber({ value, label, note, icon: Icon }) {
   return (
@@ -836,7 +836,7 @@ function RouteCard({ number, icon: Icon, eyebrow, title, description, action, on
           <span className="grid h-10 w-10 place-items-center rounded-premium bg-gold-500/10 text-gold-400">
             <Icon className="h-4 w-4" />
           </span>
-          <p className="text-[10px] uppercase tracking-[0.25em] text-gold-400">{number} · {eyebrow}</p>
+          <p className="text-[10px] uppercase tracking-[0.25em] text-gold-400">{number} Â· {eyebrow}</p>
         </div>
         {count !== undefined && (
           <span className="rounded-full border border-zinc-800 bg-zinc-900/60 px-2.5 py-0.5 text-[10px] font-medium text-zinc-400">{count}</span>
