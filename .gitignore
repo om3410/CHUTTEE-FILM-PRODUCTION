@@ -91,3 +91,8 @@ frontend/src/**/*.bak
 token.json
 backend/chroma_db/
 frontend/script.txt
+
+full-paths.txt
+structure.txt
+chuttee_admin_credentials.txt
+*.mp4
