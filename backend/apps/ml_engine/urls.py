@@ -9,6 +9,7 @@ from .views import (
     DailyReportView, ContractRiskView, LegalQAView, MeetingMinutesView,
     ProducerCopilotView, NLAnalyticsView,
     TrailerNarrationView, PosterContentView, StoryboardView,
+    DialogueRewriteView,
     MemoryRememberView, MemoryRecallView,
     GenerateImageView,
 )
@@ -40,6 +41,7 @@ urlpatterns = [
     path("script/trailer/", TrailerNarrationView.as_view()),
     path("marketing/poster/", PosterContentView.as_view()),
     path("script/storyboard/", StoryboardView.as_view()),
+    path("script/dialogue-rewrite/", DialogueRewriteView.as_view()),
     path("memory/remember/", MemoryRememberView.as_view()),
     path("memory/recall/", MemoryRecallView.as_view()),
 

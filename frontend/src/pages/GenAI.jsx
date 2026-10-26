@@ -103,6 +103,7 @@ const ROUTES = {
   storyboardai:     { url: '/api/ml/script/storyboard/',      method: 'POST' },
   productionwiki:   { url: '/api/ml/legal/qa/',               method: 'POST' },
   editadvisor:      { url: '/api/ml/ai/scene-duration/',      method: 'POST' },
+  dialoguedoctor:   { url: '/api/ml/script/dialogue-rewrite/', method: 'POST' },
 };
 
 export default function GenAI() {

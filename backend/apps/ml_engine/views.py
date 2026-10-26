@@ -723,6 +723,28 @@ class StoryboardView(APIView):
             return Response({"error": str(e)}, status=500)
 
 
+class DialogueRewriteView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        text = request.data.get("text", "") if isinstance(request.data, dict) else ""
+        if not text:
+            text = _extract_text(request)
+        if not text:
+            return Response({"error": "text required"}, status=400)
+        prompt = (
+            "Rewrite the following request into the target voice described "
+            "inside it. Preserve meaning, subtext and character intent. "
+            "Return only the rewritten dialogue lines, no commentary.\n\n"
+            f"{text[:8000]}"
+        )
+        try:
+            rewritten = generate(prompt, system="You are a screenwriter. Return only dialogue.")
+            return Response({"rewritten": rewritten})
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
+
+
 class MemoryRememberView(APIView):
     permission_classes = [AllowAny]
 
@@ -778,7 +800,7 @@ class GenerateImageView(APIView):
             width, height = 1024, 768
 
         width = max(256, min(width, 1024))
-        height = max(256, min(height, 1024))
+        height = max(256, min(height, 768))
 
         try:
             result = _generate_image(prompt, width=width, height=height)
