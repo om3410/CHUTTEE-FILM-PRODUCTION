@@ -13,40 +13,40 @@ import FeatureRunner from '../components/genai/FeatureRunner';
 import api from '../api/client';
 import PipelineViewer from '../components/genai/PipelineViewer';
 
-/* ────────────────────────────────────────────────────────────────
-   28 features · 8 stages · P0/P1/P2
-   ──────────────────────────────────────────────────────────────── */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+   28 features Â· 8 stages Â· P0/P1/P2
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const STAGES = ['All', 'Script', 'Pre-Viz', 'Casting', 'Planning', 'Post', 'Marketing', 'Analytics', 'Knowledge'];
 
 const FEATURES = [
-  { id: 'sceneweaver',      emoji: '🎬', name: 'SceneWeaver',       stage: 'Script',    priority: 'P0', description: 'Scene-by-scene outlines from a premise' },
-  { id: 'characterforge',   emoji: '👤', name: 'CharacterForge',    stage: 'Script',    priority: 'P0', description: 'Bios, arcs, relationship maps' },
-  { id: 'scriptcoverage',   emoji: '📋', name: 'ScriptCoverage',    stage: 'Script',    priority: 'P0', description: "Auto reader's report + marketability score" },
-  { id: 'loglinelab',       emoji: '💡', name: 'LoglineLab',        stage: 'Script',    priority: 'P0', description: 'Loglines, synopses, one-pagers' },
-  { id: 'scriptqa',         emoji: '❓', name: 'ScriptQ&A',         stage: 'Script',    priority: 'P0', description: 'NL questions about your script (RAG)' },
-  { id: 'dialoguedoctor',   emoji: '💬', name: 'DialogueDoctor',    stage: 'Script',    priority: 'P1', description: 'Rewrite dialogue in target voice' },
-  { id: 'beatsheetai',      emoji: '🥁', name: 'BeatSheetAI',       stage: 'Script',    priority: 'P1', description: "Save-the-Cat / Hero's Journey beats" },
-  { id: 'storyboardai',     emoji: '🎨', name: 'StoryBoardAI',      stage: 'Pre-Viz',   priority: 'P1', description: 'Text→storyboard frames' },
-  { id: 'shotlistgenie',    emoji: '📸', name: 'ShotListGenie',     stage: 'Pre-Viz',   priority: 'P0', description: 'Auto shot list from scene' },
-  { id: 'moodboardgen',     emoji: '🖼️', name: 'MoodBoardGen',      stage: 'Pre-Viz',   priority: 'P2', description: 'Visual reference sheets per scene' },
-  { id: 'castmatch',        emoji: '🎭', name: 'CastMatch',         stage: 'Casting',   priority: 'P1', description: 'Actor archetype suggestions' },
-  { id: 'auditionanalyzer', emoji: '🎥', name: 'AuditionAnalyzer',  stage: 'Casting',   priority: 'P2', description: 'Score self-tapes' },
-  { id: 'budgetbot',        emoji: '💰', name: 'BudgetBot',         stage: 'Planning',  priority: 'P0', description: 'Budget line items from script' },
-  { id: 'schedulesensei',   emoji: '📅', name: 'ScheduleSensei',    stage: 'Planning',  priority: 'P1', description: 'Optimised shooting schedule' },
-  { id: 'callsheetcopilot', emoji: '📞', name: 'CallSheetCopilot',  stage: 'Planning',  priority: 'P1', description: 'Auto call sheets' },
-  { id: 'continuityguard',  emoji: '🔍', name: 'ContinuityGuard',   stage: 'Planning',  priority: 'P2', description: 'Flag continuity errors' },
-  { id: 'riskradar',        emoji: '⚠️', name: 'RiskRadar',         stage: 'Planning',  priority: 'P2', description: 'Production risk register' },
-  { id: 'editadvisor',      emoji: '✂️', name: 'EditAdvisor',       stage: 'Post',      priority: 'P2', description: 'Rough-cut pacing notes' },
-  { id: 'subtitlestudio',   emoji: '📝', name: 'SubtitleStudio',    stage: 'Post',      priority: 'P1', description: 'Auto subtitles + translation' },
-  { id: 'dubmaster',        emoji: '🎙️', name: 'DubMaster',         stage: 'Post',      priority: 'P2', description: 'Dubbing script + lip-sync guidance' },
-  { id: 'trailercraft',     emoji: '🎞️', name: 'TrailerCraft',      stage: 'Post',      priority: 'P2', description: 'Trailer script/beats' },
-  { id: 'posterforge',      emoji: '🖼️', name: 'PosterForge',       stage: 'Marketing', priority: 'P1', description: 'Poster concepts' },
-  { id: 'taglinetitan',     emoji: '✨', name: 'TaglineTitan',      stage: 'Marketing', priority: 'P0', description: 'Taglines + marketing copy' },
-  { id: 'presskitpro',      emoji: '📰', name: 'PressKitPro',       stage: 'Marketing', priority: 'P1', description: 'EPK / press kit generator' },
-  { id: 'pitchdeckai',      emoji: '📊', name: 'PitchDeckAI',       stage: 'Marketing', priority: 'P1', description: 'Investor deck outline + copy' },
-  { id: 'boxofficeoracle',  emoji: '📈', name: 'BoxOfficeOracle',   stage: 'Analytics', priority: 'P2', description: 'Performance prediction from comps' },
-  { id: 'audienceatlas',    emoji: '🧠', name: 'AudienceAtlas',     stage: 'Analytics', priority: 'P1', description: 'Audience personas/segments' },
-  { id: 'productionwiki',   emoji: '📚', name: 'ProductionWiki',    stage: 'Knowledge', priority: 'P0', description: 'RAG Q&A over scripts/schedules/contracts' },
+  { id: 'sceneweaver',      emoji: 'ðŸŽ¬', name: 'SceneWeaver',       stage: 'Script',    priority: 'P0', description: 'Scene-by-scene outlines from a premise' },
+  { id: 'characterforge',   emoji: 'ðŸ‘¤', name: 'CharacterForge',    stage: 'Script',    priority: 'P0', description: 'Bios, arcs, relationship maps' },
+  { id: 'scriptcoverage',   emoji: 'ðŸ“‹', name: 'ScriptCoverage',    stage: 'Script',    priority: 'P0', description: "Auto reader's report + marketability score" },
+  { id: 'loglinelab',       emoji: 'ðŸ’¡', name: 'LoglineLab',        stage: 'Script',    priority: 'P0', description: 'Loglines, synopses, one-pagers' },
+  { id: 'scriptqa',         emoji: 'â“', name: 'ScriptQ&A',         stage: 'Script',    priority: 'P0', description: 'NL questions about your script (RAG)' },
+  { id: 'dialoguedoctor',   emoji: 'ðŸ’¬', name: 'DialogueDoctor',    stage: 'Script',    priority: 'P1', description: 'Rewrite dialogue in target voice' },
+  { id: 'beatsheetai',      emoji: 'ðŸ¥', name: 'BeatSheetAI',       stage: 'Script',    priority: 'P1', description: "Save-the-Cat / Hero's Journey beats" },
+  { id: 'storyboardai',     emoji: 'ðŸŽ¨', name: 'StoryBoardAI',      stage: 'Pre-Viz',   priority: 'P1', description: 'Textâ†’storyboard frames' },
+  { id: 'shotlistgenie',    emoji: 'ðŸ“¸', name: 'ShotListGenie',     stage: 'Pre-Viz',   priority: 'P0', description: 'Auto shot list from scene' },
+  { id: 'moodboardgen',     emoji: 'ðŸ–¼ï¸', name: 'MoodBoardGen',      stage: 'Pre-Viz',   priority: 'P2', description: 'Visual reference sheets per scene' },
+  { id: 'castmatch',        emoji: 'ðŸŽ­', name: 'CastMatch',         stage: 'Casting',   priority: 'P1', description: 'Actor archetype suggestions' },
+  { id: 'auditionanalyzer', emoji: 'ðŸŽ¥', name: 'AuditionAnalyzer',  stage: 'Casting',   priority: 'P2', description: 'Score self-tapes' },
+  { id: 'budgetbot',        emoji: 'ðŸ’°', name: 'BudgetBot',         stage: 'Planning',  priority: 'P0', description: 'Budget line items from script' },
+  { id: 'schedulesensei',   emoji: 'ðŸ“…', name: 'ScheduleSensei',    stage: 'Planning',  priority: 'P1', description: 'Optimised shooting schedule' },
+  { id: 'callsheetcopilot', emoji: 'ðŸ“ž', name: 'CallSheetCopilot',  stage: 'Planning',  priority: 'P1', description: 'Auto call sheets' },
+  { id: 'continuityguard',  emoji: 'ðŸ”', name: 'ContinuityGuard',   stage: 'Planning',  priority: 'P2', description: 'Flag continuity errors' },
+  { id: 'riskradar',        emoji: 'âš ï¸', name: 'RiskRadar',         stage: 'Planning',  priority: 'P2', description: 'Production risk register' },
+  { id: 'editadvisor',      emoji: 'âœ‚ï¸', name: 'EditAdvisor',       stage: 'Post',      priority: 'P2', description: 'Rough-cut pacing notes' },
+  { id: 'subtitlestudio',   emoji: 'ðŸ“', name: 'SubtitleStudio',    stage: 'Post',      priority: 'P1', description: 'Auto subtitles + translation' },
+  { id: 'dubmaster',        emoji: 'ðŸŽ™ï¸', name: 'DubMaster',         stage: 'Post',      priority: 'P2', description: 'Dubbing script + lip-sync guidance' },
+  { id: 'trailercraft',     emoji: 'ðŸŽžï¸', name: 'TrailerCraft',      stage: 'Post',      priority: 'P2', description: 'Trailer script/beats' },
+  { id: 'posterforge',      emoji: 'ðŸ–¼ï¸', name: 'PosterForge',       stage: 'Marketing', priority: 'P1', description: 'Poster concepts' },
+  { id: 'taglinetitan',     emoji: 'âœ¨', name: 'TaglineTitan',      stage: 'Marketing', priority: 'P0', description: 'Taglines + marketing copy' },
+  { id: 'presskitpro',      emoji: 'ðŸ“°', name: 'PressKitPro',       stage: 'Marketing', priority: 'P1', description: 'EPK / press kit generator' },
+  { id: 'pitchdeckai',      emoji: 'ðŸ“Š', name: 'PitchDeckAI',       stage: 'Marketing', priority: 'P1', description: 'Investor deck outline + copy' },
+  { id: 'boxofficeoracle',  emoji: 'ðŸ“ˆ', name: 'BoxOfficeOracle',   stage: 'Analytics', priority: 'P2', description: 'Performance prediction from comps' },
+  { id: 'audienceatlas',    emoji: 'ðŸ§ ', name: 'AudienceAtlas',     stage: 'Analytics', priority: 'P1', description: 'Audience personas/segments' },
+  { id: 'productionwiki',   emoji: 'ðŸ“š', name: 'ProductionWiki',    stage: 'Knowledge', priority: 'P0', description: 'RAG Q&A over scripts/schedules/contracts' },
 ];
 
 const PRIORITY_VARIANT = { P0: 'danger', P1: 'warn', P2: 'default' };
@@ -84,7 +84,7 @@ export default function StudioPage() {
     });
   }, [stage, search]);
 
-  /* ── If arriving via /genai/:featureId, open that feature straight away ── */
+  /* â”€â”€ If arriving via /genai/:featureId, open that feature straight away â”€â”€ */
   const incomingFeature =
     state?.feature || (featureId ? FEATURES.find((f) => f.id === featureId) : null);
 
@@ -105,7 +105,8 @@ export default function StudioPage() {
       budgetbot: '/api/ml/forecast/budget/',
       riskradar: '/api/ml/ai/risk-forecast/',
       castmatch: '/api/ml/ai/cast-recommendation/',
-      boxofficeoracle: '/api/ml/predict/festival/'
+      boxofficeoracle: '/api/ml/predict/festival/',
+      dialoguedoctor: '/api/ml/script/dialogue-rewrite/'
     };
     const route = ROUTES[feature.id];
     if (!route) {
@@ -133,18 +134,18 @@ export default function StudioPage() {
         title="Twenty-Eight Tools."
         subtitle="One Production Pipeline."
         lead="From the first logline to the final trailer, CHUTTEE's GenAI studio gives every stage of production its own dedicated assistant. SceneWeaver outlines the script. BudgetBot prices it. ScheduleSensei sequences it. CallSheetCopilot ships it. TrailerCraft pitches it. Every call runs through the same shield, the same audit trail, and the same provider allowlist as everything else in CHUTTEE."
-        slogan="AI does not replace the crew. It shortens the distance between a decision and its first draft — so the people on set can spend their time on the work only they can do."
+        slogan="AI does not replace the crew. It shortens the distance between a decision and its first draft â€” so the people on set can spend their time on the work only they can do."
       />
 
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatNumber value={FEATURES.length} label="GenAI features" note="Across every production stage" />
         <StatNumber value={STAGE_META.length} label="Production stages" note="Script to release" />
-        <StatNumber value={p0Count} label="Priority tools" note="P0 — ready for daily use" />
+        <StatNumber value={p0Count} label="Priority tools" note="P0 â€” ready for daily use" />
         <StatNumber value="100%" label="Shielded" note="Prompt + PII scanning on by default" />
       </section>
 
       <Quote>
-        "The best AI tool is the one the crew forgets is there — because it already did the boring part before anyone asked."
+        "The best AI tool is the one the crew forgets is there â€” because it already did the boring part before anyone asked."
       </Quote>
 
       <section>
@@ -252,7 +253,7 @@ export default function StudioPage() {
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search features…"
+              placeholder="Search featuresâ€¦"
               className="input pl-10"
             />
           </div>
@@ -320,7 +321,7 @@ export default function StudioPage() {
             'Never send financial or contract data to non-approved providers.',
             'Never accept a prompt that tries to override the shield.',
             'Never route a prompt to a provider that is not on the allowlist.',
-            'Never store prompt history on the server — it stays in the browser.',
+            'Never store prompt history on the server â€” it stays in the browser.',
             'Never run a feature that has not been mapped to a data class.',
           ].map((rule) => (
             <div key={rule} className="flex items-start gap-2 rounded-premium border border-zinc-800 bg-zinc-900/40 p-4">
@@ -353,7 +354,7 @@ export default function StudioPage() {
             The Market Has Models. What It Often Lacks Is Judgement.
           </h2>
           <p className="mt-3 text-sm text-zinc-400 leading-relaxed">
-            CHUTTEE is built to connect AI to the craft of production — without pretending a model replaces
+            CHUTTEE is built to connect AI to the craft of production â€” without pretending a model replaces
             taste, context or the people on set.
           </p>
         </div>
@@ -361,13 +362,13 @@ export default function StudioPage() {
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Pillar title="Craft Over Noise" body="More models, more outputs, more dashboards do not automatically create better films. We focus on the tools that shorten real work." />
           <Pillar title="Context Before Generation" body="A prompt without production context is guesswork. Every feature reads from your existing project, crew and budget data." />
-          <Pillar title="Relevant Reach Over Mere Visibility" body="For producers, the goal is reaching the tool capable of the work — not simply more tools." />
+          <Pillar title="Relevant Reach Over Mere Visibility" body="For producers, the goal is reaching the tool capable of the work â€” not simply more tools." />
           <Pillar title="Human Judgement Remains Central" body="AI can reduce friction and organise information. The creative decision remains with the filmmaker." />
         </div>
       </section>
 
       <Quote>
-        "The films that endure are not the ones with the fewest problems. They are the ones where the people behind them saw the problems early — and solved them together."
+        "The films that endure are not the ones with the fewest problems. They are the ones where the people behind them saw the problems early â€” and solved them together."
       </Quote>
 
       <section className="premium-card relative overflow-hidden p-8 sm:p-10">
@@ -420,9 +421,9 @@ export default function StudioPage() {
   );
 }
 
-/* ────────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    Helper components
-   ──────────────────────────────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 function StatNumber({ value, label, note }) {
   return (
