@@ -241,12 +241,12 @@
         <div class="btn-row">
           <a href="/api/production/projects/" class="btn btn-primary">View Projects API</a>
           <a href="/swagger/" class="btn btn-ghost">Open API Docs</a>
-          <a href="{% url 'logout' %}" class="btn btn-ghost">Logout</a>
+          <a href="{% url 'html-logout' %}" class="btn btn-ghost">Logout</a>
         </div>
       {% else %}
         <p class="welcome">Sign in to continue to your film dashboard.</p>
         <div class="btn-row">
-          <a href="{% url 'login' %}" class="btn btn-primary">Login</a>
+          <a href="{% url 'html-login' %}" class="btn btn-primary">Login</a>
           <a href="{% url 'register' %}" class="btn btn-ghost">Create Account</a>
         </div>
       {% endif %}

@@ -118,7 +118,7 @@ export default function GenAI() {
     if (!route) {
       throw new Error('Backend route for "' + feature.name + '" has not been built yet.');
     }
-    const payload = { prompt: input, text: input, question: input };
+    const payload = { prompt: input, text: input, question: input, role_description: input };
     try {
       const res = await api.post(route, payload);
       return JSON.stringify(res.data, null, 2);
