@@ -26,7 +26,7 @@ def _require_rag():
 @lru_cache(maxsize=1)
 def _client():
     _require_rag()
-    path = getattr(settings, "CHROMA_PATH", str(settings.BASE_DIR / "chroma_db"))
+    path = getattr(settings, "CHROMA_PATH", None) or os.path.join(str(settings.BASE_DIR), "chroma_db")
     os.makedirs(path, exist_ok=True)
     return chromadb.PersistentClient(path=path)
 
@@ -42,7 +42,8 @@ def _collection(name="film_knowledge"):
 
 
 def embed(texts):
-    return _embedder().encode(texts, normalize_embeddings=True).tolist()
+    safe = [t if isinstance(t, str) else ("" if t is None else str(t)) for t in texts]
+    return _embedder().encode(safe, normalize_embeddings=True).tolist()
 
 
 def add(docs, metadatas=None, ids=None, collection="film_knowledge"):

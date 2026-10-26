@@ -748,7 +748,8 @@ class MemoryRecallView(APIView):
         except RuntimeError as e:
             return Response({"error": str(e)}, status=503)
         except Exception as e:
-            return Response({"error": str(e)}, status=500)
+            import traceback
+            return Response({"error": str(e), "traceback": traceback.format_exc()}, status=500)
 
 
 # ============================================================

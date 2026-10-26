@@ -88,3 +88,6 @@ backend/query
 *.bak
 frontend/src/**/*.bak
 
+token.json
+backend/chroma_db/
+frontend/script.txt

@@ -175,7 +175,7 @@ class ScriptSentimentService:
             neg = sum(1 for w in words if w in negative)
             total = pos + neg
             polarity = (pos - neg) / total if total else 0.0
-            subjectivity = min(1.0, total / max(len(words), 1))
+            subjectivity = min(1.0, float(total) / max(len(words), 1))
 
         text_lower = text.lower()
         emotion_scores = {

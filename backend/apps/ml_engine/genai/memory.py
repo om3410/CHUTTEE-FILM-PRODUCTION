@@ -5,11 +5,25 @@ from apps.ml_engine.llm.client import generate
 
 def remember(text: str, metadata: dict = None):
     """Store a memory."""
+    if text is None:
+        text = ""
+    if not isinstance(text, str):
+        text = str(text)
+    text = text.strip()
+    if not text:
+        return
     add([text], [metadata or {}])
 
 
 def recall(question: str, k: int = 5) -> dict:
     """Retrieve memories and answer."""
+    if question is None:
+        question = ""
+    if not isinstance(question, str):
+        question = str(question)
+    question = question.strip()
+    if not question:
+        return {"answer": "No question provided.", "sources": []}
     hits = query(question, n=k)
     if not hits:
         return {"answer": "No memories yet.", "sources": []}

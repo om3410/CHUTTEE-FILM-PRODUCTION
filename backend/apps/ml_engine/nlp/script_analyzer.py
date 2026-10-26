@@ -74,7 +74,7 @@ class ScriptAnalyzer:
             "main_characters": list(chars)[:5],
             "locations": sorted({s["location"] for s in scenes if s["location"]}),
             "speaking_percentage": {
-                k: round(v / total * 100, 1) for k, v in words.items()
+                k: round((float(v) / float(total)) * 100, 1) for k, v in words.items()
             },
             "dialogue_count": len(dlg),
         }

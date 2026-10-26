@@ -1,4 +1,4 @@
-"""RAG retriever — retrieve + answer."""
+"""RAG retriever â€” retrieve + answer."""
 from .vector_store import query
 from apps.ml_engine.llm.client import generate
 
@@ -10,6 +10,13 @@ SYSTEM = (
 
 
 def answer(question, k=5):
+    if question is None:
+        question = ""
+    if not isinstance(question, str):
+        question = str(question)
+    question = question.strip()
+    if not question:
+        return {"answer": "No question provided.", "sources": []}
     hits = query(question, n=k)
     if not hits:
         return {"answer": "No knowledge documents have been ingested yet.", "sources": []}
