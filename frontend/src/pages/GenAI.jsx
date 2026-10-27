@@ -1,4 +1,4 @@
-﻿import { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -24,7 +24,7 @@ const FEATURES = [
   { id: 'characterforge',   emoji: '👤', name: 'CharacterForge',    stage: 'Script',    priority: 'P0', description: 'Bios, arcs, relationship maps' },
   { id: 'scriptcoverage',   emoji: '📋', name: 'ScriptCoverage',    stage: 'Script',    priority: 'P0', description: "Auto reader's report + marketability score" },
   { id: 'loglinelab',       emoji: '💡', name: 'LoglineLab',        stage: 'Script',    priority: 'P0', description: 'Loglines, synopses, one-pagers' },
-  { id: 'scriptqa',         emoji: '❓', name: 'ScriptQ&A',         stage: 'Script',    priority: 'P0', description: 'NL questions about your script (RAG)' },
+  { id: 'scriptqa',         emoji: '❓', name: 'ProjectQ&A',        stage: 'Script',    priority: 'P0', description: 'Query your production database in plain English' },
   { id: 'dialoguedoctor',   emoji: '💬', name: 'DialogueDoctor',    stage: 'Script',    priority: 'P1', description: 'Rewrite dialogue in target voice' },
   { id: 'beatsheetai',      emoji: '🦁', name: 'BeatSheetAI',       stage: 'Script',    priority: 'P1', description: "Save-the-Cat / Hero's Journey beats" },
 
