@@ -579,9 +579,11 @@ class ScriptSummarizeView(APIView):
                 "of the action and what the scene accomplishes in the story."
             ),
             "character-bios": (
-                "Extract every named character from this screenplay. For each character produce: "
-                "NAME, a one-paragraph biography, their character arc (where they start vs where "
-                "they end), and a bullet list of their relationships to other characters."
+                "If the input is a full screenplay or scene, extract every named character. "
+                "If the input is a premise or logline, invent a plausible ensemble cast. "
+                "For each character produce: NAME, one-paragraph biography, their character "
+                "arc (where they start vs where they end), and a bullet list of their "
+                "relationships to other characters."
             ),
             "logline": (
                 "Write three loglines for this screenplay: "
@@ -702,9 +704,64 @@ class MeetingMinutesView(APIView):
 class ProducerCopilotView(APIView):
     permission_classes = [AllowAny]
 
+    STYLE_PROMPTS = {
+        "beats": (
+            "Write a Save-the-Cat beat sheet for the following film premise. "
+            "Use exactly these 15 beats, numbered, each 1-2 sentences:\n"
+            "1. Opening Image\n"
+            "2. Theme Stated\n"
+            "3. Set-Up\n"
+            "4. Catalyst\n"
+            "5. Debate\n"
+            "6. Break into Two\n"
+            "7. B Story\n"
+            "8. Fun and Games\n"
+            "9. Midpoint\n"
+            "10. Bad Guys Close In\n"
+            "11. All Is Lost\n"
+            "12. Dark Night of the Soul\n"
+            "13. Break into Three\n"
+            "14. Finale\n"
+            "15. Final Image\n\n"
+            "Premise:\n{text}"
+        ),
+        "shotlist": (
+            "Write a professional shot list for the opening sequence of the "
+            "following film. For each shot give: SHOT #, SHOT TYPE "
+            "(WS/MS/CU/OTS/POV), MOVEMENT (static/pan/dolly/handheld/crane), "
+            "DESCRIPTION, DURATION. Aim for 20-30 shots covering the first "
+            "two scenes.\n\nPremise:\n{text}"
+        ),
+        "schedule": (
+            "Write an optimized shooting schedule for the following film. "
+            "Break down by shoot day with: DAY #, LOCATION(S), SCENES "
+            "(numbered), CAST NEEDED, KEY PROPS, ESTIMATED HOURS. Aim for "
+            "15-20 shooting days. Group scenes by location to minimize moves."
+            "\n\nPremise:\n{text}"
+        ),
+    }
+
     def post(self, request):
-        q = request.data.get("question", "") if isinstance(request.data, dict) else ""
+        data = request.data if isinstance(request.data, dict) else {}
+        q = (
+            data.get("question")
+            or data.get("text")
+            or data.get("prompt")
+            or ""
+        )
+        style = (data.get("style") or "producer").strip()
+        prompt_template = self.STYLE_PROMPTS.get(style)
+
         try:
+            if prompt_template:
+                prompt = prompt_template.replace("{text}", q[:8000])
+                answer = generate(
+                    prompt,
+                    system="You are a film production expert. Return only the requested structured output.",
+                )
+                return Response({"answer": answer, "style": style})
+
+            # Fall back to existing behavior for producer/default/unknown styles
             return Response(executive.producer_copilot(q))
         except Exception as e:
             return Response({"error": str(e)}, status=500)
