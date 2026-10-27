@@ -577,9 +577,11 @@ class ScriptSummarizeView(APIView):
                 "of the action and what the scene accomplishes in the story."
             ),
             "character-bios": (
-                "Extract every named character from this screenplay. For each character produce: "
-                "NAME, a one-paragraph biography, their character arc (where they start vs where "
-                "they end), and a bullet list of their relationships to other characters."
+                "If the input is a full screenplay or scene, extract every named character. "
+                "If the input is a premise or logline, invent a plausible ensemble cast. "
+                "For each character produce: NAME, one-paragraph biography, their character "
+                "arc (where they start vs where they end), and a bullet list of their "
+                "relationships to other characters."
             ),
             "logline": (
                 "Write three loglines for this screenplay: "

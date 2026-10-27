@@ -1,4 +1,4 @@
-import { Routes, Route , Navigate } from 'react-router-dom';
+﻿import { Routes, Route , Navigate } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { ToastProvider } from './context/ToastContext';
 import { AuthProvider } from './context/AuthContext';
@@ -53,8 +53,8 @@ export default function App() {
                 <Route path="/activity" element={<ActivityFeed />} />
                 <Route path="/ai" element={<AIInsights />} />
                 <Route path="/genai" element={<GenAI />} />
-                <Route path="/genai/:featureId" element={<StudioPage />} />
-                <Route path="/studio" element={<StudioPage />} />
+                <Route path="/genai/:featureId" element={<GenAI />} />
+                <Route path="/studio" element={<GenAI />} />
                 <Route path="/security" element={<Security />} />
                 <Route path="/security-center" element={<SecurityCenterPage />} />
                 <Route path="/wiki" element={<ProductionWiki />} />
