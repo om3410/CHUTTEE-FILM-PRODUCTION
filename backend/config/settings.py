@@ -6,7 +6,7 @@ import dj_database_url
 from corsheaders.defaults import default_headers
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(dotenv_path="C:/dev/CHUTTEE-FILM-PRODUCTION/backend/.env", override=True)
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 

@@ -15,7 +15,7 @@ export default function Navbar({ onToggleSidebar }) {
     <header className="glass-nav sticky top-0 z-30 border-b border-zinc-800">
       {/* Contact strip */}
       <div className="hidden md:flex h-7 items-center justify-between border-b border-zinc-800/60 bg-zinc-950/40 px-6 text-[11px] text-zinc-500">
-        <span>omrewaskar4@gmail.com · +91 74101 14971</span>
+        <span>omrewaskar4@gmail.com . +91 74101 14971</span>
         <span className="text-gold-400">Film Production Management</span>
       </div>
 
@@ -32,7 +32,22 @@ export default function Navbar({ onToggleSidebar }) {
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2.5 shrink-0">
           <div className="grid h-9 w-9 place-items-center rounded-premium bg-gradient-to-br from-gold-300 to-gold-600 shadow-gold">
-            <span className="font-serif font-bold text-zinc-950">C</span>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#18181b"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-label="CHUTTEE"
+            >
+              <path d="M20.2 6 3 11l-.9-2.4c-.3-1.1.3-2.2 1.3-2.5l13.5-4c1.1-.3 2.2.3 2.5 1.3Z" />
+              <path d="m6.2 5.3 3.1 3.9" />
+              <path d="m12.4 3.4 3.1 4" />
+              <path d="M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z" />
+            </svg>
           </div>
           <div className="hidden sm:block">
             <p className="font-serif text-lg font-bold leading-none text-gold-gradient">CHUTTEE</p>
@@ -45,7 +60,7 @@ export default function Navbar({ onToggleSidebar }) {
           <FiSearch size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500" />
           <input
             type="text"
-            placeholder="Search anything…"
+            placeholder="Search anything.…"
             className="w-full rounded-premium border border-zinc-800 bg-zinc-950 py-2 pl-10 pr-16 text-sm placeholder:text-zinc-600 focus:border-gold-500 focus:outline-none transition-colors"
           />
           <kbd className="absolute right-3 top-1/2 -translate-y-1/2 hidden lg:inline-flex items-center gap-1 rounded border border-zinc-800 bg-zinc-900 px-1.5 py-0.5 text-[10px] font-mono text-zinc-500">
