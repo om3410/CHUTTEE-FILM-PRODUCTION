@@ -98,3 +98,12 @@ chuttee_admin_credentials.txt
 *.mp4
 genai-feature-test-*.csv
 test-genai-features*.ps1
+
+# Test artifacts
+*-test.jpg
+*-test.png
+phoenix.jpg
+moodboard-*.jpg
+pollinations-*.jpg
+hf-*.png
+*.bak_*
