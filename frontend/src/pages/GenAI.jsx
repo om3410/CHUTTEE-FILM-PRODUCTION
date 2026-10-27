@@ -35,7 +35,7 @@ const FEATURES = [
 
   // Casting
   { id: 'castmatch',        emoji: '🎭', name: 'CastMatch',         stage: 'Casting',   priority: 'P1', description: 'Actor archetype suggestions' },
-  { id: 'auditionanalyzer', emoji: '🎥', name: 'AuditionAnalyzer',  stage: 'Casting',   priority: 'P2', description: 'Score self-tapes' },
+  { id: 'auditionanalyzer', emoji: '🎥', name: 'DialogueTone',      stage: 'Casting',   priority: 'P2', description: 'Analyze emotional tone & pacing of dialogue' },
 
   // Planning
   { id: 'budgetbot',        emoji: '💰', name: 'BudgetBot',         stage: 'Planning',  priority: 'P0', description: 'Budget line items from script' },
@@ -154,6 +154,7 @@ export default function GenAI() {
       text: input,
       question: input,
       role_description: input,
+      dialogue_text: input,
       style: entry.style || 'default',
       feature_id: feature.id,
     };
