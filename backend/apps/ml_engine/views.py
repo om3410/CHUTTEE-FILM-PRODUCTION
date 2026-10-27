@@ -563,10 +563,44 @@ class ScriptSummarizeView(APIView):
             return Response({"error": "text required"}, status=400)
 
         prompts = {
-            "short":     "Summarize this screenplay in 3 sentences.",
-            "scene":     "Summarize this screenplay scene by scene (1 sentence per scene).",
-            "producer":  "Write a producer-facing summary: budget sensibility, cast load, risks.",
-            "marketing": "Write a marketing synopsis suitable for a poster blurb.",
+            # Original keys (kept for backwards compatibility)
+            "short":         "Summarize this screenplay in 3 sentences.",
+            "scene":         "Summarize this screenplay scene by scene (1 sentence per scene).",
+            "producer":      "Write a producer-facing summary: budget sensibility, cast load, risks.",
+            "marketing":     "Write a marketing synopsis suitable for a poster blurb.",
+
+            # Frontend style keys (match ROUTES in GenAI.jsx)
+            "scene-outline": (
+                "Write a scene-by-scene outline for this screenplay. "
+                "Number each scene (SCENE 1, SCENE 2, ...). For each scene, give a slug line "
+                "(e.g. 'INT. TRAIN STATION - NIGHT') followed by a one-paragraph description "
+                "of the action and what the scene accomplishes in the story."
+            ),
+            "character-bios": (
+                "Extract every named character from this screenplay. For each character produce: "
+                "NAME, a one-paragraph biography, their character arc (where they start vs where "
+                "they end), and a bullet list of their relationships to other characters."
+            ),
+            "logline": (
+                "Write three loglines for this screenplay: "
+                "(1) one sentence, (2) two sentences with genre context, (3) an elevator pitch. "
+                "After the loglines, write a one-paragraph synopsis."
+            ),
+            "coverage": (
+                "Write a reader's coverage report for this screenplay. Include: "
+                "LOGLINE, SYNOPSIS (one paragraph), 3 STRENGTHS, 3 WEAKNESSES, "
+                "MARKETABILITY SCORE (1-10 with reasoning), and a RECOMMENDATION "
+                "(Recommend / Consider / Pass)."
+            ),
+            "tagline": (
+                "Write 10 taglines for this film, ranging from dramatic to punchy. "
+                "Then write 3 social-media captions."
+            ),
+            "press-kit": (
+                "Write a press kit for this film: a 3-paragraph synopsis, 5 cast/crew bios "
+                "(use placeholder names if needed), 3 pull quotes, and a one-line sell "
+                "suitable for a film market."
+            ),
         }
         prompt = prompts.get(style, prompts["short"])
 
