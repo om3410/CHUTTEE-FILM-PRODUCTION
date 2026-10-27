@@ -1,26 +1,38 @@
 import os
-import sys
 from datetime import timedelta
 
 import dj_database_url
 from corsheaders.defaults import default_headers
+from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 
-load_dotenv(dotenv_path="C:/dev/CHUTTEE-FILM-PRODUCTION/backend/.env", override=True)
-
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# override=False: real environment variables (e.g. in production) win over .env.
+# In local dev .env is the only source, so it still works as before.
+load_dotenv(dotenv_path=os.path.join(BASE_DIR, ".env"), override=False)
 
 # ============================================================
 # SECURITY
 # ============================================================
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "change-me-in-production")
-DEBUG = os.getenv("DEBUG", "True") == "True"
+DEBUG = os.getenv("DEBUG", "False").strip().lower() in ("true", "1", "yes", "on")
+
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+if not SECRET_KEY:
+    if not DEBUG:
+        raise ImproperlyConfigured(
+            "DJANGO_SECRET_KEY must be set when DEBUG=False."
+        )
+    SECRET_KEY = "dev-only-insecure-key-do-not-use-in-production"
 
 ALLOWED_HOSTS = [
     h.strip()
     for h in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
     if h.strip()
 ]
+
+if not DEBUG and not ALLOWED_HOSTS:
+    raise ImproperlyConfigured("ALLOWED_HOSTS must not be empty when DEBUG=False.")
 
 # ============================================================
 # INSTALLED APPS
@@ -38,8 +50,8 @@ INSTALLED_APPS = [
     # Third-party
     "rest_framework",
     "rest_framework_simplejwt",
-    "rest_framework_simplejwt.token_blacklist",   # FIX: missing comma
-    "axes",                                       # FIX: added for suspicious login detection
+    "rest_framework_simplejwt.token_blacklist",
+    "axes",
     "corsheaders",
     "django_filters",
     "drf_yasg",
@@ -67,7 +79,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
-    "axes.middleware.AxesMiddleware",              # FIX: added
+    "axes.middleware.AxesMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -81,7 +93,7 @@ MIDDLEWARE = [
 # ============================================================
 # AUTH BACKENDS
 # ============================================================
-AUTHENTICATION_BACKENDS = [                        # FIX: added
+AUTHENTICATION_BACKENDS = [
     "axes.backends.AxesStandaloneBackend",
     "django.contrib.auth.backends.ModelBackend",
 ]
@@ -117,9 +129,13 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 if DATABASE_URL:
     DATABASES = {
         "default": dj_database_url.parse(
-            DATABASE_URL, conn_max_age=600, ssl_require=False
+            DATABASE_URL,
+            conn_max_age=600,
+            ssl_require=os.getenv("DB_SSLMODE", "disable") != "disable",
         )
     }
+    DATABASES["default"].setdefault("OPTIONS", {})
+    DATABASES["default"]["OPTIONS"]["sslmode"] = os.getenv("DB_SSLMODE", "disable")
 else:
     DATABASES = {
         "default": {
@@ -129,7 +145,7 @@ else:
             "PASSWORD": os.getenv("DB_PASSWORD", "postgres"),
             "HOST": os.getenv("DB_HOST", "localhost"),
             "PORT": os.getenv("DB_PORT", "5432"),
-            "OPTIONS": {"sslmode": "disable"},
+            "OPTIONS": {"sslmode": os.getenv("DB_SSLMODE", "disable")},
         }
     }
 
@@ -184,10 +200,12 @@ CORS_ALLOWED_ORIGINS = [
     if o.strip()
 ]
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_HEADERS = list(default_headers) + ["authorization"]
-CSRF_TRUSTED_ORIGINS = CORS_ALLOWED_ORIGINS
+# 'authorization' is already in default_headers in current django-cors-headers;
+# keep the dedupe so it stays present even on older versions.
+CORS_ALLOW_HEADERS = list(dict.fromkeys([*default_headers, "authorization"]))
+CSRF_TRUSTED_ORIGINS = list(CORS_ALLOWED_ORIGINS)  # copy, not alias
 
-# Session/CSRF cookies kept for Django admin only; the API is JWT-only.
+# Session/CSRF cookies are for Django admin only; the API is JWT-only.
 SESSION_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_SAMESITE = "Lax"
 SESSION_COOKIE_HTTPONLY = True
@@ -201,7 +219,6 @@ if not DEBUG:
 # ============================================================
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        # FIX: custom auth enforces token_version + session revocation
         "apps.authentication.authentication.SessionAwareJWTAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": (
@@ -222,8 +239,8 @@ REST_FRAMEWORK = {
         "anon": "30/min",
         "user": "300/min",
         "ai": "20/min",
-        "login": "10/min",         # NEW: throttle login endpoint
-        "refresh": "30/min",       # NEW: throttle refresh endpoint
+        "login": "10/min",
+        "refresh": "30/min",
     },
     "EXCEPTION_HANDLER": "apps.production.exceptions.custom_exception_handler",
 }
@@ -232,14 +249,13 @@ REST_FRAMEWORK = {
 # SIMPLE JWT
 # ============================================================
 SIMPLE_JWT = {
-    # Keep access tokens short so revocation takes effect quickly.
     "ACCESS_TOKEN_LIFETIME": timedelta(
-        minutes=int(os.getenv("JWT_EXPIRE_MINUTES", 15))   # FIX: 60 -> 15
+        minutes=int(os.getenv("JWT_EXPIRE_MINUTES", "15"))
     ),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
-    "ROTATE_REFRESH_TOKENS": True,                         # FIX: required
-    "BLACKLIST_AFTER_ROTATION": True,                      # FIX: required
-    "UPDATE_LAST_LOGIN": True,                             # FIX: audit
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "UPDATE_LAST_LOGIN": True,
     "SIGNING_KEY": os.getenv("JWT_SIGNING_KEY") or SECRET_KEY,
     "AUTH_HEADER_TYPES": ("Bearer",),
     "USER_ID_FIELD": "id",
@@ -247,10 +263,10 @@ SIMPLE_JWT = {
 }
 
 # ============================================================
-# DJANGO-AXES (suspicious login detection)
+# DJANGO-AXES
 # ============================================================
-AXES_FAILURE_LIMIT = int(os.getenv("AXES_FAILURE_LIMIT", 5))
-AXES_COOLOFF_TIME = int(os.getenv("AXES_COOLOFF_TIME", 1))  # hours
+AXES_FAILURE_LIMIT = int(os.getenv("AXES_FAILURE_LIMIT", "5"))
+AXES_COOLOFF_TIME = int(os.getenv("AXES_COOLOFF_TIME", "1"))  # hours
 AXES_LOCKOUT_PARAMETERS = [["ip_address", "username"]]
 AXES_RESET_ON_SUCCESS = True
 AXES_ENABLE_ADMIN = True
@@ -259,11 +275,16 @@ AXES_ENABLE_ADMIN = True
 # EMAIL
 # ============================================================
 EMAIL_BACKEND = os.getenv(
-    "EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend"
+    "EMAIL_BACKEND",
+    "django.core.mail.backends.console.EmailBackend"
+    if DEBUG
+    else "django.core.mail.backends.smtp.EmailBackend",
 )
 EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
-EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))
-EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True") == "True"
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True").strip().lower() in (
+    "true", "1", "yes", "on",
+)
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER)
@@ -284,8 +305,7 @@ CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = "Asia/Kolkata"
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
-# FIX: only run tasks inline in development. In production this would
-# block every HTTP request until the task finishes.
+# Only run tasks inline in development; in production run real workers.
 CELERY_TASK_ALWAYS_EAGER = DEBUG
 CELERY_TASK_EAGER_PROPAGATES = DEBUG
 
@@ -302,9 +322,7 @@ if REDIS_URL:
     }
 else:
     CHANNEL_LAYERS = {
-        "default": {
-            "BACKEND": "channels.layers.InMemoryChannelLayer",
-        },
+        "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"},
     }
 
 # ============================================================
@@ -327,9 +345,7 @@ if os.getenv("CLOUDINARY_CLOUD_NAME"):
     }
 else:
     STORAGES = {
-        "default": {
-            "BACKEND": "django.core.files.storage.FileSystemStorage",
-        },
+        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
         "staticfiles": {
             "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
         },
@@ -361,9 +377,7 @@ DEFAULT_OPENROUTER_MODEL = os.getenv(
 DEFAULT_MISTRAL_MODEL = os.getenv("DEFAULT_MISTRAL_MODEL", "mistral-large-latest")
 DEFAULT_DEEPSEEK_MODEL = os.getenv("DEFAULT_DEEPSEEK_MODEL", "deepseek-chat")
 DEFAULT_COHERE_MODEL = os.getenv("DEFAULT_COHERE_MODEL", "command-r-plus-08-2024")
-DEFAULT_HF_MODEL = os.getenv(
-    "DEFAULT_HF_MODEL", "meta-llama/Llama-3.3-70B-Instruct"
-)
+DEFAULT_HF_MODEL = os.getenv("DEFAULT_HF_MODEL", "meta-llama/Llama-3.3-70B-Instruct")
 
 # ============================================================
 # EXTERNAL APIs (FREE)
@@ -377,6 +391,27 @@ SERPAPI_KEY = os.getenv("SERPAPI_KEY")
 # ============================================================
 FIREBASE_SERVER_KEY = os.getenv("FIREBASE_SERVER_KEY")
 FIREBASE_PROJECT_ID = os.getenv("FIREBASE_PROJECT_ID")
+
+# ============================================================
+# PRODUCTION HARDENING
+# ============================================================
+if not DEBUG:
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_REFERRER_POLICY = "same-origin"
+    X_FRAME_OPTIONS = "DENY"
+
+    # Only enable if you are behind a reverse proxy that sets X-Forwarded-Proto.
+    if os.getenv("SECURE_PROXY_SSL_HEADER", "false").strip().lower() in (
+        "true", "1", "yes", "on",
+    ):
+        SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+    SECURE_SSL_REDIRECT = os.getenv("SECURE_SSL_REDIRECT", "false").strip().lower() in (
+        "true", "1", "yes", "on",
+    )
+    SECURE_HSTS_SECONDS = int(os.getenv("SECURE_HSTS_SECONDS", "0"))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = SECURE_HSTS_SECONDS > 0
+    SECURE_HSTS_PRELOAD = SECURE_HSTS_SECONDS > 0
 
 # ============================================================
 # LOGGING
@@ -405,7 +440,9 @@ LOGGING = {
 # ============================================================
 # TEST-SPECIFIC OVERRIDES
 # ============================================================
+# NOTE: TEST["TEMPLATE"] must exist as a real database or `manage.py test` fails.
+#       Create it once:  CREATE DATABASE chuttee_test_template TEMPLATE template0;
 DATABASES["default"]["TEST"] = {
-    "NAME": "test_chuttee_production",
-    "TEMPLATE": "chuttee_test_template",
+    "NAME": os.getenv("TEST_DB_NAME", "test_chuttee_production"),
+    "TEMPLATE": os.getenv("TEST_DB_TEMPLATE", "chuttee_test_template"),
 }
