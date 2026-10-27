@@ -96,18 +96,20 @@ export default function StudioPage() {
   const p0Count = FEATURES.filter((f) => f.priority === 'P0').length;
 
   const handleRun = async (feature, input) => {
+    /* BoxOfficeOracle intentionally has no route — the comps-based
+       prediction endpoint does not exist in the backend yet. */
     const ROUTES = {
-      sceneweaver: '/api/ml/script/summarize/',
+      sceneweaver:    '/api/ml/script/summarize/',
       characterforge: '/api/ml/script/summarize/',
       scriptcoverage: '/api/ml/script/summarize/',
-      loglinelab: '/api/ml/script/summarize/',
-      scriptqa: '/api/ml/query/sql/',
-      budgetbot: '/api/ml/forecast/budget/',
-      riskradar: '/api/ml/ai/risk-forecast/',
-      castmatch: '/api/ml/ai/cast-recommendation/',
-      boxofficeoracle: '/api/ml/predict/festival/',
+      loglinelab:     '/api/ml/script/summarize/',
+      scriptqa:       '/api/ml/query/sql/',
+      budgetbot:      '/api/ml/forecast/budget/',
+      riskradar:      '/api/ml/ai/risk-forecast/',
+      castmatch:      '/api/ml/ai/cast-recommendation/',
       dialoguedoctor: '/api/ml/script/dialogue-rewrite/',
-      trailercraft: '/api/ml/script/summarize/'
+      trailercraft:   '/api/ml/script/summarize/',
+      /* boxofficeoracle: no route — feature is a P2 placeholder */
     };
     const route = ROUTES[feature.id];
     if (!route) {
