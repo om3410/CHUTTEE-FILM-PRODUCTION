@@ -1,4 +1,4 @@
-﻿import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import {
   FiLayout, FiUsers, FiUserCheck, FiFilm, FiDollarSign,
   FiActivity, FiCpu, FiInbox, FiCreditCard, FiSettings,
@@ -8,7 +8,6 @@ import {
 import { useAuthStore } from '../../store/authStore';
 import { cn } from '../../lib/utils';
 
-// Single source of truth â€” change here, not in 20 places
 const DEFAULT_EMAIL = 'omrewaskar4@gmail.com';
 const DEFAULT_NAME  = 'Producer';
 
@@ -44,14 +43,18 @@ export default function Sidebar({ collapsed, onToggle }) {
     navigate('/signin', { replace: true });
   };
 
+  // Width NEVER changes — only the contents collapse. This keeps the navbar from shifting.
+  const W = 'w-[260px]';
+
   return (
     <aside
       className={cn(
-        'sticky top-0 hidden md:flex h-screen flex-col border-r border-zinc-800 bg-zinc-900 transition-[width] duration-300',
-        collapsed ? 'w-[76px]' : 'w-[260px]'
+        'sticky top-0 hidden md:flex h-screen flex-col border-r border-zinc-800 bg-zinc-900 transition-colors duration-200',
+        W
       )}
     >
-      <div className="flex h-16 items-center gap-3 border-b border-zinc-800 px-4">
+      {/* Logo */}
+      <div className={cn('flex h-16 items-center gap-3 border-b border-zinc-800 px-4', collapsed && 'justify-center')}>
         <div className="grid h-9 w-9 shrink-0 place-items-center rounded-premium bg-gradient-to-br from-gold-300 to-gold-600 shadow-gold">
           <FiFilm size={18} className="text-zinc-950" />
         </div>
@@ -74,7 +77,8 @@ export default function Sidebar({ collapsed, onToggle }) {
             title={collapsed ? label : undefined}
             className={({ isActive }) =>
               cn(
-                'relative flex items-center gap-3 rounded-premium px-3 py-2.5 text-sm transition-all',
+                'relative flex items-center rounded-premium px-3 py-2.5 text-sm transition-all',
+                collapsed ? 'justify-center' : 'gap-3',
                 isActive
                   ? 'bg-gold-500/10 text-gold-400 font-medium'
                   : 'text-zinc-500 hover:bg-zinc-800 hover:text-zinc-100'
@@ -138,4 +142,3 @@ export default function Sidebar({ collapsed, onToggle }) {
     </aside>
   );
 }
-
