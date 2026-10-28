@@ -116,7 +116,7 @@ const ROUTES = {
   // ❌ Still require NEW backend views (marked "Soon" in UI)
   subtitlestudio:   { url: '/api/ml/script/subtitle/',  method: 'POST' },
   dubmaster:        { url: '/api/ml/script/dub/',       method: 'POST' },
-  // pitchdeckai:      { url: '/api/ml/marketing/pitch/',  method: 'POST' },
+  pitchdeckai:      { url: '/api/ml/marketing/pitch/',  method: 'POST' },
 };
 
 export default function GenAI() {

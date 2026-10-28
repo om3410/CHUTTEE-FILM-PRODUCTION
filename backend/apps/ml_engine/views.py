@@ -980,3 +980,43 @@ class SubtitleStudioView(APIView):
             })
         except Exception as e:
             return Response({"error": str(e)}, status=500)
+
+# ============================================================
+# PitchDeckAI — Investor deck outline + copy
+# ============================================================
+class PitchDeckAIView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        text = request.data.get("text", "") if isinstance(request.data, dict) else ""
+
+        if not text:
+            return Response({"error": "text required"}, status=400)
+
+        prompt = (
+            f"Create an investor pitch deck for the following film project. "
+            f"Structure it as 10 slides with concise bullet points and speaker notes:\n"
+            f"1. Title Slide (title, tagline, genre, target market)\n"
+            f"2. The Hook (one-line premise)\n"
+            f"3. The Market (addressable audience, box office comparables)\n"
+            f"4. The Story (3-sentence synopsis)\n"
+            f"5. The Team (key cast/crew, director vision)\n"
+            f"6. The Budget (total, breakdown by category)\n"
+            f"7. The Financing (sources, projected ROI)\n"
+            f"8. The Timeline (pre-prod, shoot, post, release)\n"
+            f"9. The Marketing Plan (festivals, platforms, key dates)\n"
+            f"10. The Ask (investment target, use of funds, contact)\n\n"
+            f"Project details:\n{text[:8000]}"
+        )
+
+        try:
+            result = generate(
+                prompt,
+                system="You are a film finance executive. Return a professional 10-slide investor pitch deck.",
+            )
+            return Response({
+                "pitch_deck": result,
+                "status": "success",
+            })
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
