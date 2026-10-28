@@ -5,7 +5,7 @@ from .views import (
     AICastRecommendationView, AIRiskForecastView, AIFestivalWinView,
     AILocationRecommendationView, AIDailyInsightsView,
     MLPingView, ScriptAnalyzeView, NLQueryView,
-    ScriptSummarizeView, ScriptMoodView, DubMasterView,
+    ScriptSummarizeView, ScriptMoodView, DubMasterView, SubtitleStudioView,
     DailyReportView, ContractRiskView, LegalQAView, MeetingMinutesView,
     ProducerCopilotView, NLAnalyticsView,
     TrailerNarrationView, PosterContentView, StoryboardView,
@@ -30,6 +30,7 @@ urlpatterns = [
     path("script/analyze/", ScriptAnalyzeView.as_view()),
     path("script/summarize/", ScriptSummarizeView.as_view()),
     path("script/dub/", DubMasterView.as_view()),
+    path("script/subtitle/", SubtitleStudioView.as_view()),
     path("script/mood/", ScriptMoodView.as_view()),
     path("query/sql/", NLQueryView.as_view()),
 

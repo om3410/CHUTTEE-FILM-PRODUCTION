@@ -945,3 +945,38 @@ class DubMasterView(APIView):
             })
         except Exception as e:
             return Response({"error": str(e)}, status=500)
+
+# ============================================================
+# SubtitleStudio — Auto subtitles + translation
+# ============================================================
+class SubtitleStudioView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        text = request.data.get("text", "") if isinstance(request.data, dict) else ""
+        target_language = request.data.get("target_language", "en") if isinstance(request.data, dict) else "en"
+
+        if not text:
+            return Response({"error": "text required"}, status=400)
+
+        prompt = (
+            f"Generate subtitles for the following content. Output format:\n"
+            f"1. An SRT-formatted subtitle block (numbered, with HH:MM:SS,mmm --> HH:MM:SS,mmm timing and text)\n"
+            f"2. A list of translated subtitles in {target_language}\n"
+            f"3. Brief translation notes (idioms, cultural references)\n\n"
+            f"Estimate timing based on average reading speed (~17 chars/second).\n\n"
+            f"Original text:\n{text[:8000]}"
+        )
+
+        try:
+            result = generate(
+                prompt,
+                system="You are a professional subtitle editor. Return structured subtitles with accurate SRT formatting.",
+            )
+            return Response({
+                "subtitles": result,
+                "target_language": target_language,
+                "status": "success",
+            })
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
