@@ -1,4 +1,4 @@
-import api from './index';
+﻿import api from './index';
 import { fetchAllPages } from './production';
 
 const mapCrewMember = (member) => ({
@@ -20,12 +20,12 @@ export const fetchCrew = async ({ search, department } = {}) => {
 };
 
 export const fetchCrewMember = async (id) => {
-  const { data } = await api.get(`/api/production/crew/${id}/`);
+  const { data } = await api.get(`/production/crew/${id}/`);
   return mapCrewMember(data);
 };
 
 export const createCrewMember = async (crewMember) => {
-  const { data } = await api.post('/api/production/crew/', {
+  const { data } = await api.post('/production/crew/', {
     full_name: crewMember.name,
     role: crewMember.role,
     department: crewMember.department,
@@ -37,12 +37,12 @@ export const createCrewMember = async (crewMember) => {
 };
 
 export const updateCrewAvailability = async (id, available) => {
-  const { data } = await api.patch(`/api/production/crew/${id}/`, {
+  const { data } = await api.patch(`/production/crew/${id}/`, {
     is_available: available,
   });
   return mapCrewMember(data);
 };
 
 export const deleteCrewMember = async (id) => {
-  await api.delete(`/api/production/crew/${id}/`);
+  await api.delete(`/production/crew/${id}/`);
 };
