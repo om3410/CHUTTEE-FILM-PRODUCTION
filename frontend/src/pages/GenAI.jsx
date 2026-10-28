@@ -57,7 +57,7 @@ const FEATURES = [
   { id: 'pitchdeckai',      emoji: '📊', name: 'PitchDeckAI',       stage: 'Marketing', priority: 'P1', description: 'Investor deck outline + copy' },
 
   // Analytics
-  { id: 'boxofficeoracle',  emoji: '📈', name: 'BoxOfficeOracle',   stage: 'Analytics', priority: 'P2', description: 'Performance prediction from comps' },
+  { id: 'boxofficeoracle',  emoji: '🏆', name: 'FestivalPredictor', stage: 'Analytics', priority: 'P2', description: 'Predict festival submission outcome' },
   { id: 'audienceatlas',    emoji: '🧠', name: 'AudienceAtlas',     stage: 'Analytics', priority: 'P1', description: 'Audience personas/segments' },
 
   // Knowledge
@@ -157,6 +157,8 @@ export default function GenAI() {
       dialogue_text: input,
       style: entry.style || 'default',
       project_id: ['callsheetcopilot', 'riskradar', 'budgetbot', 'productionwiki'].includes(feature.id) ? 'a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d' : undefined,
+      submission_fee: feature.id === 'boxofficeoracle' ? 50 : undefined,
+      competition_level: feature.id === 'boxofficeoracle' ? 2 : undefined,
       scene_number: feature.id === 'editadvisor' ? 1 : undefined,
       feature_id: feature.id,
     };
