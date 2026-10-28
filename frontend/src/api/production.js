@@ -1,4 +1,4 @@
-import api from './index';
+﻿import api from './index';
 
 const rows = (data) => (Array.isArray(data) ? data : data.results || []);
 
@@ -78,7 +78,7 @@ export const fetchCast = async () => {
 
 export const createCastMember = async ({ name, character, age, categories }) => {
   const cats = Array.isArray(categories) && categories.length ? categories : ['Actor'];
-  const { data } = await api.post('/api/production/cast/', {
+  const { data } = await api.post('/production/cast/', {
     full_name: name,
     character_name: character,
     physical_attributes: { age: Number(age) },
@@ -99,7 +99,7 @@ export const fetchScenes = async () => {
 };
 
 export const createShootDay = async ({ projectId, shootDate, dayNumber, location }) => {
-  const { data } = await api.post('/api/production/shoot-days/', {
+  const { data } = await api.post('/production/shoot-days/', {
     project: projectId || null,
     shoot_date: shootDate,
     day_number: dayNumber,
@@ -136,7 +136,7 @@ export const createScene = async ({ number, title, location, timeOfDay, status }
     Shot: 'Completed',
     Cut: 'Ready',
   };
-  const { data } = await api.post('/api/production/scenes/', {
+  const { data } = await api.post('/production/scenes/', {
     scene_number: number,
     notes: title,
     location,
@@ -181,7 +181,7 @@ export const fetchBudgetTransactions = async () => {
 };
 
 export const createBudgetTransaction = async ({ description, category, amount, date }) => {
-  const { data } = await api.post('/api/production/budget/', {
+  const { data } = await api.post('/production/budget/', {
     description,
     category,
     amount,
@@ -205,7 +205,7 @@ export const fetchEquipment = async () => {
 };
 
 export const createEquipment = async ({ name, category, serial }) => {
-  const { data } = await api.post('/api/production/equipment/', {
+  const { data } = await api.post('/production/equipment/', {
     name,
     category,
     serial_number: serial,
@@ -224,7 +224,7 @@ export const createFilmAsset = async ({ title, category, image }) => {
   formData.append('title', title);
   formData.append('category', category);
   formData.append('image', image);
-  const { data } = await api.post('/api/production/film-assets/', formData, {
+  const { data } = await api.post('/production/film-assets/', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
   return mapFilmAsset(data);

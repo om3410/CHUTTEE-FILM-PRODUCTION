@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+﻿import { useQuery } from '@tanstack/react-query';
 import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import { CalendarIcon, MapPinIcon, ClockIcon } from '../../icons';
@@ -8,7 +8,7 @@ export default function UpcomingShoots() {
   const { data } = useQuery({
     queryKey: ['upcoming-shoots'],
     queryFn: async () => {
-      const { data } = await api.get('/api/production/shoot-days/');
+      const { data } = await api.get('/production/shoot-days/');
       return data.results;
     },
   });
