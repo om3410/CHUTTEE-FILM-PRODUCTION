@@ -33,6 +33,7 @@ export default function Crew() {
   const [department, setCrewDepartment] = useState('');
   const [availability, setCrewAvailability] = useState('');
   const setCrewDepartments = () => {};
+  const [loading, setLoading] = useState(true);
   const [crew, setCrew] = useState([]);
   const [updatingAvailability, setUpdatingAvailability] = useState([]);
   const [selected, setSelected] = useState([]);
@@ -701,3 +702,4 @@ function QuickAction({ icon: Icon, title, description, onAction }) {
     </button>
   );
 }
+
