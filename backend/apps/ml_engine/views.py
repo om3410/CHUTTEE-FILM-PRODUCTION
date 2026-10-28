@@ -909,3 +909,39 @@ class GenerateImageView(APIView):
                 {"detail": f"Could not generate image: {exc}"},
                 status=status.HTTP_502_BAD_GATEWAY,
             )
+
+# ============================================================
+# DubMaster — Dubbing script + lip-sync guidance
+# ============================================================
+class DubMasterView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        text = request.data.get("text", "") if isinstance(request.data, dict) else ""
+        target_language = request.data.get("target_language", "en") if isinstance(request.data, dict) else "en"
+
+        if not text:
+            return Response({"error": "text required"}, status=400)
+
+        prompt = (
+            f"Create a professional dubbing script for the following content, "
+            f"targeting {target_language} language. Include:\n"
+            f"1. Line-by-line dub script (original + translation)\n"
+            f"2. Lip-sync timing guidance per line (approximate seconds, syllable count)\n"
+            f"3. Cultural adaptation notes\n"
+            f"4. Voice talent guidance (tone, pace, emotion)\n\n"
+            f"Original text:\n{text[:8000]}"
+        )
+
+        try:
+            result = generate(
+                prompt,
+                system="You are a professional dubbing director. Return structured dubbing guidance.",
+            )
+            return Response({
+                "dubbing_script": result,
+                "target_language": target_language,
+                "status": "success",
+            })
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
