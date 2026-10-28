@@ -168,7 +168,7 @@ export default function GenAI() {
         ? await api.get(entry.url)
         : await api.post(entry.url, payload);
 
-      return JSON.stringify(res.data, null, 2);
+      return res.data;
     } catch (err) {
       const status = (err && err.response && err.response.status) || '?';
       const detail = err && err.response && err.response.data
