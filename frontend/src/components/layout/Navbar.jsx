@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FiSearch, FiBell, FiSun, FiMoon, FiPlus, FiMenu } from 'react-icons/fi';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
+import { useUIStore } from '../../store/uiStore';
 
 export default function Navbar({ onToggleSidebar }) {
   const { theme, toggleTheme } = useTheme();
@@ -10,6 +11,7 @@ export default function Navbar({ onToggleSidebar }) {
   const safeName = isJwt(user?.name) ? null : user?.name;
   const safeEmail = isJwt(user?.email) ? null : user?.email;
   const navigate = useNavigate();
+  const openCommandPalette = useUIStore((s) => s.openCommandPalette);
 
   return (
     <header className="glass-nav sticky top-0 z-30 border-b border-zinc-800">
@@ -60,8 +62,11 @@ export default function Navbar({ onToggleSidebar }) {
           <FiSearch size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500" />
           <input
             type="text"
-            placeholder="Search anything.…"
-            className="w-full rounded-premium border border-zinc-800 bg-zinc-950 py-2 pl-10 pr-16 text-sm placeholder:text-zinc-600 focus:border-gold-500 focus:outline-none transition-colors"
+            placeholder="Search anything…"
+            onClick={openCommandPalette}
+            onFocus={openCommandPalette}
+            readOnly
+            className="w-full cursor-pointer rounded-premium border border-zinc-800 bg-zinc-950 py-2 pl-10 pr-16 text-sm placeholder:text-zinc-600 focus:border-gold-500 focus:outline-none transition-colors"
           />
           <kbd className="absolute right-3 top-1/2 -translate-y-1/2 hidden lg:inline-flex items-center gap-1 rounded border border-zinc-800 bg-zinc-900 px-1.5 py-0.5 text-[10px] font-mono text-zinc-500">
             ⌘K

@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+﻿import { NavLink, useNavigate } from 'react-router-dom';
 import {
   FiLayout, FiUsers, FiUserCheck, FiFilm, FiDollarSign,
   FiActivity, FiCpu, FiInbox, FiCreditCard, FiSettings,
@@ -8,7 +8,7 @@ import {
 import { useAuthStore } from '../../store/authStore';
 import { cn } from '../../lib/utils';
 
-// Single source of truth ├óΓé¼ΓÇ¥ change here, not in 20 places
+// Single source of truth â€” change here, not in 20 places
 const DEFAULT_EMAIL = 'omrewaskar4@gmail.com';
 const DEFAULT_NAME  = 'Producer';
 
@@ -31,6 +31,7 @@ const NAV = [
 
 export default function Sidebar({ collapsed, onToggle }) {
   const { user, logout } = useAuthStore();
+  const navigate = useNavigate();
 
   const isJwt = (v) => typeof v === 'string' && v.startsWith('eyJ') && v.length > 100;
   const rawEmail = user?.email;
@@ -38,10 +39,15 @@ export default function Sidebar({ collapsed, onToggle }) {
   const displayName  = (!isJwt(rawName)  && rawName)  || DEFAULT_NAME;
   const displayEmail = (!isJwt(rawEmail) && rawEmail) || DEFAULT_EMAIL;
 
+  const handleLogout = async () => {
+    try { await logout(); } catch { /* ignore network errors on logout */ }
+    navigate('/signin', { replace: true });
+  };
+
   return (
     <aside
       className={cn(
-        'sticky top-0 hidden md:flex h-screen flex-col border-r border-zinc-800 bg-zinc-900 transition-[width] duration-300',
+        'sticky top-0 hidden md:flex h-[calc(100vh-4rem)] flex-col border-r border-zinc-800 bg-zinc-900 transition-[width] duration-300',
         collapsed ? 'w-[76px]' : 'w-[260px]'
       )}
     >
@@ -90,33 +96,31 @@ export default function Sidebar({ collapsed, onToggle }) {
 
       <div className="gold-divider mx-3" />
 
-      <div className={cn('flex items-center gap-3 p-3', collapsed && 'justify-center')}>
-        {!collapsed ? (
-          <>
-            <div className="h-9 w-9 rounded-full bg-gold-500/10 grid place-items-center font-serif text-sm text-gold-400">
-              {displayName[0]?.toUpperCase() || 'U'}
-            </div>
+      {/* User + Logout footer */}
+      <div className="p-3 space-y-2">
+        <div className={cn('flex items-center gap-3', collapsed && 'justify-center')}>
+          <div className="h-9 w-9 shrink-0 rounded-full bg-gold-500/10 grid place-items-center font-serif text-sm text-gold-400">
+            {displayName[0]?.toUpperCase() || 'U'}
+          </div>
+          {!collapsed && (
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium text-zinc-100">{displayName}</p>
               <p className="truncate text-xs text-zinc-500">{displayEmail}</p>
             </div>
-            <button
-              onClick={logout}
-              className="rounded-premium p-1.5 text-zinc-500 hover:text-gold-400"
-              aria-label="Log out"
-            >
-              <FiLogOut size={16} />
-            </button>
-          </>
-        ) : (
-          <button
-            onClick={logout}
-            className="rounded-premium p-2 text-zinc-500 hover:text-gold-400"
-            aria-label="Log out"
-          >
-            <FiLogOut size={18} />
-          </button>
-        )}
+          )}
+        </div>
+
+        <button
+          onClick={handleLogout}
+          title={collapsed ? 'Logout' : undefined}
+          className={cn(
+            'flex w-full items-center gap-3 rounded-premium border border-zinc-800 px-3 py-2.5 text-sm text-zinc-400 transition-all hover:border-red-500/40 hover:bg-red-500/10 hover:text-red-400',
+            collapsed && 'justify-center px-2'
+          )}
+        >
+          <FiLogOut size={18} className="shrink-0" />
+          {!collapsed && <span>Logout</span>}
+        </button>
       </div>
 
       <button

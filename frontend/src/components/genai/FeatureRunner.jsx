@@ -133,7 +133,7 @@ function StructuredOutput({ data }) {
   }
 
   // 2. Object with recognizable array field → render all array fields as tables
-  const arrayKeys = ['recommendations', 'risks', 'risk_forecasts', 'personas', 'festival_predictions', 'forecasts', 'scenes', 'frames', 'storyboards', 'cast', 'line_items'];
+  const arrayKeys = ['recommendations', 'risks', 'risk_forecasts', 'personas', 'festival_predictions', 'forecasts', 'scenes', 'frames', 'storyboards', 'cast', 'line_items', 'rows', 'results'];
   if (typeof data === 'object' && !Array.isArray(data)) {
     const tables = [];
     for (const key of arrayKeys) {
@@ -219,12 +219,25 @@ function KeyValueCards({ entries }) {
             {k.replace(/_/g, ' ')}
           </div>
           <div className="text-sm text-zinc-200 whitespace-pre-wrap leading-relaxed">
-            {typeof v === 'string' ? v : String(v)}
+            {renderValue(v)}
           </div>
         </div>
       ))}
     </div>
   );
+}
+
+function renderValue(v) {
+  if (v === null || v === undefined) return '—';
+  if (typeof v === 'string') return v;
+  if (typeof v === 'number') return v.toLocaleString();
+  if (typeof v === 'boolean') return v ? 'Yes' : 'No';
+  if (Array.isArray(v)) {
+    if (v.length === 0) return '—';
+    if (typeof v[0] === 'string') return v.join(', ');
+    return JSON.stringify(v, null, 2);
+  }
+  return JSON.stringify(v, null, 2);
 }
 
 function renderCell(value) {
