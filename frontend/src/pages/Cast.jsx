@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useLocation, useNavigate, useOutletContext } from 'react-router-dom';
 import {
@@ -29,16 +29,10 @@ export default function Crew() {
   const { user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  const {
-    crewSearch: search = '',
-    crewDepartment: department = '',
-    crewAvailability: availability = '',
-    setCrewSearch = () => {},
-    setCrewDepartment = () => {},
-    setCrewAvailability = () => {},
-    setCrewDepartments = () => {},
-  } = useOutletContext() || {};
-  const [loading, setLoading] = useState(true);
+  const [search, setCrewSearch] = useState('');
+  const [department, setCrewDepartment] = useState('');
+  const [availability, setCrewAvailability] = useState('');
+  const setCrewDepartments = () => {};
   const [crew, setCrew] = useState([]);
   const [updatingAvailability, setUpdatingAvailability] = useState([]);
   const [selected, setSelected] = useState([]);
@@ -47,7 +41,7 @@ export default function Crew() {
   const [adding, setAdding] = useState(false);
   const [newCrew, setNewCrew] = useState({ name: '', role: '', department: DEPARTMENTS[0], dailyRate: '' });
 
-  /* ─────────────── Filter helpers — use context setters ─────────────── */
+  /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Filter helpers â€” use context setters â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   const clearAllFilters = () => {
     setCrewSearch('');
     setCrewDepartment('');
@@ -182,7 +176,7 @@ export default function Crew() {
         eyebrow="The People Behind the Frame"
         title="Every Story Needs a Team."
         subtitle="Every Frame Needs Craft."
-        lead="Discover directors, cinematographers, editors, designers and technicians. Review rate cards and availability. Assign to scenes and shoot days. Build the crew that brings your vision to life — department by department, role by role, shot by shot."
+        lead="Discover directors, cinematographers, editors, designers and technicians. Review rate cards and availability. Assign to scenes and shoot days. Build the crew that brings your vision to life â€” department by department, role by role, shot by shot."
         slogan="Every crew member has a story. Every role has a purpose. The right team, the right timing, the right craft can turn a production into a legacy that outlasts the work itself."
       />
 
@@ -206,7 +200,7 @@ export default function Crew() {
               <input
                 value={search}
                 onChange={(e) => setCrewSearch(e.target.value)}
-                placeholder="Name, role, skill…"
+                placeholder="Name, role, skillâ€¦"
                 className="input pl-10"
               />
             </div>
@@ -267,7 +261,7 @@ export default function Crew() {
 
       {/* 4. QUOTE */}
       <Quote>
-        "A film is never made by one person. It is made by a hundred — each one carrying a piece of the vision the director cannot hold alone."
+        "A film is never made by one person. It is made by a hundred â€” each one carrying a piece of the vision the director cannot hold alone."
       </Quote>
 
       {/* 5. SIX ROLE ROUTES */}
@@ -293,7 +287,7 @@ export default function Crew() {
               description={description}
               count={departmentCount(filter)}
               isActive={department === filter}
-              action={department === filter ? 'Clear filter' : 'View crew →'}
+              action={department === filter ? 'Clear filter' : 'View crew â†’'}
               onAction={() => {
                 if (department === filter) {
                   setCrewDepartment('');
@@ -309,7 +303,7 @@ export default function Crew() {
 
       {/* 6. QUOTE */}
       <Quote>
-        "A crew list is not a directory. It is a map of the people who can turn a script into a story — one shoot day at a time."
+        "A crew list is not a directory. It is a map of the people who can turn a script into a story â€” one shoot day at a time."
       </Quote>
 
       {/* 7. DEPARTMENT CHIPS */}
@@ -352,7 +346,7 @@ export default function Crew() {
             A Producer Wants Clarity. A Crew Wants Work.
           </h2>
           <p className="mt-3 text-sm text-zinc-400 leading-relaxed">
-            CHUTTEE supports both journeys — one for the person building the team, one for the person on set.
+            CHUTTEE supports both journeys â€” one for the person building the team, one for the person on set.
           </p>
         </div>
 
@@ -384,7 +378,7 @@ export default function Crew() {
 
       {/* 9. QUOTE */}
       <Quote>
-        "The best crews are not the largest. They are the ones where every person knows exactly why they are there — and what their work makes possible."
+        "The best crews are not the largest. They are the ones where every person knows exactly why they are there â€” and what their work makes possible."
       </Quote>
 
       {/* 10. MAIN CREW GRID */}
@@ -395,7 +389,7 @@ export default function Crew() {
             Your Team, in One Place.
           </h2>
           <p className="mt-3 text-sm text-zinc-400 leading-relaxed">
-            {filtered.length} of {crew.length} crew members shown{department && ` — filtered by ${department}`}.
+            {filtered.length} of {crew.length} crew members shown{department && ` â€” filtered by ${department}`}.
           </p>
         </div>
 
@@ -438,7 +432,7 @@ export default function Crew() {
                           className="rounded-full disabled:cursor-wait disabled:opacity-60"
                         >
                           <Badge variant={m.available ? 'success' : 'default'}>
-                            {updatingAvailability.includes(m.id) ? 'Saving…' : m.available ? 'Available' : 'Busy'}
+                            {updatingAvailability.includes(m.id) ? 'Savingâ€¦' : m.available ? 'Available' : 'Busy'}
                           </Badge>
                         </button>
                       ) : (
@@ -452,7 +446,7 @@ export default function Crew() {
                         onClick={() => setCrewDepartment(m.department)}
                         className="mt-3 text-[10px] uppercase tracking-[0.2em] text-gold-400 transition-colors hover:text-gold-300"
                       >
-                        {m.department} →
+                        {m.department} â†’
                       </button>
                     )}
 
@@ -588,9 +582,9 @@ export default function Crew() {
   );
 }
 
-/* ═══════════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    HELPER COMPONENTS
-   ═══════════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 function StatNumber({ value, label, note }) {
   return (
@@ -623,7 +617,7 @@ function RouteCard({ number, icon: Icon, eyebrow, title, description, action, on
             <Icon className="h-4 w-4" />
           </span>
           <p className="text-[10px] uppercase tracking-[0.25em] text-gold-400">
-            {number} · {eyebrow}
+            {number} Â· {eyebrow}
           </p>
         </div>
         {typeof count === 'number' && (
