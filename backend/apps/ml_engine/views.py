@@ -658,7 +658,7 @@ class DailyReportView(APIView):
             return Response({"error": "project_id required"}, status=400)
         try:
             if hasattr(scheduling, 'daily_report'):
-                return Response(scheduling.daily_report(int(pid)))
+                return Response(scheduling.daily_report(pid))
             return Response({"error": "daily_report not implemented in scheduling module"}, status=501)
         except Exception as e:
             return Response({"error": str(e)}, status=500)

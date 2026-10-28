@@ -1,7 +1,7 @@
 """Scheduling intelligence features."""
 from datetime import date
 from apps.ml_engine.llm.client import generate_json, generate
-from apps.production.models import Scene, ShootDay, CastMember
+from apps.production.models import Scene, ShootDay, CastMember, FilmProject
 
 
 def reschedule_suggestions(actor_id: int, unavailable_date: str) -> dict:
