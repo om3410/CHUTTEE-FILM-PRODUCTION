@@ -156,6 +156,8 @@ export default function GenAI() {
       role_description: input,
       dialogue_text: input,
       style: entry.style || 'default',
+      project_id: ['callsheetcopilot', 'riskradar', 'budgetbot', 'productionwiki'].includes(feature.id) ? 'a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d' : undefined,
+      scene_number: feature.id === 'editadvisor' ? 1 : undefined,
       feature_id: feature.id,
     };
 
@@ -381,6 +383,11 @@ export default function GenAI() {
                   <div className="flex items-start justify-between">
                     <span className="text-2xl leading-none" aria-hidden>{f.emoji}</span>
                     <Badge variant={PRIORITY_VARIANT[f.priority] || 'default'}>{f.priority}</Badge>
+                    {!ROUTES[f.id] && (
+                      <span className="ml-1 rounded-full bg-zinc-800 px-2 py-0.5 text-[9px] uppercase tracking-wider text-zinc-500">
+                        Soon
+                      </span>
+                    )}
                   </div>
                   <h3 className="mt-3 font-serif text-base font-semibold text-zinc-100">{f.name}</h3>
                   <p className="mt-1 text-[10px] uppercase tracking-[0.2em] text-gold-400">{f.stage}</p>
