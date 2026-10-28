@@ -43,17 +43,13 @@ export default function Sidebar({ collapsed, onToggle }) {
     navigate('/signin', { replace: true });
   };
 
-  // Width NEVER changes — only the contents collapse. This keeps the navbar from shifting.
-  const W = 'w-[260px]';
-
   return (
     <aside
       className={cn(
-        'sticky top-0 hidden md:flex h-screen flex-col border-r border-zinc-800 bg-zinc-900 transition-colors duration-200',
-        W
+        'sticky top-0 hidden md:flex h-screen flex-col border-r border-zinc-800 bg-zinc-900 transition-[width] duration-300',
+        collapsed ? 'w-[76px]' : 'w-[260px]'
       )}
     >
-      {/* Logo */}
       <div className={cn('flex h-16 items-center gap-3 border-b border-zinc-800 px-4', collapsed && 'justify-center')}>
         <div className="grid h-9 w-9 shrink-0 place-items-center rounded-premium bg-gradient-to-br from-gold-300 to-gold-600 shadow-gold">
           <FiFilm size={18} className="text-zinc-950" />
@@ -100,7 +96,6 @@ export default function Sidebar({ collapsed, onToggle }) {
 
       <div className="gold-divider mx-3" />
 
-      {/* User + Logout footer */}
       <div className="p-3 space-y-2">
         <div className={cn('flex items-center gap-3', collapsed && 'justify-center')}>
           <div className="h-9 w-9 shrink-0 rounded-full bg-gold-500/10 grid place-items-center font-serif text-sm text-gold-400">

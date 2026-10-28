@@ -25,13 +25,13 @@ export default function Navbar({ onToggleSidebar }) {
         {/* Mobile sidebar toggle */}
         <button
           onClick={onToggleSidebar}
-          className="lg:hidden rounded-premium p-2 text-zinc-500 hover:text-gold-400 transition"
+          className="lg:hidden rounded-premium p-2 text-zinc-500 hover:text-gold-400 transition shrink-0"
           aria-label="Toggle sidebar"
         >
           <FiMenu size={20} />
         </button>
 
-        {/* Logo */}
+        {/* Logo (shrinks out of the way on small screens) */}
         <Link to="/" className="flex items-center gap-2.5 shrink-0">
           <div className="grid h-9 w-9 place-items-center rounded-premium bg-gradient-to-br from-gold-300 to-gold-600 shadow-gold">
             <svg
@@ -57,9 +57,9 @@ export default function Navbar({ onToggleSidebar }) {
           </div>
         </Link>
 
-        {/* Global search */}
-        <div className="relative hidden md:flex flex-1 max-w-lg">
-          <FiSearch size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500" />
+        {/* Global search — stretches to fill the row, no max-width cap */}
+        <div className="relative hidden md:flex flex-1 min-w-0">
+          <FiSearch size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
           <input
             type="text"
             placeholder="Search anything…"
@@ -73,56 +73,53 @@ export default function Navbar({ onToggleSidebar }) {
           </kbd>
         </div>
 
-        <div className="flex-1 md:flex-none" />
-
-        {/* Create */}
-        <button
-          onClick={() => navigate('/scenes')}
-          className="hidden sm:inline-flex items-center gap-1.5 rounded-premium border border-gold-500/30 bg-gold-500/10 px-3 py-2 text-xs font-medium text-gold-400 transition-all hover:border-gold-500 hover:shadow-gold"
-        >
-          <FiPlus size={14} /> Create
-        </button>
-
-        {/* Theme toggle */}
-        <button
-          onClick={toggleTheme}
-          className="rounded-premium p-2 text-zinc-500 hover:text-gold-400 transition"
-          aria-label="Toggle theme"
-        >
-          {theme === 'dark' ? <FiSun size={18} /> : <FiMoon size={18} />}
-        </button>
-
-        {/* Notifications */}
-        <button
-          onClick={() => navigate('/activity')}
-          className="relative rounded-premium p-2 text-zinc-500 hover:text-gold-400 transition"
-          aria-label="Notifications"
-        >
-          <FiBell size={18} />
-          <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-gold-400 animate-pulse-gold" />
-        </button>
-
-        {/* User */}
-        {user ? (
-          <Link
-            to="/settings"
-            className="hidden sm:flex items-center gap-2 rounded-premium border border-zinc-800 bg-zinc-900 px-2 py-1.5 transition hover:border-gold-500/40"
+        {/* Right-aligned actions — stay pinned to the right edge */}
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={() => navigate('/scenes')}
+            className="hidden sm:inline-flex items-center gap-1.5 rounded-premium border border-gold-500/30 bg-gold-500/10 px-3 py-2 text-xs font-medium text-gold-400 transition-all hover:border-gold-500 hover:shadow-gold"
           >
-            <div className="h-7 w-7 overflow-hidden rounded-full bg-gold-500/10 grid place-items-center font-serif text-sm text-gold-400">
-              {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
-            </div>
-            <span className="max-w-[100px] truncate text-xs">
-              {safeName || safeEmail || 'Producer'}
-            </span>
-          </Link>
-        ) : (
-          <Link
-            to="/signin"
-            className="hidden sm:inline-flex items-center gap-1.5 rounded-premium border border-zinc-800 bg-zinc-900 px-4 py-2 text-xs font-medium text-zinc-300 transition hover:border-gold-500/40 hover:text-gold-400"
+            <FiPlus size={14} /> Create
+          </button>
+
+          <button
+            onClick={toggleTheme}
+            className="rounded-premium p-2 text-zinc-500 hover:text-gold-400 transition"
+            aria-label="Toggle theme"
           >
-            Sign in
-          </Link>
-        )}
+            {theme === 'dark' ? <FiSun size={18} /> : <FiMoon size={18} />}
+          </button>
+
+          <button
+            onClick={() => navigate('/activity')}
+            className="relative rounded-premium p-2 text-zinc-500 hover:text-gold-400 transition"
+            aria-label="Notifications"
+          >
+            <FiBell size={18} />
+            <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-gold-400 animate-pulse-gold" />
+          </button>
+
+          {user ? (
+            <Link
+              to="/settings"
+              className="hidden sm:flex items-center gap-2 rounded-premium border border-zinc-800 bg-zinc-900 px-2 py-1.5 transition hover:border-gold-500/40"
+            >
+              <div className="h-7 w-7 overflow-hidden rounded-full bg-gold-500/10 grid place-items-center font-serif text-sm text-gold-400">
+                {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
+              </div>
+              <span className="max-w-[100px] truncate text-xs">
+                {safeName || safeEmail || 'Producer'}
+              </span>
+            </Link>
+          ) : (
+            <Link
+              to="/signin"
+              className="hidden sm:inline-flex items-center gap-1.5 rounded-premium border border-zinc-800 bg-zinc-900 px-4 py-2 text-xs font-medium text-zinc-300 transition hover:border-gold-500/40 hover:text-gold-400"
+            >
+              Sign in
+            </Link>
+          )}
+        </div>
       </div>
     </header>
   );

@@ -12,5 +12,6 @@ urlpatterns = [
     path('api/exports/', include('apps.exports.urls')),
     path('api/collaboration/', include('apps.collaboration.urls')),
     path('api/security/', include('apps.security_extras.urls')),
+    path('api/', include('apps.authentication.urls')),
     path('', include('apps.authentication.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
