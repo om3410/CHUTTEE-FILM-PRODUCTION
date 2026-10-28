@@ -40,12 +40,12 @@ const FEATURES = [
   // Planning
   { id: 'budgetbot',        emoji: '💰', name: 'SpendForecast',    stage: 'Planning',  priority: 'P0', description: 'Project spend forecast (next 3 periods)' },
   { id: 'schedulesensei',   emoji: '📅', name: 'ScheduleSensei',    stage: 'Planning',  priority: 'P1', description: 'Optimised shooting schedule' },
-  { id: 'callsheetcopilot', emoji: '📞', name: 'CallSheetCopilot',  stage: 'Planning',  priority: 'P1', description: 'Auto call sheets' },
-  { id: 'continuityguard',  emoji: '🔍', name: 'ContinuityGuard',   stage: 'Planning',  priority: 'P2', description: 'Flag continuity errors' },
+  { id: 'callsheetcopilot', emoji: '📊', name: 'DailyReport',       stage: 'Planning',  priority: 'P1', description: 'Auto daily production reports' },
+  { id: 'continuityguard',  emoji: '📊', name: 'InsightsDashboard', stage: 'Planning',  priority: 'P2', description: 'AI insights: sentiment, risks, budget, festivals' },
   { id: 'riskradar',        emoji: '⚠️', name: 'RiskRadar',         stage: 'Planning',  priority: 'P2', description: 'Production risk register' },
 
   // Post
-  { id: 'editadvisor',      emoji: '✂️', name: 'EditAdvisor',       stage: 'Post',      priority: 'P2', description: 'Rough-cut pacing notes' },
+  { id: 'editadvisor',      emoji: '⏱️', name: 'SceneDuration',     stage: 'Post',      priority: 'P2', description: 'Predict scene shooting duration' },
   { id: 'subtitlestudio',   emoji: '📝', name: 'SubtitleStudio',    stage: 'Post',      priority: 'P1', description: 'Auto subtitles + translation' },
   { id: 'dubmaster',        emoji: '🎙️', name: 'DubMaster',         stage: 'Post',      priority: 'P2', description: 'Dubbing script + lip-sync guidance' },
   { id: 'trailercraft',     emoji: '🎞️', name: 'TrailerCraft',      stage: 'Post',      priority: 'P2', description: 'Trailer script/beats' },
@@ -185,7 +185,7 @@ export default function GenAI() {
         eyebrow="GenAI Studio"
         title="Twenty-Eight Tools."
         subtitle="One Production Pipeline."
-        lead="From the first logline to the final trailer, CHUTTEE's GenAI studio gives every stage of production its own dedicated assistant. SceneWeaver outlines the script. SpendForecast projects it. ScheduleSensei sequences it. CallSheetCopilot ships it. TrailerCraft pitches it. Every call runs through the same shield, the same audit trail, and the same provider allowlist as everything else in CHUTTEE."
+        lead="From the first logline to the final trailer, CHUTTEE's GenAI studio gives every stage of production its own dedicated assistant. SceneWeaver outlines the script. SpendForecast projects it. ScheduleSensei sequences it. DailyReport ships it. TrailerCraft pitches it. Every call runs through the same shield, the same audit trail, and the same provider allowlist as everything else in CHUTTEE."
         slogan="AI does not replace the crew. It shortens the distance between a decision and its first draft — so the people on set can spend their time on the work only they can do."
       />
 
