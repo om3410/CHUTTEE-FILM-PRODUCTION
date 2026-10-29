@@ -1,4 +1,4 @@
-﻿import { defineConfig } from 'vite';
+import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 const BACKEND = 'http://localhost:8000';
@@ -6,7 +6,7 @@ const BACKEND = 'http://localhost:8000';
 export default defineConfig({
   plugins: [react()],
   build: {
-    chunkSizeWarningLimit: 800,
+    chunkSizeWarningLimit: 1500,
     rollupOptions: {
       output: {
         manualChunks: {
@@ -36,4 +36,5 @@ export default defineConfig({
     },
   },
 });
+
 
