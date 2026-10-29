@@ -47,7 +47,7 @@ export default function AccountRecovery() {
           </form>
         )}
         <p className="mt-6 text-center text-sm text-zinc-500">
-          Remember your details? <Link to="/login" className="font-medium text-brand-400 hover:underline">Sign in</Link>
+          Remember your details? <Link to="/login" className="font-medium text-gold-400 hover:underline">Sign in</Link>
         </p>
       </motion.div>
     </div>

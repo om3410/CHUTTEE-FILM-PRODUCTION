@@ -164,13 +164,13 @@ export default function Register() {
 
         <p className="mt-6 text-center text-sm text-zinc-500">
           Already have one?{' '}
-          <Link to="/login" className="font-medium text-brand-400 hover:underline">
+          <Link to="/login" className="font-medium text-gold-400 hover:underline">
             Sign in
           </Link>
         </p>
         <p className="mt-3 text-center text-sm text-zinc-500">
           Forgot your username or password?{' '}
-          <Link to="/account-recovery" className="font-medium text-brand-400 hover:underline">
+          <Link to="/account-recovery" className="font-medium text-gold-400 hover:underline">
             Recover account
           </Link>
         </p>

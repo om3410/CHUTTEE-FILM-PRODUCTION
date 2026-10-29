@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+﻿import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiMessageSquare, FiX, FiSend, FiCpu, FiMinimize2, FiMaximize2, FiTrash2, FiCopy, FiThumbsUp, FiThumbsDown, FiZap, FiUser } from 'react-icons/fi';
 import { useAIChat } from '../../hooks/useAIChat';
@@ -31,7 +31,7 @@ export default function AIChatWidget() {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             onClick={() => setOpen(true)}
-            className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-brand-500 text-white shadow-lg shadow-brand-500/30 transition-transform hover:scale-110 active:scale-95"
+            className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-gold-500 text-white shadow-lg shadow-gold-500/30 transition-transform hover:scale-110 active:scale-95"
             title="Open AI assistant"
             aria-label="Open AI assistant"
           >
@@ -58,13 +58,13 @@ export default function AIChatWidget() {
           >
             <div className="flex items-center justify-between border-b border-zinc-800 bg-zinc-900/95 px-4 py-3 backdrop-blur">
               <div className="flex items-center gap-3">
-                <div className="relative flex h-9 w-9 items-center justify-center rounded-lg bg-brand-500/15">
-                  <FiCpu className="h-5 w-5 text-brand-400" />
+                <div className="relative flex h-9 w-9 items-center justify-center rounded-lg bg-gold-500/15">
+                  <FiCpu className="h-5 w-5 text-gold-400" />
                   <span className="absolute -right-0.5 -bottom-0.5 h-3 w-3 rounded-full bg-emerald-500 ring-2 ring-zinc-900" />
                 </div>
                 <div>
                   <p className="text-sm font-semibold">CHUTTEE AI</p>
-                  <p className="text-[10px] text-zinc-500">{thinking ? 'Thinking…' : 'Online · Production copilot'}</p>
+                  <p className="text-[10px] text-zinc-500">{thinking ? 'Thinkingâ€¦' : 'Online Â· Production copilot'}</p>
                 </div>
               </div>
               <div className="flex items-center gap-1">
@@ -80,8 +80,8 @@ export default function AIChatWidget() {
               {messages.map((m) => <MessageBubble key={m.id} message={m} onAction={(a) => send(a)} />)}
               {thinking && (
                 <div className="flex items-start gap-3 py-3">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-500/15">
-                    <FiCpu className="h-4 w-4 text-brand-400" />
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold-500/15">
+                    <FiCpu className="h-4 w-4 text-gold-400" />
                   </div>
                   <div className="flex items-center gap-1.5 rounded-2xl rounded-tl-sm bg-zinc-800 px-4 py-3">
                     <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-zinc-500" style={{ animationDelay: '0ms' }} />
@@ -97,7 +97,7 @@ export default function AIChatWidget() {
                 <p className="mb-2 flex items-center gap-1 text-[10px] uppercase tracking-wider text-zinc-500"><FiZap className="h-3 w-3" /> Try asking</p>
                 <div className="flex flex-wrap gap-1.5">
                   {SUGGESTED_PROMPTS.map((p) => (
-                    <button key={p.text} onClick={() => send(p.text)} className="rounded-full border border-zinc-800 bg-zinc-900 px-3 py-1 text-xs text-zinc-300 transition-colors hover:border-brand-500/50 hover:text-brand-400">
+                    <button key={p.text} onClick={() => send(p.text)} className="rounded-full border border-zinc-800 bg-zinc-900 px-3 py-1 text-xs text-zinc-300 transition-colors hover:border-gold-500/50 hover:text-gold-400">
                       {p.icon} {p.text}
                     </button>
                   ))}
@@ -112,14 +112,14 @@ export default function AIChatWidget() {
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(e); } }}
                   rows={1}
-                  placeholder="Ask about budget, scenes, cast, risks…"
-                  className="max-h-32 flex-1 resize-none rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2.5 text-sm outline-none placeholder:text-zinc-600 focus:border-brand-500"
+                  placeholder="Ask about budget, scenes, cast, risksâ€¦"
+                  className="max-h-32 flex-1 resize-none rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2.5 text-sm outline-none placeholder:text-zinc-600 focus:border-gold-500"
                 />
-                <button type="submit" title="Send message" aria-label="Send message" disabled={!input.trim() || thinking} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-500 text-white transition-colors hover:bg-brand-400 disabled:opacity-40">
+                <button type="submit" title="Send message" aria-label="Send message" disabled={!input.trim() || thinking} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gold-500 text-white transition-colors hover:bg-gold-400 disabled:opacity-40">
                   <FiSend className="h-4 w-4" />
                 </button>
               </div>
-              <p className="mt-1.5 text-[10px] text-zinc-600">Runs entirely in your browser · No data leaves your device</p>
+              <p className="mt-1.5 text-[10px] text-zinc-600">Runs entirely in your browser Â· No data leaves your device</p>
             </form>
           </motion.div>
         )}
@@ -132,11 +132,11 @@ function MessageBubble({ message, onAction }) {
   const isUser = message.role === 'user';
   return (
     <div className={`flex items-start gap-3 py-3 ${isUser ? 'flex-row-reverse' : ''}`}>
-      <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${isUser ? 'bg-zinc-800' : 'bg-brand-500/15'}`}>
-        {isUser ? <FiUser className="h-4 w-4 text-zinc-400" /> : <FiCpu className="h-4 w-4 text-brand-400" />}
+      <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${isUser ? 'bg-zinc-800' : 'bg-gold-500/15'}`}>
+        {isUser ? <FiUser className="h-4 w-4 text-zinc-400" /> : <FiCpu className="h-4 w-4 text-gold-400" />}
       </div>
       <div className={`flex-1 min-w-0 ${isUser ? 'text-right' : ''}`}>
-        <div className={`inline-block max-w-full rounded-2xl px-4 py-3 text-sm ${isUser ? 'rounded-tr-sm bg-brand-500 text-white' : 'rounded-tl-sm bg-zinc-800 text-zinc-100'}`}>
+        <div className={`inline-block max-w-full rounded-2xl px-4 py-3 text-sm ${isUser ? 'rounded-tr-sm bg-gold-500 text-white' : 'rounded-tl-sm bg-zinc-800 text-zinc-100'}`}>
           <FormattedText text={message.text} />
         </div>
         {message.widgets?.length > 0 && (
@@ -145,7 +145,7 @@ function MessageBubble({ message, onAction }) {
         {message.actions?.length > 0 && (
           <div className="mt-2 flex flex-wrap gap-1.5">
             {message.actions.map((a) => (
-              <button key={a} onClick={() => onAction(a)} className="rounded-full border border-zinc-800 bg-zinc-900 px-3 py-1 text-[11px] text-zinc-300 transition-colors hover:border-brand-500/50 hover:text-brand-400">
+              <button key={a} onClick={() => onAction(a)} className="rounded-full border border-zinc-800 bg-zinc-900 px-3 py-1 text-[11px] text-zinc-300 transition-colors hover:border-gold-500/50 hover:text-gold-400">
                 {a}
               </button>
             ))}
@@ -180,11 +180,11 @@ function InlineWidget({ widget }) {
       <div className="rounded-lg border border-zinc-800 bg-zinc-900/60 p-3 text-left">
         <p className="text-[10px] uppercase tracking-wider text-zinc-500">Budget runway</p>
         <div className="mt-1 flex items-baseline gap-2">
-          <span className="text-xl font-bold text-brand-400">{daysLeft}</span>
+          <span className="text-xl font-bold text-gold-400">{daysLeft}</span>
           <span className="text-xs text-zinc-400">days ({weeksLeft} weeks)</span>
         </div>
         <div className={`mt-1 text-[10px] ${status === 'critical' ? 'text-red-400' : status === 'warning' ? 'text-amber-400' : 'text-emerald-400'}`}>
-          {status === 'critical' ? '⚠️ Critical — under 2 weeks' : status === 'warning' ? '⚠️ Watch closely' : '✓ Healthy'}
+          {status === 'critical' ? 'âš ï¸ Critical â€” under 2 weeks' : status === 'warning' ? 'âš ï¸ Watch closely' : 'âœ“ Healthy'}
         </div>
       </div>
     );
@@ -197,7 +197,7 @@ function InlineWidget({ widget }) {
           {widget.data.map((a) => (
             <li key={a.id} className="flex items-center justify-between text-xs">
               <span className="truncate text-zinc-300">{a.description}</span>
-              <span className="ml-2 shrink-0 font-mono text-red-400">{a.zScore}σ</span>
+              <span className="ml-2 shrink-0 font-mono text-red-400">{a.zScore}Ïƒ</span>
             </li>
           ))}
         </ul>
@@ -225,13 +225,13 @@ function InlineWidget({ widget }) {
         {widget.data.slice(0, 3).map((m) => (
           <div key={m.actor.id} className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-900/60 p-2.5 text-left">
             <div className="flex items-center gap-2 min-w-0">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-500/15 text-[10px] font-bold text-brand-400">{m.actor.name.charAt(0)}</div>
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gold-500/15 text-[10px] font-bold text-gold-400">{m.actor.name.charAt(0)}</div>
               <div className="min-w-0">
                 <p className="truncate text-xs font-medium">{m.actor.name}</p>
-                <p className="truncate text-[10px] text-zinc-500">{m.reasons.slice(0, 2).join(' · ')}</p>
+                <p className="truncate text-[10px] text-zinc-500">{m.reasons.slice(0, 2).join(' Â· ')}</p>
               </div>
             </div>
-            <span className="ml-2 shrink-0 text-xs font-semibold text-brand-400">{m.score}%</span>
+            <span className="ml-2 shrink-0 text-xs font-semibold text-gold-400">{m.score}%</span>
           </div>
         ))}
       </div>
@@ -263,9 +263,9 @@ function InlineWidget({ widget }) {
             <div key={f.name} className="flex items-center gap-2">
               <span className="w-20 shrink-0 text-xs text-zinc-300">{f.name}</span>
               <div className="flex-1 h-1.5 overflow-hidden rounded-full bg-zinc-800">
-                <div className="h-full rounded-full bg-gradient-to-r from-brand-500 to-brand-400" style={{ width: `${f.chance}%` }} />
+                <div className="h-full rounded-full bg-gradient-to-r from-gold-500 to-gold-400" style={{ width: `${f.chance}%` }} />
               </div>
-              <span className="w-8 shrink-0 text-right text-[10px] text-brand-400">{f.chance}%</span>
+              <span className="w-8 shrink-0 text-right text-[10px] text-gold-400">{f.chance}%</span>
             </div>
           ))}
         </div>
@@ -280,7 +280,7 @@ function InlineWidget({ widget }) {
           {widget.data.map((p) => (
             <li key={p.scene.id} className="flex items-center justify-between text-xs">
               <span className="truncate text-zinc-300">#{p.scene.number} {p.scene.title}</span>
-              <span className="ml-2 shrink-0 font-mono text-brand-400">{p.prediction.minutes}m</span>
+              <span className="ml-2 shrink-0 font-mono text-gold-400">{p.prediction.minutes}m</span>
             </li>
           ))}
         </ul>
@@ -295,7 +295,7 @@ function InlineWidget({ widget }) {
           {Object.entries(widget.data).map(([dept, n]) => (
             <li key={dept} className="flex items-center justify-between text-xs">
               <span className="text-zinc-300">{dept}</span>
-              <span className="text-brand-400">{n}</span>
+              <span className="text-gold-400">{n}</span>
             </li>
           ))}
         </ul>

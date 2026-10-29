@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Badge from './ui/Badge';
 
@@ -21,7 +21,7 @@ export default function KanbanBoard({ columns, items, onMove, renderItem }) {
               const id = e.dataTransfer.getData('text/plain');
               if (id) onMove(id, col);
             }}
-            className={`rounded-xl border bg-zinc-900/40 p-3 transition-colors ${overColumn === col ? 'border-brand-500/60 bg-brand-500/5' : 'border-zinc-800'}`}
+            className={`rounded-xl border bg-zinc-900/40 p-3 transition-colors ${overColumn === col ? 'border-gold-500/60 bg-gold-500/5' : 'border-zinc-800'}`}
           >
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-400">{col}</h3>

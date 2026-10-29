@@ -83,40 +83,40 @@ const STAGE_META = [
    ──────────────────────────────────────────────────────────── */
 const ROUTES = {
   // ✅ Verified working
-  castmatch:        { url: '/api/ml/ai/cast-recommendation/', method: 'POST' },
-  budgetbot:        { url: '/api/ml/forecast/budget/',        method: 'GET'  },
-  riskradar:        { url: '/api/ml/ai/risk-forecast/',       method: 'GET'  },
-  trailercraft:     { url: '/api/ml/script/trailer/',         method: 'POST' },
-  posterforge:      { url: '/api/ml/marketing/poster/',       method: 'POST' },
-  storyboardai:     { url: '/api/ml/script/storyboard/',      method: 'POST' },
-  dialoguedoctor:   { url: '/api/ml/script/dialogue-rewrite/', method: 'POST' },
+  castmatch:        { url: '/ml/ai/cast-recommendation/', method: 'POST' },
+  budgetbot:        { url: '/ml/forecast/budget/',        method: 'GET'  },
+  riskradar:        { url: '/ml/ai/risk-forecast/',       method: 'GET'  },
+  trailercraft:     { url: '/ml/script/trailer/',         method: 'POST' },
+  posterforge:      { url: '/ml/marketing/poster/',       method: 'POST' },
+  storyboardai:     { url: '/ml/script/storyboard/',      method: 'POST' },
+  dialoguedoctor:   { url: '/ml/script/dialogue-rewrite/', method: 'POST' },
 
   // 🔧 Summarize family — differentiated by `style` param
-  sceneweaver:      { url: '/api/ml/script/summarize/', method: 'POST', style: 'scene-outline' },
-  characterforge:   { url: '/api/ml/script/summarize/', method: 'POST', style: 'character-bios' },
-  loglinelab:       { url: '/api/ml/script/summarize/', method: 'POST', style: 'logline' },
-  scriptcoverage:   { url: '/api/ml/script/summarize/', method: 'POST', style: 'coverage' },
-  taglinetitan:     { url: '/api/ml/script/summarize/', method: 'POST', style: 'tagline' },
-  presskitpro:      { url: '/api/ml/script/summarize/', method: 'POST', style: 'press-kit' },
+  sceneweaver:      { url: '/ml/script/summarize/', method: 'POST', style: 'scene-outline' },
+  characterforge:   { url: '/ml/script/summarize/', method: 'POST', style: 'character-bios' },
+  loglinelab:       { url: '/ml/script/summarize/', method: 'POST', style: 'logline' },
+  scriptcoverage:   { url: '/ml/script/summarize/', method: 'POST', style: 'coverage' },
+  taglinetitan:     { url: '/ml/script/summarize/', method: 'POST', style: 'tagline' },
+  presskitpro:      { url: '/ml/script/summarize/', method: 'POST', style: 'press-kit' },
 
   // 🔄 Reuse existing endpoints for previously-missing cards
-  scriptqa:         { url: '/api/ml/query/sql/',        method: 'POST' },
-  beatsheetai:      { url: '/api/ml/copilot/producer/', method: 'POST', style: 'beats' },
-  shotlistgenie:    { url: '/api/ml/copilot/producer/', method: 'POST', style: 'shotlist' },
-  schedulesensei:   { url: '/api/ml/copilot/producer/', method: 'POST', style: 'schedule' },
-  callsheetcopilot: { url: '/api/ml/report/daily/',     method: 'POST' },
-  continuityguard:  { url: '/api/ml/ai/daily-insights/', method: 'GET' },
-  editadvisor:      { url: '/api/ml/ai/scene-duration/', method: 'POST' },
-  moodboardgen:     { url: '/api/ml/media/generate-image/', method: 'POST', style: 'moodboard' },
-  auditionanalyzer: { url: '/api/ml/ai/script-sentiment/', method: 'POST' },
-  boxofficeoracle:  { url: '/api/ml/predict/festival/', method: 'POST' },
-  audienceatlas:    { url: '/api/ml/analytics/nl/',     method: 'POST', style: 'personas' },
-  productionwiki:   { url: '/api/ml/memory/recall/',    method: 'POST' },
+  scriptqa:         { url: '/ml/query/sql/',        method: 'POST' },
+  beatsheetai:      { url: '/ml/copilot/producer/', method: 'POST', style: 'beats' },
+  shotlistgenie:    { url: '/ml/copilot/producer/', method: 'POST', style: 'shotlist' },
+  schedulesensei:   { url: '/ml/copilot/producer/', method: 'POST', style: 'schedule' },
+  callsheetcopilot: { url: '/ml/report/daily/',     method: 'POST' },
+  continuityguard:  { url: '/ml/ai/daily-insights/', method: 'GET' },
+  editadvisor:      { url: '/ml/ai/scene-duration/', method: 'POST' },
+  moodboardgen:     { url: '/ml/media/generate-image/', method: 'POST', style: 'moodboard' },
+  auditionanalyzer: { url: '/ml/ai/script-sentiment/', method: 'POST' },
+  boxofficeoracle:  { url: '/ml/predict/festival/', method: 'POST' },
+  audienceatlas:    { url: '/ml/analytics/nl/',     method: 'POST', style: 'personas' },
+  productionwiki:   { url: '/ml/memory/recall/',    method: 'POST' },
 
   // ❌ Still require NEW backend views (marked "Soon" in UI)
-  subtitlestudio:   { url: '/api/ml/script/subtitle/',  method: 'POST' },
-  dubmaster:        { url: '/api/ml/script/dub/',       method: 'POST' },
-  pitchdeckai:      { url: '/api/ml/marketing/pitch/',  method: 'POST' },
+  subtitlestudio:   { url: '/ml/script/subtitle/',  method: 'POST' },
+  dubmaster:        { url: '/ml/script/dub/',       method: 'POST' },
+  pitchdeckai:      { url: '/ml/marketing/pitch/',  method: 'POST' },
 };
 
 export default function GenAI() {
@@ -543,8 +543,8 @@ export default function GenAI() {
       <FeatureRunner
         feature={runnerFeature}
         open={Boolean(runnerFeature)}
-        onClose={() => setRunnerFeature(null)}
         onRun={handleRun}
+        onClose={() => setRunnerFeature(null)}
       />
     </div>
   );

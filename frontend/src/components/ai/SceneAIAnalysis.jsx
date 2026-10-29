@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiCpu, FiChevronDown, FiClock, FiSmile, FiUser, FiZap } from 'react-icons/fi';
 import { Card, CardBody } from '../ui/Card';
@@ -17,11 +17,11 @@ export default function SceneAIAnalysis({ scene }) {
   const castMatches = matchCastToScene(scene, MOCK.cast);
 
   return (
-    <Card className="mt-3 border-brand-500/20 bg-brand-500/[0.02]">
+    <Card className="mt-3 border-gold-500/20 bg-gold-500/[0.02]">
       <button onClick={() => setOpen((o) => !o)} className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left">
         <div className="flex items-center gap-2">
-          <div className="rounded-lg bg-brand-500/15 p-1.5 text-brand-400"><FiCpu className="h-3.5 w-3.5" /></div>
-          <span className="text-xs font-semibold text-brand-400">AI Analysis</span>
+          <div className="rounded-lg bg-gold-500/15 p-1.5 text-gold-400"><FiCpu className="h-3.5 w-3.5" /></div>
+          <span className="text-xs font-semibold text-gold-400">AI Analysis</span>
           <SentimentBadge sentiment={sentiment.overall} score={sentiment.confidence} />
         </div>
         <FiChevronDown className={`h-4 w-4 text-zinc-500 transition-transform ${open ? 'rotate-180' : ''}`} />
@@ -36,7 +36,7 @@ export default function SceneAIAnalysis({ scene }) {
                   <FiClock className="h-3 w-3" /> Predicted Duration
                 </p>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-bold text-brand-400">{duration.minutes}</span>
+                  <span className="text-2xl font-bold text-gold-400">{duration.minutes}</span>
                   <span className="text-xs text-zinc-500">minutes</span>
                   <span className="ml-auto text-[10px] text-zinc-500">{duration.confidence}% confidence</span>
                 </div>
@@ -58,7 +58,7 @@ export default function SceneAIAnalysis({ scene }) {
                     <div key={emotion} className="flex items-center gap-2">
                       <span className="w-16 shrink-0 text-xs capitalize text-zinc-400">{emotion}</span>
                       <div className="flex-1 h-1.5 overflow-hidden rounded-full bg-zinc-800">
-                        <div className="h-full rounded-full bg-gradient-to-r from-brand-500 to-brand-400" style={{ width: `${pct}%` }} />
+                        <div className="h-full rounded-full bg-gradient-to-r from-gold-500 to-gold-400" style={{ width: `${pct}%` }} />
                       </div>
                       <span className="w-8 shrink-0 text-right text-[10px] text-zinc-500">{pct}%</span>
                     </div>
@@ -76,9 +76,9 @@ export default function SceneAIAnalysis({ scene }) {
                       <div key={m.actor.id} className="flex items-center justify-between rounded-lg bg-zinc-900/60 px-3 py-2">
                         <div className="min-w-0">
                           <p className="truncate text-xs font-medium">{m.actor.name}</p>
-                          <p className="truncate text-[10px] text-zinc-500">{m.reasons.slice(0, 2).join(' · ') || 'Available'}</p>
+                          <p className="truncate text-[10px] text-zinc-500">{m.reasons.slice(0, 2).join(' Â· ') || 'Available'}</p>
                         </div>
-                        <span className="ml-2 shrink-0 text-xs font-semibold text-brand-400">{m.score}%</span>
+                        <span className="ml-2 shrink-0 text-xs font-semibold text-gold-400">{m.score}%</span>
                       </div>
                     ))}
                   </div>
@@ -86,8 +86,8 @@ export default function SceneAIAnalysis({ scene }) {
               )}
 
               <div className="flex items-center gap-2 rounded-md bg-zinc-900/60 p-2 text-[10px] text-zinc-500">
-                <FiZap className="h-3 w-3 text-brand-400" />
-                <span>Analysis runs locally · Results are deterministic per scene data</span>
+                <FiZap className="h-3 w-3 text-gold-400" />
+                <span>Analysis runs locally Â· Results are deterministic per scene data</span>
               </div>
             </CardBody>
           </motion.div>

@@ -10,7 +10,7 @@ const mapCrewMember = (member) => ({
 });
 
 export const fetchCrew = async ({ search, department } = {}) => {
-  let results = (await fetchAllPages('/api/production/crew/')).map(mapCrewMember);
+  let results = (await fetchAllPages('/production/crew/')).map(mapCrewMember);
   if (search) {
     const q = search.toLowerCase();
     results = results.filter((c) => c.name.toLowerCase().includes(q));

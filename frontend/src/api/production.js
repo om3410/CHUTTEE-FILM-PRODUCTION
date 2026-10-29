@@ -73,7 +73,7 @@ const mapFilmAsset = (asset) => ({
 });
 
 export const fetchCast = async () => {
-  return (await fetchAllPages('/api/production/cast/')).map(mapCastMember);
+  return (await fetchAllPages('/production/cast/')).map(mapCastMember);
 };
 
 export const createCastMember = async ({ name, character, age, categories }) => {
@@ -95,7 +95,7 @@ export const deleteCastMember = async (id) => {
 };
 
 export const fetchScenes = async () => {
-  return (await fetchAllPages('/api/production/scenes/')).map(mapScene);
+  return (await fetchAllPages('/production/scenes/')).map(mapScene);
 };
 
 export const createShootDay = async ({ projectId, shootDate, dayNumber, location }) => {
@@ -177,7 +177,7 @@ export const updateSceneStatus = async (scene, status) => {
 };
 
 export const fetchBudgetTransactions = async () => {
-  return (await fetchAllPages('/api/production/budget/')).map(mapTransaction);
+  return (await fetchAllPages('/production/budget/')).map(mapTransaction);
 };
 
 export const createBudgetTransaction = async ({ description, category, amount, date }) => {
@@ -201,7 +201,7 @@ export const updateBudgetTransaction = async ({ id, description, category, amoun
 };
 
 export const fetchEquipment = async () => {
-  return (await fetchAllPages('/api/production/equipment/')).map(mapEquipment);
+  return (await fetchAllPages('/production/equipment/')).map(mapEquipment);
 };
 
 export const createEquipment = async ({ name, category, serial }) => {
@@ -216,7 +216,7 @@ export const createEquipment = async ({ name, category, serial }) => {
 };
 
 export const fetchFilmAssets = async () => {
-  return (await fetchAllPages('/api/production/film-assets/')).map(mapFilmAsset);
+  return (await fetchAllPages('/production/film-assets/')).map(mapFilmAsset);
 };
 
 export const createFilmAsset = async ({ title, category, image }) => {

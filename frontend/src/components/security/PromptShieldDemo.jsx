@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { FiShield, FiAlertTriangle, FiCheckCircle } from 'react-icons/fi';
 import { Card, CardHeader, CardBody } from '../ui/Card';
 import Button from '../ui/Button';
@@ -28,7 +28,7 @@ export default function PromptShieldDemo() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           rows={4}
-          className="w-full resize-none rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2.5 font-mono text-xs text-zinc-100 outline-none focus:border-brand-500"
+          className="w-full resize-none rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2.5 font-mono text-xs text-zinc-100 outline-none focus:border-gold-500"
           aria-label="Prompt to test for injection"
         />
         <div className="flex flex-wrap gap-2">
@@ -36,7 +36,7 @@ export default function PromptShieldDemo() {
             <button
               key={i}
               onClick={() => setInput(ex)}
-              className="rounded-full border border-zinc-800 bg-zinc-900 px-3 py-1 text-xs text-zinc-400 hover:border-brand-500/50 hover:text-brand-400"
+              className="rounded-full border border-zinc-800 bg-zinc-900 px-3 py-1 text-xs text-zinc-400 hover:border-gold-500/50 hover:text-gold-400"
             >
               Try example {i + 1}
             </button>
@@ -55,7 +55,7 @@ export default function PromptShieldDemo() {
             </div>
             {result.matches.length > 0 && (
               <ul className="space-y-1 text-xs text-red-400">
-                {result.matches.map((m, i) => <li key={i}>• {m.pattern}</li>)}
+                {result.matches.map((m, i) => <li key={i}>â€¢ {m.pattern}</li>)}
               </ul>
             )}
           </div>

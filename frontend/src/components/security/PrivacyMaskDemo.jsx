@@ -1,11 +1,11 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { FiLock, FiRefreshCw } from 'react-icons/fi';
 import { Card, CardHeader, CardBody } from '../ui/Card';
 import Button from '../ui/Button';
 import Badge from '../ui/Badge';
 import { mask } from '../../security/privacyMask';
 
-// ⬇️ REPLACE THESE WITH YOUR REAL INFO IF YOU WANT THE DEMO TO SHOW THEM
+// â¬‡ï¸ REPLACE THESE WITH YOUR REAL INFO IF YOU WANT THE DEMO TO SHOW THEM
 const MY_EMAIL = 'omrewaskar4@gmail.com';
 const MY_PHONE = '+91 74101 14971';
 
@@ -22,7 +22,7 @@ const EXAMPLES = [
   },
   {
     label: 'Aadhaar + PAN',
-    text: 'Aadhaar: 1234 5678 9012 · PAN: ABCDE1234F',
+    text: 'Aadhaar: 1234 5678 9012 Â· PAN: ABCDE1234F',
   },
   {
     label: 'IP + URL token',
@@ -47,7 +47,7 @@ export default function PrivacyMaskDemo() {
 
   return (
     <Card>
-      <CardHeader title="PrivacyMask Demo" subtitle="Real PII redaction — edit anything below" icon={FiLock} />
+      <CardHeader title="PrivacyMask Demo" subtitle="Real PII redaction â€” edit anything below" icon={FiLock} />
       <CardBody className="space-y-4">
         {/* Quick-fill examples */}
         <div className="flex flex-wrap gap-2">
@@ -58,7 +58,7 @@ export default function PrivacyMaskDemo() {
                 setInput(ex.text);
                 setResult(null);
               }}
-              className="rounded-full border border-zinc-800 bg-zinc-900 px-3 py-1 text-xs text-zinc-400 hover:border-brand-500/50 hover:text-brand-400"
+              className="rounded-full border border-zinc-800 bg-zinc-900 px-3 py-1 text-xs text-zinc-400 hover:border-gold-500/50 hover:text-gold-400"
             >
               {ex.label}
             </button>
@@ -75,9 +75,9 @@ export default function PrivacyMaskDemo() {
             setResult(null);
           }}
           rows={4}
-          className="w-full resize-none rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2.5 font-mono text-xs text-zinc-100 outline-none focus:border-brand-500"
+          className="w-full resize-none rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2.5 font-mono text-xs text-zinc-100 outline-none focus:border-gold-500"
           aria-label="Text to redact PII from"
-          placeholder="Type or paste any text with emails, phones, cards, or other PII…"
+          placeholder="Type or paste any text with emails, phones, cards, or other PIIâ€¦"
         />
 
         <div className="flex flex-wrap gap-2">
@@ -130,7 +130,7 @@ export default function PrivacyMaskDemo() {
               </>
             ) : (
               <p className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-3 text-xs text-emerald-400">
-                ✓ No PII detected in this input
+                âœ“ No PII detected in this input
               </p>
             )}
           </div>

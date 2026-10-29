@@ -41,11 +41,9 @@ export function useAIChat() {
         { id: Date.now() + 2, role: 'assistant', text: 'Sorry, I hit an error. Try again?', timestamp: new Date(), error: true },
       ]);
     } finally {
-      setLoading();
+      setThinking(false);
     }
   }, []);
-
-  const setLoading = () => setThinking(false);
 
   const clear = useCallback(() => {
     setMessages([{ id: 'welcome', role: 'assistant', text: 'Chat cleared. What would you like to know?', timestamp: new Date() }]);

@@ -44,7 +44,7 @@ export default function Security() {
   ];
 
   const signals = [
-    { label: 'Audit events',     value: events.length,           note: 'Across all users',                             color: 'text-brand-400' },
+    { label: 'Audit events',     value: events.length,           note: 'Across all users',                             color: 'text-gold-400' },
     { label: 'Active anomalies', value: anomalyCount,            note: anomalyCount ? 'Needs review' : 'All clear',    color: anomalyCount ? 'text-red-400' : 'text-emerald-400' },
     { label: 'Login successes',  value: threat?.successes || 0,  note: 'Recent window',                                color: 'text-emerald-400' },
     { label: 'Risk score',       value: `${riskScore}%`,         note: riskScore > 60 ? 'Elevated' : 'Normal',         color: riskScore > 60 ? 'text-amber-400' : 'text-emerald-400' },

@@ -27,8 +27,8 @@ export default function ProductionWiki() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center gap-3">
-        <div className="rounded-xl bg-brand-500/15 p-3">
-          <FiBookOpen className="h-6 w-6 text-brand-400" />
+        <div className="rounded-xl bg-gold-500/15 p-3">
+          <FiBookOpen className="h-6 w-6 text-gold-400" />
         </div>
         <div>
           <h1 className="text-2xl font-bold">Production Wiki</h1>
@@ -49,7 +49,7 @@ export default function ProductionWiki() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="e.g., What is the shooting schedule for week 3?"
-                className="w-full rounded-lg border border-zinc-700 bg-zinc-900 py-3 pl-10 pr-4 text-sm outline-none focus:border-brand-500"
+                className="w-full rounded-lg border border-zinc-700 bg-zinc-900 py-3 pl-10 pr-4 text-sm outline-none focus:border-gold-500"
                 aria-label="Ask the production wiki"
                 disabled={loading}
               />
@@ -62,7 +62,7 @@ export default function ProductionWiki() {
           </form>
 
           {result && (
-            <div className={`mt-4 rounded-lg border p-4 ${result.ok ? 'border-brand-500/30 bg-brand-500/5' : 'border-red-500/30 bg-red-500/5'}`}>
+            <div className={`mt-4 rounded-lg border p-4 ${result.ok ? 'border-gold-500/30 bg-gold-500/5' : 'border-red-500/30 bg-red-500/5'}`}>
               {result.ok ? (
                 <pre className="whitespace-pre-wrap text-sm text-zinc-200">{result.output}</pre>
               ) : (

@@ -44,7 +44,7 @@ export default function ResetPassword() {
           </Button>
         </form>
         <p className="mt-6 text-center text-sm text-zinc-500">
-          <Link to="/login" className="font-medium text-brand-400 hover:underline">Back to sign in</Link>
+          <Link to="/login" className="font-medium text-gold-400 hover:underline">Back to sign in</Link>
         </p>
       </motion.div>
     </div>

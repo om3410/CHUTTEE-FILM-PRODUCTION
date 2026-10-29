@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from 'framer-motion';
+﻿import { motion, AnimatePresence } from 'framer-motion';
 import { FiTrash2, FiX, FiDownload } from 'react-icons/fi';
 import Button from './ui/Button';
 
@@ -10,7 +10,7 @@ export default function BulkActionsBar({ count, onClear, onDelete, onExport }) {
           initial={{ y: 80, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 80, opacity: 0 }}
           className="fixed bottom-6 left-1/2 z-30 flex -translate-x-1/2 items-center gap-3 rounded-xl border border-zinc-700 bg-zinc-900/95 px-4 py-3 shadow-2xl backdrop-blur"
         >
-          <span className="text-sm text-zinc-300"><span className="font-semibold text-brand-400">{count}</span> selected</span>
+          <span className="text-sm text-zinc-300"><span className="font-semibold text-gold-400">{count}</span> selected</span>
           <div className="h-5 w-px bg-zinc-700" />
           {onExport && <Button size="sm" variant="ghost" icon={FiDownload} onClick={onExport}>Export</Button>}
           {onDelete && <Button size="sm" variant="ghost" className="text-red-400 hover:bg-red-500/10" icon={FiTrash2} onClick={onDelete}>Delete</Button>}

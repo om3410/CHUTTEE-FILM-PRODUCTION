@@ -45,11 +45,11 @@ export default function Dashboard() {
   useEffect(() => {
     let cancelled = false;
     Promise.all([
-      fetchAllPages('/api/production/projects/'),
+      fetchAllPages('/production/projects/'),
       fetchCrew(),
       fetchCast(),
       fetchScenes(),
-      fetchAllPages('/api/production/shoot-days/'),
+      fetchAllPages('/production/shoot-days/'),
     ])
       .then(([projects, crew, cast, scenes, shootDays]) => {
         if (cancelled) return;

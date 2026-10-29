@@ -52,7 +52,7 @@ export default function Login({ requiredRole = null }) {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-zinc-950 px-4">
-      <div className="pointer-events-none absolute -top-32 left-1/2 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-brand-500/10 blur-3xl" />
+      <div className="pointer-events-none absolute -top-32 left-1/2 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-gold-500/10 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-40 right-0 h-[400px] w-[400px] rounded-full bg-purple-500/10 blur-3xl" />
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="relative w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-900/70 p-8 backdrop-blur-xl">
@@ -77,19 +77,19 @@ export default function Login({ requiredRole = null }) {
         </div>
         {!requiredRole && (
           <p className="mt-4 text-center text-sm text-zinc-500">
-            New here? <Link to="/register" className="font-medium text-brand-400 hover:underline">Create an account</Link>
+            New here? <Link to="/register" className="font-medium text-gold-400 hover:underline">Create an account</Link>
           </p>
         )}
         <p className="mt-3 text-center text-sm text-zinc-500">
-          Forgot your username or password? <Link to="/account-recovery" className="font-medium text-brand-400 hover:underline">Recover account</Link>
+          Forgot your username or password? <Link to="/account-recovery" className="font-medium text-gold-400 hover:underline">Recover account</Link>
         </p>
         <p className="mt-4 text-center text-sm text-zinc-500">
           {requiredRole === 'CREW' ? (
-            <><Link to="/admin-login" className="font-medium text-brand-400 hover:underline">Superuser sign in</Link> · <Link to="/login" className="font-medium text-brand-400 hover:underline">General sign in</Link></>
+            <><Link to="/admin-login" className="font-medium text-gold-400 hover:underline">Superuser sign in</Link> · <Link to="/login" className="font-medium text-gold-400 hover:underline">General sign in</Link></>
           ) : requiredRole === 'SUPERUSER' ? (
-            <><Link to="/crew-login" className="font-medium text-brand-400 hover:underline">Crew sign in</Link> · <Link to="/login" className="font-medium text-brand-400 hover:underline">General sign in</Link></>
+            <><Link to="/crew-login" className="font-medium text-gold-400 hover:underline">Crew sign in</Link> · <Link to="/login" className="font-medium text-gold-400 hover:underline">General sign in</Link></>
           ) : (
-            <><Link to="/crew-login" className="font-medium text-brand-400 hover:underline">Crew sign in</Link> · <Link to="/admin-login" className="font-medium text-brand-400 hover:underline">Superuser sign in</Link></>
+            <><Link to="/crew-login" className="font-medium text-gold-400 hover:underline">Crew sign in</Link> · <Link to="/admin-login" className="font-medium text-gold-400 hover:underline">Superuser sign in</Link></>
           )}
         </p>
       </motion.div>

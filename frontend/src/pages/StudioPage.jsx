@@ -99,17 +99,16 @@ export default function StudioPage() {
     /* BoxOfficeOracle intentionally has no route — the comps-based
        prediction endpoint does not exist in the backend yet. */
     const ROUTES = {
-      sceneweaver:    '/api/ml/script/summarize/',
-      characterforge: '/api/ml/script/summarize/',
-      scriptcoverage: '/api/ml/script/summarize/',
-      loglinelab:     '/api/ml/script/summarize/',
-      scriptqa:       '/api/ml/query/sql/',
-      budgetbot:      '/api/ml/forecast/budget/',
-      riskradar:      '/api/ml/ai/risk-forecast/',
-      castmatch:      '/api/ml/ai/cast-recommendation/',
-      dialoguedoctor: '/api/ml/script/dialogue-rewrite/',
-      trailercraft:   '/api/ml/script/summarize/',
-      /* boxofficeoracle: no route — feature is a P2 placeholder */
+      sceneweaver:    '/ml/script/summarize/',
+      characterforge: '/ml/script/summarize/',
+      scriptcoverage: '/ml/script/summarize/',
+      loglinelab:     '/ml/script/summarize/',
+      scriptqa:       '/ml/query/sql/',
+      budgetbot:      '/ml/forecast/budget/',
+      riskradar:      '/ml/ai/risk-forecast/',
+      castmatch:      '/ml/ai/cast-recommendation/',
+      dialoguedoctor: '/ml/script/dialogue-rewrite/',
+      trailercraft:   '/ml/script/summarize/',
     };
     const route = ROUTES[feature.id];
     if (!route) {

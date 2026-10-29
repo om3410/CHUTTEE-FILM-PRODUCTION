@@ -45,7 +45,7 @@ export default function Security() {
   ];
 
   const signals = [
-    { label: 'Audit events',     value: events.length,                     note: 'Across all users',             color: 'text-brand-400' },
+    { label: 'Audit events',     value: events.length,                     note: 'Across all users',             color: 'text-gold-400' },
     { label: 'Active anomalies', value: anomalyCount,                      note: anomalyCount ? 'Needs review' : 'All clear', color: anomalyCount ? 'text-red-400' : 'text-emerald-400' },
     { label: 'Login successes',  value: threat?.successes || 0,            note: 'Recent window',                color: 'text-emerald-400' },
     { label: 'Risk score',       value: `${riskScore}%`,                   note: riskScore > 60 ? 'Elevated' : 'Normal', color: riskScore > 60 ? 'text-amber-400' : 'text-emerald-400' },
@@ -62,7 +62,6 @@ export default function Security() {
         slogan="A production is only as safe as the weakest handoff. Every crew member, every vendor, every AI call is part of the trust perimeter — and CHUTTEE holds that perimeter with intent."
       />
 
-      {/* Live signals strip */}
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {signals.map((s) => (
           <div key={s.label} className="premium-card p-6">
@@ -77,7 +76,6 @@ export default function Security() {
         "Security is not a lock on the door. It is the set of habits that keep the door locked even when everyone is tired and moving fast."
       </Quote>
 
-      {/* Four pillars */}
       <section>
         <div className="max-w-3xl">
           <p className="text-[11px] uppercase tracking-[0.25em] text-gold-400">The Four Pillars</p>
@@ -105,7 +103,6 @@ export default function Security() {
         </div>
       </section>
 
-      {/* Provider allowlist */}
       <section>
         <div className="max-w-3xl">
           <p className="text-[11px] uppercase tracking-[0.25em] text-gold-400">Provider Allowlist</p>
@@ -149,7 +146,6 @@ export default function Security() {
         "The safest data is the data that never travels. The second safest is the data that travels only where it must — and returns without a trail."
       </Quote>
 
-      {/* Live anomalies */}
       <section>
         <div className="max-w-3xl">
           <p className="text-[11px] uppercase tracking-[0.25em] text-gold-400">Threat Signals</p>
@@ -185,7 +181,6 @@ export default function Security() {
         </div>
       </section>
 
-      {/* Security Center CTA */}
       <section className="premium-card relative overflow-hidden p-8 sm:p-10">
         <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-gold-500/10 blur-3xl" />
         <div className="relative grid gap-8 lg:grid-cols-3">
@@ -230,7 +225,6 @@ export default function Security() {
         </div>
       </section>
 
-      {/* Quick actions */}
       <section>
         <div className="max-w-3xl">
           <p className="text-[11px] uppercase tracking-[0.25em] text-gold-400">Next Steps</p>
@@ -261,7 +255,6 @@ export default function Security() {
         </div>
       </section>
 
-      {/* Contact */}
       <section className="premium-card relative overflow-hidden p-8 sm:p-10">
         <div className="relative grid gap-8 lg:grid-cols-3">
           <div>
@@ -300,10 +293,6 @@ export default function Security() {
     </div>
   );
 }
-
-/* ────────────────────────────────────────────────────────────────
-   Helper components
-   ──────────────────────────────────────────────────────────────── */
 
 function Quote({ children }) {
   return (

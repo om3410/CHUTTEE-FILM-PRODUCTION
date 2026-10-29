@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+﻿import { useNavigate } from 'react-router-dom';
 import { FiCamera, FiDollarSign, FiImage, FiUsers, FiVideo } from 'react-icons/fi';
 import Modal from './ui/Modal';
 import Button from './ui/Button';
@@ -28,7 +28,7 @@ export default function QuickCreate({ open, onClose }) {
               onClose();
             }}
           >
-            <Icon className="h-5 w-5 shrink-0 text-brand-400" />
+            <Icon className="h-5 w-5 shrink-0 text-gold-400" />
             <span>
               <span className="block text-sm font-medium">{label}</span>
               <span className="mt-1 block text-xs font-normal text-zinc-500">{description}</span>

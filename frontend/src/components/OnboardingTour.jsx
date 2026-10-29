@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiArrowRight, FiX, FiHome, FiUsers, FiVideo, FiDollarSign } from 'react-icons/fi';
 import Button from './ui/Button';
@@ -23,9 +23,9 @@ export default function OnboardingTour({ open, onClose, onComplete }) {
           <motion.div initial={{ scale: 0.95, y: 12 }} animate={{ scale: 1, y: 0 }} className="w-full max-w-md overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 p-6 shadow-2xl">
             <div className="flex items-start justify-between">
               <div className="flex items-start gap-3">
-                <div className="rounded-lg bg-brand-500/15 p-2.5 text-brand-400"><Icon className="h-5 w-5" /></div>
+                <div className="rounded-lg bg-gold-500/15 p-2.5 text-gold-400"><Icon className="h-5 w-5" /></div>
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-brand-400">Step {step + 1} of {STEPS.length}</p>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gold-400">Step {step + 1} of {STEPS.length}</p>
                   <h2 className="mt-1 text-xl font-bold text-zinc-100">{s.title}</h2>
                 </div>
               </div>
@@ -35,7 +35,7 @@ export default function OnboardingTour({ open, onClose, onComplete }) {
             <div className="mt-6 flex items-center justify-between">
               <div className="flex gap-1.5">
                 {STEPS.map((_, i) => (
-                  <span key={i} className={`h-1.5 rounded-full transition-all ${i === step ? 'w-6 bg-brand-500' : 'w-1.5 bg-zinc-700'}`} />
+                  <span key={i} className={`h-1.5 rounded-full transition-all ${i === step ? 'w-6 bg-gold-500' : 'w-1.5 bg-zinc-700'}`} />
                 ))}
               </div>
               <Button variant="primary" iconRight={FiArrowRight} onClick={() => { if (isLast) onComplete?.() || onClose(); else setStep((n) => n + 1); }}>
