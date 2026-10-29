@@ -1,4 +1,4 @@
-import os
+﻿import os
 from datetime import timedelta
 
 import dj_database_url
@@ -94,7 +94,7 @@ MIDDLEWARE = [
 # AUTH BACKENDS
 # ============================================================
 AUTHENTICATION_BACKENDS = [
-    "axes.backends.AxesStandaloneBackend",
+    "axes.backends.AxesBackend",
     "django.contrib.auth.backends.ModelBackend",
 ]
 
