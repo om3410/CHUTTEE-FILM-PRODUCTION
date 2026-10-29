@@ -5,6 +5,17 @@ const BACKEND = 'http://localhost:8000';
 
 export default defineConfig({
   plugins: [react()],
+  build: {
+    chunkSizeWarningLimit: 800,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'ui-vendor': ['framer-motion', 'react-icons'],
+        },
+      },
+    },
+  },
   server: {
     port: 5173,
     proxy: {
@@ -25,3 +36,4 @@ export default defineConfig({
     },
   },
 });
+

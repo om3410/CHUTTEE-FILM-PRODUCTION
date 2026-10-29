@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import {
   FiPlus, FiSearch, FiVideo, FiEye, FiEdit2, FiX, FiArrowRight,
   FiFilm, FiUsers, FiCamera, FiMic, FiMusic, FiZap, FiMonitor,
-  FiCheckCircle, FiHelpCircle, FiInbox, FiStar, FiClipboard,
+  FiCheckCircle, FiHelpCircle, FiInbox, FiStar, FiClipboard, FiTrash2,
 } from 'react-icons/fi';
 import { SCENE_STATUSES } from '../utils/constants';
 import Modal from '../components/ui/Modal';
@@ -20,10 +20,12 @@ import SentimentBadge from '../components/ai/SentimentBadge';
 import PageHero from '../components/ui/PageHero';
 import { analyzeSentiment } from '../ai/sentiment';
 import { useToast } from '../context/ToastContext';
-import { createScene, fetchScenes, updateScene, updateSceneStatus } from '../api/production';
+import {
+  createScene, deleteScene, fetchScenes, updateScene, updateSceneStatus,
+} from '../api/production';
 import { getApiErrorMessage } from '../api/auth';
 
-/* ─────────── The 8-stage production pipeline ─────────── */
+/* ——————————— The 8-stage production pipeline ——————————— */
 const STAGE_ROUTES = [
   { number: '01', icon: FiClipboard, eyebrow: 'Development',      title: 'Script & Concept',      description: 'Break the screenplay into scenes. Track script versions, concept notes and narrative flow.', filter: 'Not Started' },
   { number: '02', icon: FiUsers,     eyebrow: 'Pre-Production',   title: 'Planning & Casting',    description: 'Assign crew, cast and locations. Plan shoot days, availability and scene order.',           filter: 'In Progress' },
@@ -35,7 +37,7 @@ const STAGE_ROUTES = [
   { number: '08', icon: FiCheckCircle, eyebrow: 'Release',        title: 'On Screen',             description: 'Mark scenes as released. Track final running order and audience-facing versions.',            filter: 'Locked' },
 ];
 
-/* ─────────── Popular status filter chips ─────────── */
+/* ——————————— Popular status filter chips ——————————— */
 const POPULAR_STATUSES = ['Not Started', 'In Progress', 'Ready', 'Shot', 'Cut', 'Locked'];
 
 export default function Scenes() {
@@ -54,6 +56,10 @@ export default function Scenes() {
   const [editingScene, setEditingScene] = useState(null);
   const [editForm, setEditForm] = useState({ title: '', location: '', timeOfDay: '', status: '' });
   const [newScene, setNewScene] = useState({ title: '', location: '', timeOfDay: '' });
+
+  /* NEW: delete confirmation state */
+  const [deletingScene, setDeletingScene] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (location.state?.openAdd) setAddOpen(true);
@@ -185,6 +191,30 @@ export default function Scenes() {
       toast(getApiErrorMessage(error, 'Could not update scene.'), 'error');
     } finally {
       setSaving(false);
+    }
+  };
+
+  /* NEW: open the delete-confirm modal */
+  const requestDeleteScene = (scene) => {
+    if (!scene) return;
+    setDeletingScene(scene);
+  };
+
+  /* NEW: perform the actual delete */
+  const confirmDeleteScene = async () => {
+    if (!deletingScene) return;
+    setDeleting(true);
+    try {
+      await deleteScene(deletingScene);
+      setScenes((list) => list.filter((s) => s.id !== deletingScene.id));
+      toast(`Deleted "${deletingScene.title}"`, 'success');
+      if (selectedScene?.id === deletingScene.id) setSelectedScene(null);
+      if (editingScene?.id === deletingScene.id) setEditingScene(null);
+      setDeletingScene(null);
+    } catch (error) {
+      toast(getApiErrorMessage(error, 'Could not delete scene.'), 'error');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -427,7 +457,7 @@ export default function Scenes() {
                   <Card className="p-3 transition-all hover:border-gold-500/40 hover:scale-[1.02]">
                     <div className="flex items-start justify-between gap-2">
                       <p className="text-[10px] uppercase tracking-[0.2em] text-gold-400">#{scene.number}</p>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5">
                         <SentimentBadge sentiment={sentiment.overall} showScore={false} />
                         <button
                           onClick={() => openSceneEdit(scene)}
@@ -436,6 +466,14 @@ export default function Scenes() {
                           className="rounded-lg p-1 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-gold-400"
                         >
                           <FiEdit2 className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          onClick={() => requestDeleteScene(scene)}
+                          title={`Delete ${scene.title}`}
+                          aria-label={`Delete ${scene.title}`}
+                          className="rounded-lg p-1 text-zinc-500 transition-colors hover:bg-red-500/10 hover:text-red-400"
+                        >
+                          <FiTrash2 className="h-3.5 w-3.5" />
                         </button>
                       </div>
                     </div>
@@ -461,7 +499,23 @@ export default function Scenes() {
                 { key: 'location', label: 'Location' },
                 { key: 'timeOfDay', label: 'Time' },
                 { key: 'status', label: 'Status', render: (r) => <Badge variant={r.status === 'Shot' || r.status === 'Cut' ? 'success' : r.status === 'In Progress' ? 'warn' : 'default'}>{r.status}</Badge> },
-                { key: 'actions', label: '', render: (r) => <div className="flex gap-1"><button onClick={() => setSelectedScene(r)} title={`View ${r.title}`} aria-label={`View ${r.title}`} className="rounded-lg p-1.5 text-zinc-500 hover:bg-zinc-800"><FiEye className="h-3.5 w-3.5" /></button><button onClick={() => openSceneEdit(r)} title={`Edit ${r.title}`} aria-label={`Edit ${r.title}`} className="rounded-lg p-1.5 text-zinc-500 hover:bg-zinc-800"><FiEdit2 className="h-3.5 w-3.5" /></button></div> },
+                {
+                  key: 'actions',
+                  label: '',
+                  render: (r) => (
+                    <div className="flex gap-1">
+                      <button onClick={() => setSelectedScene(r)} title={`View ${r.title}`} aria-label={`View ${r.title}`} className="rounded-lg p-1.5 text-zinc-500 hover:bg-zinc-800">
+                        <FiEye className="h-3.5 w-3.5" />
+                      </button>
+                      <button onClick={() => openSceneEdit(r)} title={`Edit ${r.title}`} aria-label={`Edit ${r.title}`} className="rounded-lg p-1.5 text-zinc-500 hover:bg-zinc-800">
+                        <FiEdit2 className="h-3.5 w-3.5" />
+                      </button>
+                      <button onClick={() => requestDeleteScene(r)} title={`Delete ${r.title}`} aria-label={`Delete ${r.title}`} className="rounded-lg p-1.5 text-zinc-500 hover:bg-red-500/10 hover:text-red-400">
+                        <FiTrash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ),
+                },
               ]}
               data={filtered}
             />
@@ -560,7 +614,15 @@ export default function Scenes() {
               <p className="text-zinc-400">Time: {selectedScene.timeOfDay}</p>
               <p className="text-zinc-400">Status: {selectedScene.status}</p>
             </div>
-            <div className="flex justify-end">
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="ghost"
+                icon={FiTrash2}
+                onClick={() => requestDeleteScene(selectedScene)}
+                className="text-red-400 hover:bg-red-500/10 hover:text-red-300"
+              >
+                Delete
+              </Button>
               <Button variant="primary" icon={FiEdit2} onClick={() => openSceneEdit(selectedScene)}>Edit Scene</Button>
             </div>
           </div>
@@ -578,11 +640,61 @@ export default function Scenes() {
               {SCENE_STATUSES.map((status) => <option key={status} value={status}>{status}</option>)}
             </select>
           </label>
-          <div className="flex justify-end gap-2">
-            <Button type="button" variant="ghost" onClick={() => setEditingScene(null)}>Cancel</Button>
-            <Button type="submit" variant="primary" disabled={saving}>{saving ? 'Saving…' : 'Save changes'}</Button>
+          <div className="flex justify-between gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              icon={FiTrash2}
+              onClick={() => requestDeleteScene(editingScene)}
+              className="text-red-400 hover:bg-red-500/10 hover:text-red-300"
+            >
+              Delete
+            </Button>
+            <div className="flex gap-2">
+              <Button type="button" variant="ghost" onClick={() => setEditingScene(null)}>Cancel</Button>
+              <Button type="submit" variant="primary" disabled={saving}>{saving ? 'Saving…' : 'Save changes'}</Button>
+            </div>
           </div>
         </form>
+      </Modal>
+
+      {/* NEW: Delete confirmation modal */}
+      <Modal
+        open={!!deletingScene}
+        onClose={() => !deleting && setDeletingScene(null)}
+        title="Delete Scene"
+        icon={FiTrash2}
+        size="sm"
+      >
+        {deletingScene && (
+          <div className="space-y-4">
+            <p className="text-sm text-zinc-300 leading-relaxed">
+              Are you sure you want to delete <span className="font-semibold text-zinc-100">
+                #{deletingScene.number} {deletingScene.title}
+              </span>? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setDeletingScene(null)}
+                disabled={deleting}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                variant="primary"
+                icon={FiTrash2}
+                onClick={confirmDeleteScene}
+                disabled={deleting}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                {deleting ? 'Deleting…' : 'Delete Scene'}
+              </Button>
+            </div>
+          </div>
+        )}
       </Modal>
     </div>
   );

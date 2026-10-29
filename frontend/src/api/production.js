@@ -91,7 +91,7 @@ export const createCastMember = async ({ name, character, age, categories }) => 
 };
 
 export const deleteCastMember = async (id) => {
-  await api.delete(`/api/production/cast/${id}/`);
+  await api.delete(`/production/cast/${id}/`);
 };
 
 export const fetchScenes = async () => {
@@ -109,7 +109,7 @@ export const createShootDay = async ({ projectId, shootDate, dayNumber, location
 };
 
 export const updateShootDay = async ({ id, projectId, shootDate, dayNumber, location }) => {
-  const { data } = await api.patch(`/api/production/shoot-days/${id}/`, {
+  const { data } = await api.patch(`/production/shoot-days/${id}/`, {
     project: projectId || null,
     shoot_date: shootDate,
     day_number: dayNumber,
@@ -119,11 +119,11 @@ export const updateShootDay = async ({ id, projectId, shootDate, dayNumber, loca
 };
 
 export const deleteShootDay = async (id) => {
-  await api.delete(`/api/production/shoot-days/${id}/`);
+  await api.delete(`/production/shoot-days/${id}/`);
 };
 
 export const updateProjectDeadline = async ({ id, endDate }) => {
-  const { data } = await api.patch(`/api/production/projects/${id}/`, {
+  const { data } = await api.patch(`/production/projects/${id}/`, {
     end_date: endDate,
   });
   return data;
@@ -153,7 +153,7 @@ export const updateScene = async ({ id, number, title, location, timeOfDay, stat
     Shot: 'Completed',
     Cut: 'Ready',
   };
-  const { data } = await api.patch(`/api/production/scenes/${id}/`, {
+  const { data } = await api.patch(`/production/scenes/${id}/`, {
     scene_number: number,
     notes: title,
     location,
@@ -170,7 +170,7 @@ export const updateSceneStatus = async (scene, status) => {
     Shot: 'Completed',
     Cut: 'Ready',
   };
-  const { data } = await api.patch(`/api/production/scenes/${scene.id}/`, {
+  const { data } = await api.patch(`/production/scenes/${scene.id}/`, {
     status: statusMap[status] ?? status,
   });
   return mapScene(data);
@@ -191,7 +191,7 @@ export const createBudgetTransaction = async ({ description, category, amount, d
 };
 
 export const updateBudgetTransaction = async ({ id, description, category, amount, date }) => {
-  const { data } = await api.patch(`/api/production/budget/${id}/`, {
+  const { data } = await api.patch(`/production/budget/${id}/`, {
     description,
     category,
     amount,
@@ -228,4 +228,12 @@ export const createFilmAsset = async ({ title, category, image }) => {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
   return mapFilmAsset(data);
+};
+
+
+
+export const deleteScene = async (scene) => {
+  const sceneId = typeof scene === 'string' ? scene : scene?.id;
+  if (!sceneId) throw new Error('deleteScene: scene id is required.');
+  await api.delete(`/production/scenes/${sceneId}/`);
 };
