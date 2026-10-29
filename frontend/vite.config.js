@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+﻿import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 const BACKEND = 'http://localhost:8000';
@@ -19,22 +19,24 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      // Proxy ONLY trailing-slash paths to the backend (these are API endpoints)
-      '^/login/$':           BACKEND,
-      '^/refresh/$':         BACKEND,
-      '^/verify/$':          BACKEND,
-      '^/logout/$':          BACKEND,
-      '^/logout-all/$':      BACKEND,
-      '^/sessions(/.*)?$':   BACKEND,
-      '^/me(/.*)?$':         BACKEND,
-      '^/register-api/$':    BACKEND,
-      '^/account-recovery/$':BACKEND,
-      '^/password-reset/':   BACKEND,
-      '^/session-login/$':   BACKEND,
-      '^/session-logout/$':  BACKEND,
-      '^/api/':              BACKEND,
+      // Proxy ALL /api requests to Django (crew, cast, scenes, etc.)
+      '/api': {
+        target: BACKEND,
+        changeOrigin: true,
+      },
+      // JWT / auth endpoints served at root (not under /api)
+      '^/login/$':            BACKEND,
+      '^/refresh/$':          BACKEND,
+      '^/verify/$':           BACKEND,
+      '^/logout/$':           BACKEND,
+      '^/logout-all/$':       BACKEND,
+      '^/sessions(/.*)?$':    BACKEND,
+      '^/me(/.*)?$':          BACKEND,
+      '^/register-api/$':     BACKEND,
+      '^/account-recovery/$': BACKEND,
+      '^/password-reset/':    BACKEND,
+      '^/session-login/$':    BACKEND,
+      '^/session-logout/$':   BACKEND,
     },
   },
 });
-
-
