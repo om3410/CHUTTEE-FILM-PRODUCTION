@@ -22,9 +22,9 @@ const CONTACT = {
   phoneRaw: '+917410114971',
 };
 
-/* ═══════════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    CONSTANTS
-   ═══════════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 const STATUS_ROUTES = [
   { number: '01', icon: FiFileText,      eyebrow: 'Not Sent',   title: 'Drafts',        description: 'Invoices created but not yet sent to the client.',           key: 'draft' },
@@ -47,7 +47,7 @@ const STATUS_STYLES = {
   overdue: 'bg-red-500/15 text-red-300 border-red-500/40',
 };
 
-/* ─────── Seed invoices ─────── */
+/* ——————— Seed invoices ——————— */
 const SEED_INVOICES = [
   { id: 'INV-001', client: 'Monsoon Letters LLP',  clientEmail: 'accounts@monsoonletters.in', project: 'Monsoon Letters', amount: 450000, gst: 81000,  total: 531000, status: 'paid',    date: '2026-01-12', dueDate: '2026-02-12', notes: 'Post-production milestone 1' },
   { id: 'INV-002', client: 'Salt Road Pictures',   clientEmail: 'finance@saltroad.com',       project: 'The Salt Road',   amount: 820000, gst: 147600, total: 967600, status: 'sent',    date: '2026-09-20', dueDate: '2026-10-20', notes: 'Principal photography wrap' },
@@ -59,9 +59,9 @@ const SEED_INVOICES = [
 
 const LS_KEY = 'chuttee.invoices';
 
-/* ═══════════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    MAIN COMPONENT
-   ═══════════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 export default function Billing() {
   const navigate = useNavigate();
@@ -94,7 +94,7 @@ export default function Billing() {
     try { localStorage.setItem(LS_KEY, JSON.stringify(invoices)); } catch {}
   }, [invoices]);
 
-  /* ─────────── Derived ─────────── */
+  /* ——————————— Derived ——————————— */
   const counts = useMemo(() => {
     const c = { all: invoices.length, draft: 0, sent: 0, paid: 0, overdue: 0 };
     invoices.forEach((inv) => { c[inv.status] = (c[inv.status] || 0) + 1; });
@@ -129,7 +129,7 @@ export default function Billing() {
 
   const countByStatus = (status) => invoices.filter((i) => i.status === status).length;
 
-  /* ─────────── Actions ─────────── */
+  /* ——————————— Actions ——————————— */
   const openCompose = (invoice = null) => {
     if (invoice) {
       setDraft({ ...invoice, amount: String(invoice.amount), gst: String(invoice.gst) });
@@ -258,7 +258,7 @@ export default function Billing() {
     toast('Invoice ledger exported as CSV', 'success');
   };
 
-  /* ─────────── Bulk actions ─────────── */
+  /* ——————————— Bulk actions ——————————— */
   const toggleSelect = (id) => setSelectedIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
   const clearSelection = () => setSelectedIds([]);
   const bulkMarkPaid = () => {
@@ -638,7 +638,7 @@ export default function Billing() {
         </div>
       </section>
 
-      {/* ═══════════ MODALS ═══════════ */}
+      {/* â•â•â•â•â•â•â•â•â•â•â• MODALS â•â•â•â•â•â•â•â•â•â•â• */}
 
       {/* Compose / Edit */}
       <Modal open={composeOpen} onClose={() => setComposeOpen(false)} title={invoices.find((i) => i.id === draft.id) ? 'Edit Invoice' : 'New Invoice'} icon={FiFileText} size="md">
@@ -753,9 +753,9 @@ export default function Billing() {
   );
 }
 
-/* ═══════════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    HELPERS
-   ═══════════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 function StatCard({ icon: Icon, value, label, note, isActive, onClick }) {
   return (

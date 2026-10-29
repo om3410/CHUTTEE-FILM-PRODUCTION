@@ -1,4 +1,4 @@
-﻿import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiMessageSquare, FiX, FiSend, FiCpu, FiMinimize2, FiMaximize2, FiTrash2, FiCopy, FiThumbsUp, FiThumbsDown, FiZap, FiUser } from 'react-icons/fi';
 import { useAIChat } from '../../hooks/useAIChat';
@@ -64,7 +64,7 @@ export default function AIChatWidget() {
                 </div>
                 <div>
                   <p className="text-sm font-semibold">CHUTTEE AI</p>
-                  <p className="text-[10px] text-zinc-500">{thinking ? 'Thinkingâ€¦' : 'Online Â· Production copilot'}</p>
+                  <p className="text-[10px] text-zinc-500">{thinking ? 'Thinking…' : 'Online · Production copilot'}</p>
                 </div>
               </div>
               <div className="flex items-center gap-1">
@@ -112,14 +112,14 @@ export default function AIChatWidget() {
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(e); } }}
                   rows={1}
-                  placeholder="Ask about budget, scenes, cast, risksâ€¦"
+                  placeholder="Ask about budget, scenes, cast, risks…"
                   className="max-h-32 flex-1 resize-none rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2.5 text-sm outline-none placeholder:text-zinc-600 focus:border-gold-500"
                 />
                 <button type="submit" title="Send message" aria-label="Send message" disabled={!input.trim() || thinking} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gold-500 text-white transition-colors hover:bg-gold-400 disabled:opacity-40">
                   <FiSend className="h-4 w-4" />
                 </button>
               </div>
-              <p className="mt-1.5 text-[10px] text-zinc-600">Runs entirely in your browser Â· No data leaves your device</p>
+              <p className="mt-1.5 text-[10px] text-zinc-600">Runs entirely in your browser · No data leaves your device</p>
             </form>
           </motion.div>
         )}
@@ -184,7 +184,7 @@ function InlineWidget({ widget }) {
           <span className="text-xs text-zinc-400">days ({weeksLeft} weeks)</span>
         </div>
         <div className={`mt-1 text-[10px] ${status === 'critical' ? 'text-red-400' : status === 'warning' ? 'text-amber-400' : 'text-emerald-400'}`}>
-          {status === 'critical' ? 'âš ï¸ Critical â€” under 2 weeks' : status === 'warning' ? 'âš ï¸ Watch closely' : 'âœ“ Healthy'}
+          {status === 'critical' ? 'âš ï¸ Critical — under 2 weeks' : status === 'warning' ? 'âš ï¸ Watch closely' : '✓ Healthy'}
         </div>
       </div>
     );
@@ -228,7 +228,7 @@ function InlineWidget({ widget }) {
               <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gold-500/15 text-[10px] font-bold text-gold-400">{m.actor.name.charAt(0)}</div>
               <div className="min-w-0">
                 <p className="truncate text-xs font-medium">{m.actor.name}</p>
-                <p className="truncate text-[10px] text-zinc-500">{m.reasons.slice(0, 2).join(' Â· ')}</p>
+                <p className="truncate text-[10px] text-zinc-500">{m.reasons.slice(0, 2).join(' · ')}</p>
               </div>
             </div>
             <span className="ml-2 shrink-0 text-xs font-semibold text-gold-400">{m.score}%</span>

@@ -55,7 +55,7 @@ export default function PromptShieldDemo() {
             </div>
             {result.matches.length > 0 && (
               <ul className="space-y-1 text-xs text-red-400">
-                {result.matches.map((m, i) => <li key={i}>â€¢ {m.pattern}</li>)}
+                {result.matches.map((m, i) => <li key={i}>• {m.pattern}</li>)}
               </ul>
             )}
           </div>

@@ -30,11 +30,11 @@ const RESPONSES = {
     `_Assumption: 25 shoot days, 2 locations, 1 VFX-heavy sequence._`,
 
   schedule: () => `**Optimised Shooting Schedule**\n\n` +
-    `• **Day 1–5:** Fort Kochi (exteriors, golden hour)\n` +
-    `• **Day 6–12:** Marine Drive (dock scenes, night shoots)\n` +
-    `• **Day 13–18:** Studio A (interiors)\n` +
-    `• **Day 19–22:** Thrissur (temple, sunrise)\n` +
-    `• **Day 23–25:** Pickups + reshoots\n\n` +
+    `• **Day 1—5:** Fort Kochi (exteriors, golden hour)\n` +
+    `• **Day 6—12:** Marine Drive (dock scenes, night shoots)\n` +
+    `• **Day 13—18:** Studio A (interiors)\n` +
+    `• **Day 19—22:** Thrissur (temple, sunrise)\n` +
+    `• **Day 23—25:** Pickups + reshoots\n\n` +
     `_Weather buffer built into Day 11 and Day 20._`,
 
   tagline: () => `**Tagline Options**\n\n` +

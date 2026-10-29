@@ -17,7 +17,7 @@ import Input from '../components/ui/Input';
 import PageHero from '../components/ui/PageHero';
 import { useToast } from '../context/ToastContext';
 
-/* ─────────── Message categories ─────────── */
+/* ——————————— Message categories ——————————— */
 const MESSAGE_ROUTES = [
   { number: '01', icon: FiMail,          eyebrow: 'Direct',     title: 'Direct Messages',    description: 'One-to-one messages from crew, cast and collaborators.',         types: ['direct'] },
   { number: '02', icon: FiMessageSquare, eyebrow: 'Notes',      title: 'Production Notes',   description: 'Scene notes, script feedback and continuity discussions.',       types: ['note'] },
@@ -80,7 +80,7 @@ export default function Inbox() {
     return () => clearTimeout(timer);
   }, []);
 
-  /* ─────────── Derived lists ─────────── */
+  /* ——————————— Derived lists ——————————— */
   const inboxMessages = useMemo(() => messages.filter((m) => !m.archived), [messages]);
   const archivedMessages = useMemo(() => messages.filter((m) => m.archived), [messages]);
   const baseList = view === 'archived' ? archivedMessages : inboxMessages;
@@ -127,7 +127,7 @@ export default function Inbox() {
 
   const countByTypes = (types) => inboxMessages.filter((m) => types.includes(m.type)).length;
 
-  /* ─────────── Actions ─────────── */
+  /* ——————————— Actions ——————————— */
   const openMessage = (m) => {
     const updated = m.unread ? { ...m, unread: false } : m;
     setActive(updated);
@@ -599,7 +599,7 @@ export default function Inbox() {
                         onClick={() => setMobileDetail(false)}
                         className="inline-flex items-center gap-1 text-sm text-zinc-400 hover:text-gold-400"
                       >
-                        ← Back to inbox
+                        â† Back to inbox
                       </button>
                     </div>
                     <div className="p-4">
@@ -724,9 +724,9 @@ export default function Inbox() {
   );
 }
 
-/* ═══════════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    SHARED COMPONENTS
-   ═══════════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 function MessageList({ messages, activeId, selectedIds, onSelect, onToggleSelect }) {
   return (
@@ -856,9 +856,9 @@ function IconBtn({ children, onClick, title, active, danger }) {
   );
 }
 
-/* ═══════════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    HELPER COMPONENTS
-   ═══════════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 function StatCard({ value, label, note, isActive, onClick }) {
   return (

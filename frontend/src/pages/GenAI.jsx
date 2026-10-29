@@ -13,20 +13,20 @@ import FeatureRunner from '../components/genai/FeatureRunner';
 import PipelineViewer from '../components/genai/PipelineViewer';
 import api from '../api/client';
 
-/* ────────────────────────────────────────────────────────────
+/* ————————————————————————————————————————————————————————————
    28 features · 8 stages · P0/P1/P2
-   ──────────────────────────────────────────────────────────── */
+   ———————————————————————————————————————————————————————————— */
 const STAGES = ['All', 'Script', 'Pre-Viz', 'Casting', 'Planning', 'Post', 'Marketing', 'Analytics', 'Knowledge'];
 
 const FEATURES = [
   // Script
   { id: 'sceneweaver',      emoji: '🎬', name: 'SceneWeaver',       stage: 'Script',    priority: 'P0', description: 'Scene-by-scene outlines from a premise' },
-  { id: 'characterforge',   emoji: '👤', name: 'CharacterForge',    stage: 'Script',    priority: 'P0', description: 'Bios, arcs, relationship maps' },
+  { id: 'characterforge',   emoji: '🧑‍🎤', name: 'CharacterForge',    stage: 'Script',    priority: 'P0', description: 'Bios, arcs, relationship maps' },
   { id: 'scriptcoverage',   emoji: '📋', name: 'ScriptCoverage',    stage: 'Script',    priority: 'P0', description: "Auto reader's report + marketability score" },
   { id: 'loglinelab',       emoji: '💡', name: 'LoglineLab',        stage: 'Script',    priority: 'P0', description: 'Loglines, synopses, one-pagers' },
   { id: 'scriptqa',         emoji: '❓', name: 'ProjectQ&A',        stage: 'Script',    priority: 'P0', description: 'Query your production database in plain English' },
   { id: 'dialoguedoctor',   emoji: '💬', name: 'DialogueDoctor',    stage: 'Script',    priority: 'P1', description: 'Rewrite dialogue in target voice' },
-  { id: 'beatsheetai',      emoji: '🦁', name: 'BeatSheetAI',       stage: 'Script',    priority: 'P1', description: "Save-the-Cat / Hero's Journey beats" },
+  { id: 'beatsheetai',      emoji: '📖', name: 'BeatSheetAI',       stage: 'Script',    priority: 'P1', description: "Save-the-Cat / Hero's Journey beats" },
 
   // Pre-Viz
   { id: 'storyboardai',     emoji: '🎨', name: 'StoryBoardAI',      stage: 'Pre-Viz',   priority: 'P1', description: 'Text→storyboard frames' },
@@ -66,6 +66,9 @@ const FEATURES = [
 
 const PRIORITY_VARIANT = { P0: 'success', P1: 'warn', P2: 'default' };
 
+/* Safe feature lookup — avoids passing `undefined` into FeatureRunner */
+const findFeature = (id) => FEATURES.find((f) => f.id === id) || null;
+
 /* Stage → department meta for the "Explore by Stage" section */
 const STAGE_META = [
   { stage: 'Script',    icon: FiFileText,   eyebrow: 'Development',        blurb: 'Draft, outline, analyse, and pressure-test the screenplay.' },
@@ -78,9 +81,9 @@ const STAGE_META = [
   { stage: 'Knowledge', icon: FiBookOpen,   eyebrow: 'RAG',                blurb: 'Ask your scripts, schedules, and contracts in plain English.' },
 ];
 
-/* ────────────────────────────────────────────────────────────
+/* ————————————————————————————————————————————————————————————
    Route map: card id → backend endpoint + HTTP method
-   ──────────────────────────────────────────────────────────── */
+   ———————————————————————————————————————————————————————————— */
 const ROUTES = {
   // ✅ Verified working
   castmatch:        { url: '/ml/ai/cast-recommendation/', method: 'POST' },
@@ -113,7 +116,7 @@ const ROUTES = {
   audienceatlas:    { url: '/ml/analytics/nl/',     method: 'POST', style: 'personas' },
   productionwiki:   { url: '/ml/memory/recall/',    method: 'POST' },
 
-  // ❌ Still require NEW backend views (marked "Soon" in UI)
+  // ⏳ Still require NEW backend views (marked "Soon" in UI)
   subtitlestudio:   { url: '/ml/script/subtitle/',  method: 'POST' },
   dubmaster:        { url: '/ml/script/dub/',       method: 'POST' },
   pitchdeckai:      { url: '/ml/marketing/pitch/',  method: 'POST' },
@@ -138,15 +141,19 @@ export default function GenAI() {
     });
   }, [stage, search]);
 
-  const openFeature = (feature) => setRunnerFeature(feature);
+  const openFeature = (feature) => {
+    if (feature) setRunnerFeature(feature);
+  };
 
   const stageCount = (s) => FEATURES.filter((f) => f.stage === s).length;
   const p0Count = FEATURES.filter((f) => f.priority === 'P0').length;
 
   const handleRun = async (feature, input) => {
+    if (!feature) throw new Error('No feature selected.');
+
     const entry = ROUTES[feature.id];
     if (!entry) {
-      throw new Error('Backend route for "' + feature.name + '" has not been built yet.');
+      throw new Error(`Backend route for "${feature.name}" has not been built yet.`);
     }
 
     const payload = {
@@ -156,7 +163,9 @@ export default function GenAI() {
       role_description: input,
       dialogue_text: input,
       style: entry.style || 'default',
-      project_id: ['callsheetcopilot', 'riskradar', 'budgetbot', 'productionwiki'].includes(feature.id) ? 'a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d' : undefined,
+      project_id: ['callsheetcopilot', 'riskradar', 'budgetbot', 'productionwiki'].includes(feature.id)
+        ? 'a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d'
+        : undefined,
       submission_fee: feature.id === 'boxofficeoracle' ? 50 : undefined,
       competition_level: feature.id === 'boxofficeoracle' ? 2 : undefined,
       scene_number: feature.id === 'editadvisor' ? 1 : undefined,
@@ -170,18 +179,23 @@ export default function GenAI() {
 
       return res.data;
     } catch (err) {
-      const status = (err && err.response && err.response.status) || '?';
-      const detail = err && err.response && err.response.data
-        ? JSON.stringify(err.response.data, null, 2)
-        : (err && err.message) || 'Request failed';
-      throw new Error(feature.name + ' failed (' + status + '): ' + detail);
+      const status = err?.response?.status ?? '?';
+      let detail;
+      try {
+        detail = err?.response?.data
+          ? JSON.stringify(err.response.data, null, 2)
+          : (err?.message || 'Request failed');
+      } catch {
+        detail = String(err?.response?.data ?? err?.message ?? 'Request failed');
+      }
+      throw new Error(`${feature.name} failed (${status}): ${detail}`);
     }
   };
 
   return (
     <div className="space-y-16 animate-fade-in">
 
-      {/* ───────── Hero ───────── */}
+      {/* ————————— Hero ————————— */}
       <PageHero
         image="/images/hero/hero-bg.jpg"
         eyebrow="GenAI Studio"
@@ -191,7 +205,7 @@ export default function GenAI() {
         slogan="AI does not replace the crew. It shortens the distance between a decision and its first draft — so the people on set can spend their time on the work only they can do."
       />
 
-      {/* ───────── Headline stats ───────── */}
+      {/* ————————— Headline stats ————————— */}
       <section>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatNumber value={FEATURES.length} label="GenAI features" note="Across every production stage" />
@@ -208,7 +222,7 @@ export default function GenAI() {
         "The best AI tool is the one the crew forgets is there — because it already did the boring part before anyone asked."
       </Quote>
 
-      {/* ───────── New intelligence strip ───────── */}
+      {/* ————————— New intelligence strip ————————— */}
       <section>
         <div className="max-w-3xl">
           <p className="text-[11px] uppercase tracking-[0.25em] text-gold-400">New Intelligence Tools</p>
@@ -227,33 +241,33 @@ export default function GenAI() {
             title="Script Analysis"
             description="Detect sentiment, emotion and pacing in your dialogue."
             action="Analyse Now"
-            onAction={() => openFeature(FEATURES.find((f) => f.id === 'scriptcoverage'))}
+            onAction={() => openFeature(findFeature('scriptcoverage'))}
           />
           <MiniTool
             icon={FiCpu}
             title="Summarise Screenplay"
             description="Get a tight summary of a full script or a specific scene."
             action="Summarise"
-            onAction={() => openFeature(FEATURES.find((f) => f.id === 'loglinelab'))}
+            onAction={() => openFeature(findFeature('loglinelab'))}
           />
           <MiniTool
             icon={FiZap}
             title="Mood Classifier"
             description="Instantly detect the genre and mood of your story."
             action="Classify Mood"
-            onAction={() => openFeature(FEATURES.find((f) => f.id === 'scriptcoverage'))}
+            onAction={() => openFeature(findFeature('scriptcoverage'))}
           />
           <MiniTool
             icon={FiBookOpen}
             title="Ask Your Database"
             description="Query projects, budgets and crew in plain English."
             action="Ask AI"
-            onAction={() => openFeature(FEATURES.find((f) => f.id === 'scriptqa'))}
+            onAction={() => openFeature(findFeature('scriptqa'))}
           />
         </div>
       </section>
 
-      {/* ───────── Pipeline viewer ───────── */}
+      {/* ————————— Pipeline viewer ————————— */}
       <section>
         <div className="max-w-3xl">
           <p className="text-[11px] uppercase tracking-[0.25em] text-gold-400">Production Pipeline</p>
@@ -274,7 +288,7 @@ export default function GenAI() {
         </div>
       </section>
 
-      {/* ───────── Explore by stage ───────── */}
+      {/* ————————— Explore by stage ————————— */}
       <section>
         <div className="max-w-3xl">
           <p className="text-[11px] uppercase tracking-[0.25em] text-gold-400">Explore by Stage</p>
@@ -306,7 +320,7 @@ export default function GenAI() {
         "A prompt is a decision in disguise. Shield it before it is sent, and the production stays yours."
       </Quote>
 
-      {/* ───────── The full catalog ───────── */}
+      {/* ————————— The full catalog ————————— */}
       <section id="catalog" className="scroll-mt-24">
         <div className="max-w-3xl">
           <p className="text-[11px] uppercase tracking-[0.25em] text-gold-400">The Full Catalog</p>
@@ -408,7 +422,7 @@ export default function GenAI() {
         "AI does not replace the crew. It shortens the distance between a decision and its first draft. The craft still belongs to the people on set."
       </Quote>
 
-      {/* ───────── Guardrails ───────── */}
+      {/* ————————— Guardrails ————————— */}
       <section>
         <div className="max-w-3xl">
           <p className="text-[11px] uppercase tracking-[0.25em] text-gold-400">Guardrails</p>
@@ -440,7 +454,7 @@ export default function GenAI() {
         </div>
       </section>
 
-      {/* ───────── Ready to shoot ───────── */}
+      {/* ————————— Ready to shoot ————————— */}
       <section>
         <div className="max-w-3xl">
           <p className="text-[11px] uppercase tracking-[0.25em] text-gold-400">Ready to Shoot?</p>
@@ -454,24 +468,24 @@ export default function GenAI() {
             icon={FiFileText}
             title="Analyse a Script"
             description="Detect sentiment, pacing and marketability in one pass."
-            onAction={() => openFeature(FEATURES.find((f) => f.id === 'scriptcoverage'))}
+            onAction={() => openFeature(findFeature('scriptcoverage'))}
           />
           <QuickAction
             icon={FiCalendar}
             title="Plan a Shoot Day"
             description="Turn a scene into a shot list, call sheet and schedule."
-            onAction={() => openFeature(FEATURES.find((f) => f.id === 'callsheetcopilot'))}
+            onAction={() => openFeature(findFeature('callsheetcopilot'))}
           />
           <QuickAction
             icon={FiBookOpen}
             title="Ask Your Database"
             description="Query projects, budgets and crew in plain English."
-            onAction={() => openFeature(FEATURES.find((f) => f.id === 'scriptqa'))}
+            onAction={() => openFeature(findFeature('scriptqa'))}
           />
         </div>
       </section>
 
-      {/* ───────── Why CHUTTEE ───────── */}
+      {/* ————————— Why CHUTTEE ————————— */}
       <section>
         <div className="max-w-3xl">
           <p className="text-[11px] uppercase tracking-[0.25em] text-gold-400">Why CHUTTEE</p>
@@ -496,7 +510,7 @@ export default function GenAI() {
         "The films that endure are not the ones with the fewest problems. They are the ones where the people behind them saw the problems early — and solved them together."
       </Quote>
 
-      {/* ───────── Contact ───────── */}
+      {/* ————————— Contact ————————— */}
       <section className="premium-card relative overflow-hidden p-8 sm:p-10">
         <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-gold-500/10 blur-3xl" />
         <div className="relative grid gap-8 lg:grid-cols-3">
@@ -539,7 +553,7 @@ export default function GenAI() {
         </div>
       </section>
 
-      {/* ───────── Runner modal ───────── */}
+      {/* ————————— Runner modal ————————— */}
       <FeatureRunner
         feature={runnerFeature}
         open={Boolean(runnerFeature)}
@@ -550,9 +564,9 @@ export default function GenAI() {
   );
 }
 
-/* ────────────────────────────────────────────────────────────
+/* ————————————————————————————————————————————————————————————
    Helper components
-   ──────────────────────────────────────────────────────────── */
+   ———————————————————————————————————————————————————————————— */
 
 function StatNumber({ value, label, note }) {
   return (

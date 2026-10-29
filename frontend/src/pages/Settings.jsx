@@ -93,7 +93,7 @@ export default function Settings() {
       form.phone !== (user?.phone || '');
   }, [form, user]);
 
-  /* ─────────── Profile save (uses real API from your file) ─────────── */
+  /* ——————————— Profile save (uses real API from your file) ——————————— */
   const saveProfile = async (e) => {
     if (e) e.preventDefault();
     if (!form.name.trim()) {
@@ -122,7 +122,7 @@ export default function Settings() {
     }
   };
 
-  /* ─────────── Company save (local — no API endpoint) ─────────── */
+  /* ——————————— Company save (local — no API endpoint) ——————————— */
   const saveCompany = async (e) => {
     if (e) e.preventDefault();
     setSavingCompany(true);
@@ -177,7 +177,7 @@ export default function Settings() {
     navigate('/login');
   };
 
-  /* ─────────── Theme helpers (support Dark / Light / System) ─────────── */
+  /* ——————————— Theme helpers (support Dark / Light / System) ——————————— */
   const applyTheme = (value) => {
     if (setTheme) {
       setTheme(value);
@@ -223,7 +223,7 @@ export default function Settings() {
           </div>
         </div>
 
-        {/* ═══════════ PROFILE ═══════════ */}
+        {/* â•â•â•â•â•â•â•â•â•â•â• PROFILE â•â•â•â•â•â•â•â•â•â•â• */}
         {tab === 'profile' && (
           <Card>
             <CardHeader title="Profile" subtitle="Your personal details" icon={FiUser} />
@@ -259,7 +259,7 @@ export default function Settings() {
           </Card>
         )}
 
-        {/* ═══════════ COMPANY ═══════════ */}
+        {/* â•â•â•â•â•â•â•â•â•â•â• COMPANY â•â•â•â•â•â•â•â•â•â•â• */}
         {tab === 'company' && (
           <Card>
             <CardHeader title="Company" subtitle="Your production house" icon={FiBriefcase} />
@@ -295,7 +295,7 @@ export default function Settings() {
           </Card>
         )}
 
-        {/* ═══════════ NOTIFICATIONS ═══════════ */}
+        {/* â•â•â•â•â•â•â•â•â•â•â• NOTIFICATIONS â•â•â•â•â•â•â•â•â•â•â• */}
         {tab === 'notifications' && (
           <Card>
             <CardHeader title="Notifications" subtitle="Choose what reaches you" icon={FiBell} />
@@ -314,7 +314,7 @@ export default function Settings() {
           </Card>
         )}
 
-        {/* ═══════════ SECURITY ═══════════ */}
+        {/* â•â•â•â•â•â•â•â•â•â•â• SECURITY â•â•â•â•â•â•â•â•â•â•â• */}
         {tab === 'security' && (
           <Card>
             <CardHeader title="Security" subtitle="Keep your account safe" icon={FiShield} />
@@ -345,7 +345,7 @@ export default function Settings() {
           </Card>
         )}
 
-        {/* ═══════════ APPEARANCE ═══════════ */}
+        {/* â•â•â•â•â•â•â•â•â•â•â• APPEARANCE â•â•â•â•â•â•â•â•â•â•â• */}
         {tab === 'appearance' && (
           <Card>
             <CardHeader title="Appearance" subtitle="Choose your theme" icon={FiMoon} />
@@ -359,7 +359,7 @@ export default function Settings() {
           </Card>
         )}
 
-        {/* ═══════════ SIGN OUT (always visible) ═══════════ */}
+        {/* â•â•â•â•â•â•â•â•â•â•â• SIGN OUT (always visible) â•â•â•â•â•â•â•â•â•â•â• */}
         <Card>
           <CardHeader title="Sign out" subtitle="End your session on this device" icon={FiLogOut} />
           <CardBody>
@@ -372,14 +372,14 @@ export default function Settings() {
           </CardBody>
         </Card>
 
-        {/* ═══════════ QUICK LINKS ═══════════ */}
+        {/* â•â•â•â•â•â•â•â•â•â•â• QUICK LINKS â•â•â•â•â•â•â•â•â•â•â• */}
         <section className="grid gap-4 sm:grid-cols-3">
           <QuickLink icon={FiHelpCircle} title="Help Center"   description="Browse FAQs and documentation." onAction={() => navigate('/help')} />
           <QuickLink icon={FiInbox}      title="Open Inbox"    description="Check messages from your crew." onAction={() => navigate('/inbox')} />
           <QuickLink icon={FiActivity}   title="View Activity" description="See every change and update." onAction={() => navigate('/activity')} />
         </section>
 
-        {/* ═══════════ QUOTE ═══════════ */}
+        {/* â•â•â•â•â•â•â•â•â•â•â• QUOTE â•â•â•â•â•â•â•â•â•â•â• */}
         <Quote>
           "Every setting has a reason. The right setup, the right workflow, the right control can change what happens next."
         </Quote>
@@ -480,9 +480,9 @@ export default function Settings() {
   );
 }
 
-/* ═══════════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    HELPER COMPONENTS
-   ═══════════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 function ThemeOption({ value, current, onSelect, icon: Icon, label, hint }) {
   const isActive = current === value;

@@ -23,7 +23,7 @@ const CONTACT = {
   phoneRaw: '+917410114971',
 };
 
-/* ─────────── Asset categories ─────────── */
+/* ——————————— Asset categories ——————————— */
 const ASSET_CATEGORIES = [
   { number: '01', icon: FiImage,  eyebrow: 'Marketing',      title: 'Posters & Key Art',     description: 'Theatrical posters, teaser art, and OTT thumbnails.',                filter: 'Poster' },
   { number: '02', icon: FiCamera, eyebrow: 'On Set',         title: 'Production Stills',     description: 'High-resolution stills captured during principal photography.',       filter: 'Still' },
@@ -33,7 +33,7 @@ const ASSET_CATEGORIES = [
 
 const POPULAR_FILTERS = ['Poster', 'Still', 'BTS', 'Concept', 'Location'];
 
-/* ─────────── Seed assets ─────────── */
+/* ——————————— Seed assets ——————————— */
 const SEED_ASSETS = [
   { id: 1, image: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?w=800', caption: 'Monsoon Letters — Teaser Poster', category: 'Poster',    project: 'Monsoon Letters' },
   { id: 2, image: 'https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?w=800', caption: 'The Salt Road — On Set',          category: 'Still',     project: 'The Salt Road' },
@@ -77,7 +77,7 @@ export default function FilmAssets() {
     try { localStorage.setItem(LS_KEY, JSON.stringify(assets)); } catch {}
   }, [assets]);
 
-  /* ─────────── Derived ─────────── */
+  /* ——————————— Derived ——————————— */
   const filteredAssets = useMemo(() => {
     const q = search.trim().toLowerCase();
     return assets.filter((asset) => {
@@ -105,7 +105,7 @@ export default function FilmAssets() {
     else { setFilter(cat); scrollToGallery(); }
   };
 
-  /* ─────────── AI Generation ─────────── */
+  /* ——————————— AI Generation ——————————— */
   const generateWithAI = async () => {
     if (!aiPrompt.trim()) {
       toast('Write a prompt describing the image you want.', 'error');
@@ -135,7 +135,7 @@ export default function FilmAssets() {
     }
   };
 
-  /* ─────────── Actions ─────────── */
+  /* ——————————— Actions ——————————— */
   const uploadAsset = (e) => {
     e.preventDefault();
     if (!newAsset.image.trim()) { toast('Add an image URL or generate one first.', 'error'); return; }
@@ -601,9 +601,9 @@ export default function FilmAssets() {
   );
 }
 
-/* ═══════════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    HELPERS
-   ═══════════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 function StatNumber({ value, label, note }) {
   return (

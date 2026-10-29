@@ -7,7 +7,7 @@ export default function Pagination({ page = 1, pageSize = 10, total = 0, onPageC
 
   return (
     <div className="flex items-center justify-between gap-3 border-t border-zinc-800 pt-4">
-      <p className="text-xs text-zinc-500">Showing <span className="text-zinc-300">{from}â€“{to}</span> of <span className="text-zinc-300">{total}</span></p>
+      <p className="text-xs text-zinc-500">Showing <span className="text-zinc-300">{from}—{to}</span> of <span className="text-zinc-300">{total}</span></p>
       <div className="flex items-center gap-1">
         <button onClick={() => onPageChange(Math.max(1, page - 1))} disabled={page === 1} className="rounded-lg border border-zinc-800 p-1.5 text-zinc-400 transition-colors hover:bg-zinc-800 disabled:opacity-40">
           <FiChevronLeft className="h-4 w-4" />

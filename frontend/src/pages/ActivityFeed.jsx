@@ -14,7 +14,7 @@ import EmptyState from '../components/feedback/EmptyState';
 import PageHero from '../components/ui/PageHero';
 import { useToast } from '../context/ToastContext';
 
-/* ─────────── Event types ─────────── */
+/* ——————————— Event types ——————————— */
 const EVENT_TYPES = {
   scene_shot:    { label: 'Scene Shot',    icon: FiFilm,        accent: '#d4af37' },
   expense_added: { label: 'Expense Added', icon: FiDollarSign,  accent: '#f59e0b' },
@@ -25,7 +25,7 @@ const EVENT_TYPES = {
   approval:      { label: 'Approval',      icon: FiThumbsUp,    accent: '#ec4899' },
 };
 
-/* ─────────── Route cards ─────────── */
+/* ——————————— Route cards ——————————— */
 const EVENT_ROUTES = [
   { number: '01', icon: FiFilm,          eyebrow: 'Production',  title: 'Scenes & Shoots',   description: 'Scene changes, shoot completions, and production milestones.',           types: ['scene_shot'] },
   { number: '02', icon: FiEdit2,         eyebrow: 'Updates',     title: 'Edits & Changes',   description: 'Who changed what, when, and on which production.',                       types: ['edit'] },
@@ -61,7 +61,7 @@ export default function ActivityFeed() {
     return () => clearTimeout(t);
   }, []);
 
-  /* ─────────── Derived ─────────── */
+  /* ——————————— Derived ——————————— */
   const counts = useMemo(() => {
     const c = { all: items.length };
     Object.keys(EVENT_TYPES).forEach((k) => {
@@ -421,9 +421,9 @@ export default function ActivityFeed() {
   );
 }
 
-/* ═══════════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    HELPER COMPONENTS
-   ═══════════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 function StatNumber({ value, label, note }) {
   return (

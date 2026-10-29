@@ -76,7 +76,7 @@ export default function SceneAIAnalysis({ scene }) {
                       <div key={m.actor.id} className="flex items-center justify-between rounded-lg bg-zinc-900/60 px-3 py-2">
                         <div className="min-w-0">
                           <p className="truncate text-xs font-medium">{m.actor.name}</p>
-                          <p className="truncate text-[10px] text-zinc-500">{m.reasons.slice(0, 2).join(' Â· ') || 'Available'}</p>
+                          <p className="truncate text-[10px] text-zinc-500">{m.reasons.slice(0, 2).join(' · ') || 'Available'}</p>
                         </div>
                         <span className="ml-2 shrink-0 text-xs font-semibold text-gold-400">{m.score}%</span>
                       </div>
@@ -87,7 +87,7 @@ export default function SceneAIAnalysis({ scene }) {
 
               <div className="flex items-center gap-2 rounded-md bg-zinc-900/60 p-2 text-[10px] text-zinc-500">
                 <FiZap className="h-3 w-3 text-gold-400" />
-                <span>Analysis runs locally Â· Results are deterministic per scene data</span>
+                <span>Analysis runs locally · Results are deterministic per scene data</span>
               </div>
             </CardBody>
           </motion.div>

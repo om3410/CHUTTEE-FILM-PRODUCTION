@@ -235,7 +235,7 @@ export default function AIInsights() {
           </button>
         </div>
 
-        {/* ─── CLIENT-SIDE INSIGHTS ─── */}
+        {/* ——— CLIENT-SIDE INSIGHTS ——— */}
         {topTab === 'insights' && (
           <div className="mt-6">
             <Tabs
@@ -268,7 +268,7 @@ export default function AIInsights() {
           </div>
         )}
 
-        {/* ─── LIVE GENAI STUDIO ─── */}
+        {/* ——— LIVE GENAI STUDIO ——— */}
         {topTab === 'studio' && (
           <div className="mt-6">
             <LiveStudio toast={toast} />
@@ -339,9 +339,9 @@ export default function AIInsights() {
   );
 }
 
-/* ═══════════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    CLIENT-SIDE AI TABS
-   ═══════════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 function OverviewTab({ risks, festival }) {
   return (
@@ -393,7 +393,7 @@ function OverviewTab({ risks, festival }) {
 }
 
 function BudgetTab({ budgetData, runway, anomalies, spikes, stats }) {
-  // FIX: guard against stats === null → avoids ₹NaNk render
+  // FIX: guard against stats === null → avoids â‚¹NaNk render
   const meanAmount = stats?.mean ?? 0;
   return (
     <div className="grid gap-6 lg:grid-cols-2">
@@ -405,7 +405,7 @@ function BudgetTab({ budgetData, runway, anomalies, spikes, stats }) {
               <BarChart data={budgetData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
                 <XAxis dataKey="name" tick={{ fill: '#71717a', fontSize: 11 }} />
-                <YAxis tick={{ fill: '#71717a', fontSize: 11 }} tickFormatter={(value) => `₹${value / 100000}L`} />
+                <YAxis tick={{ fill: '#71717a', fontSize: 11 }} tickFormatter={(value) => `â‚¹${value / 100000}L`} />
                 <Tooltip
                   contentStyle={{ background: '#18181b', border: '1px solid #3f3f46', borderRadius: 8, fontSize: 12 }}
                   formatter={(value) => formatCurrency(value)}
@@ -426,18 +426,18 @@ function BudgetTab({ budgetData, runway, anomalies, spikes, stats }) {
           <div className="grid grid-cols-3 gap-3">
             <Stat label="Days left" value={runway.daysLeft} accent />
             <Stat label="Weeks" value={runway.weeksLeft} />
-            <Stat label="Avg tx" value={`₹${(meanAmount / 1000).toFixed(0)}k`} />
+            <Stat label="Avg tx" value={`â‚¹${(meanAmount / 1000).toFixed(0)}k`} />
           </div>
           <div>
             <div className="flex items-center justify-between text-xs mb-1">
               <span className="text-zinc-400">Burn rate</span>
-              <span className="text-zinc-300">₹{(runway.dailyBurn ?? 0).toLocaleString('en-IN')}/day</span>
+              <span className="text-zinc-300">â‚¹{(runway.dailyBurn ?? 0).toLocaleString('en-IN')}/day</span>
             </div>
             <div className="h-2 overflow-hidden rounded-full bg-zinc-800">
               <div className={`h-full rounded-full ${runway.status === 'critical' ? 'bg-red-500' : runway.status === 'warning' ? 'bg-amber-500' : 'bg-emerald-500'}`} style={{ width: `${Math.min(100, (runway.daysLeft / 60) * 100)}%` }} />
             </div>
             <p className={`mt-1 text-xs ${runway.status === 'critical' ? 'text-red-400' : runway.status === 'warning' ? 'text-amber-400' : 'text-emerald-400'}`}>
-              {runway.status === 'critical' ? '⚠️ Critical' : runway.status === 'warning' ? '⚠️ Watch closely' : '✓ Healthy'}
+              {runway.status === 'critical' ? 'âš ï¸ Critical' : runway.status === 'warning' ? 'âš ï¸ Watch closely' : '✓ Healthy'}
             </p>
           </div>
         </CardBody>
@@ -453,9 +453,9 @@ function BudgetTab({ budgetData, runway, anomalies, spikes, stats }) {
               <div key={a.id} className="flex items-center justify-between rounded-lg border border-red-500/20 bg-red-500/5 p-3">
                 <div className="min-w-0">
                   <p className="truncate text-sm text-zinc-200">{a.description}</p>
-                  <p className="text-xs text-zinc-500">₹{a.amount.toLocaleString('en-IN')} · {a.category}</p>
+                  <p className="text-xs text-zinc-500">â‚¹{a.amount.toLocaleString('en-IN')} · {a.category}</p>
                 </div>
-                <span className="ml-2 shrink-0 rounded-full bg-red-500/20 px-2 py-0.5 text-[10px] font-medium text-red-400">{a.zScore}σ</span>
+                <span className="ml-2 shrink-0 rounded-full bg-red-500/20 px-2 py-0.5 text-[10px] font-medium text-red-400">{a.zScore}Ïƒ</span>
               </div>
             ))
           )}
@@ -569,9 +569,9 @@ function CastTab({ scene, castMatches }) {
   );
 }
 
-/* ═══════════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    LIVE GENAI STUDIO
-   ═══════════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 function LiveStudio({ toast }) {
   const [activeTab, setActiveTab] = useState('query');
@@ -990,9 +990,9 @@ function MoodPanel({ toast }) {
   );
 }
 
-/* ═══════════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    HELPERS
-   ═══════════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 function StatNumber({ value, label, note }) {
   return (

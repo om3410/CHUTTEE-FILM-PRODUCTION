@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { FiLock, FiRefreshCw } from 'react-icons/fi';
 import { Card, CardHeader, CardBody } from '../ui/Card';
 import Button from '../ui/Button';
@@ -22,7 +22,7 @@ const EXAMPLES = [
   },
   {
     label: 'Aadhaar + PAN',
-    text: 'Aadhaar: 1234 5678 9012 Â· PAN: ABCDE1234F',
+    text: 'Aadhaar: 1234 5678 9012 · PAN: ABCDE1234F',
   },
   {
     label: 'IP + URL token',
@@ -47,7 +47,7 @@ export default function PrivacyMaskDemo() {
 
   return (
     <Card>
-      <CardHeader title="PrivacyMask Demo" subtitle="Real PII redaction â€” edit anything below" icon={FiLock} />
+      <CardHeader title="PrivacyMask Demo" subtitle="Real PII redaction — edit anything below" icon={FiLock} />
       <CardBody className="space-y-4">
         {/* Quick-fill examples */}
         <div className="flex flex-wrap gap-2">
@@ -77,7 +77,7 @@ export default function PrivacyMaskDemo() {
           rows={4}
           className="w-full resize-none rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2.5 font-mono text-xs text-zinc-100 outline-none focus:border-gold-500"
           aria-label="Text to redact PII from"
-          placeholder="Type or paste any text with emails, phones, cards, or other PIIâ€¦"
+          placeholder="Type or paste any text with emails, phones, cards, or other PII…"
         />
 
         <div className="flex flex-wrap gap-2">
@@ -130,7 +130,7 @@ export default function PrivacyMaskDemo() {
               </>
             ) : (
               <p className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-3 text-xs text-emerald-400">
-                âœ“ No PII detected in this input
+                ✓ No PII detected in this input
               </p>
             )}
           </div>

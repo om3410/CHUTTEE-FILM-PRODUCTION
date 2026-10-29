@@ -1,4 +1,4 @@
-import { FiSmile, FiMeh, FiFrown, FiZap, FiHeart, FiAlertTriangle } from 'react-icons/fi';
+﻿import { FiSmile, FiMeh, FiFrown, FiZap, FiHeart, FiAlertTriangle } from 'react-icons/fi';
 
 const CONFIG = {
   positive: { icon: FiSmile, color: 'text-emerald-400 bg-emerald-500/15 ring-emerald-500/30' },

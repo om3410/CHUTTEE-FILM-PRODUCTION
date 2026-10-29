@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { BellIcon } from '../../icons';
 import { fetchRecentNotifications } from '../../api/notifications';
 

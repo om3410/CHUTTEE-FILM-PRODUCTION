@@ -5,7 +5,7 @@ import { MOCK } from '../../utils/constants';
 
 const EXAMPLES = ['scenes with VFX', 'crew available this week', 'budget overruns', 'romantic scenes', 'high risk items'];
 
-export default function AISearch({ onResults, placeholder = 'Ask AI or searchâ€¦', inputRef }) {
+export default function AISearch({ onResults, placeholder = 'Ask AI or search…', inputRef }) {
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [answer, setAnswer] = useState(null);

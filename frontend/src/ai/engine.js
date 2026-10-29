@@ -20,7 +20,7 @@ export async function generateAIResponse(query, context) {
         `• Spent: ₹${((project?.budgetSpent || 0) / 100000).toFixed(1)}L of ₹${((project?.budgetTotal || 0) / 100000).toFixed(1)}L (${Math.round(((project?.budgetSpent || 0) / (project?.budgetTotal || 1)) * 100)}%)\n` +
         `• Average transaction: ₹${stats?.mean?.toLocaleString('en-IN') || 0}\n` +
         `• Runway at current burn: **${runway.daysLeft} days** (${runway.weeksLeft} weeks)\n` +
-        (anomalies.length ? `• ⚠️ ${anomalies.length} unusual transaction${anomalies.length > 1 ? 's' : ''} detected\n` : '• No anomalies detected\n') +
+        (anomalies.length ? `• âš ï¸ ${anomalies.length} unusual transaction${anomalies.length > 1 ? 's' : ''} detected\n` : '• No anomalies detected\n') +
         (spikes.length ? `• 📈 Over-budget: ${spikes.map((s) => `${s.name} (+${s.variance}%)`).join(', ')}` : ''),
       actions: ['Show all expenses', 'Detect anomalies', 'Project runway'],
       widgets: [
@@ -106,12 +106,12 @@ export async function generateAIResponse(query, context) {
   return {
     text: `I can help with production intelligence across:\n\n` +
       `💰 **Budget** — "How is my budget tracking?"\n` +
-      `🎬 **Scenes** — "Predict duration for scene 3"\n` +
-      `👤 **Cast** — "Recommend cast for scene 4"\n` +
+      `**Scenes** — "Predict duration for scene 3"\n` +
+      `**Cast** — "Recommend cast for scene 4"\n` +
       `😊 **Sentiment** — "Analyze script tone"\n` +
-      `⚠️ **Risks** — "What are my top risks?"\n` +
+      `âš ï¸ **Risks** — "What are my top risks?"\n` +
       `🏆 **Festival** — "Festival win chances?"\n` +
-      `👥 **Crew** — "Show crew availability"`,
+      `**Crew** — "Show crew availability"`,
     actions: ['Show me a demo', 'What can you do?'],
     widgets: [],
   };
@@ -119,9 +119,9 @@ export async function generateAIResponse(query, context) {
 
 export const SUGGESTED_PROMPTS = [
   { icon: '💰', text: 'How is my budget tracking?' },
-  { icon: '🎬', text: 'Predict duration for all scenes' },
-  { icon: '⚠️', text: 'What are my top risks?' },
-  { icon: '👤', text: 'Recommend cast for scene 4' },
+  { icon: '', text: 'Predict duration for all scenes' },
+  { icon: 'âš ï¸', text: 'What are my top risks?' },
+  { icon: '', text: 'Recommend cast for scene 4' },
   { icon: '😊', text: 'Analyze script sentiment' },
   { icon: '🏆', text: 'What are my festival chances?' },
 ];

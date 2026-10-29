@@ -52,12 +52,12 @@ export default function Crew() {
   const [adding, setAdding] = useState(false);
   const [newCrew, setNewCrew] = useState({ name: '', role: '', department: DEPARTMENTS[0], dailyRate: '' });
 
-  /* ─────────────── Effective filters (page overrides navbar) ─────────────── */
+  /* ——————————————— Effective filters (page overrides navbar) ——————————————— */
   const effectiveSearch = pageSearch || crewSearch;
   const effectiveDepartment = pageDepartment || crewDepartment;
   const effectiveAvailability = pageAvailability || crewAvailability;
 
-  /* ─────────────── Page-local helpers ─────────────── */
+  /* ——————————————— Page-local helpers ——————————————— */
   const clearPageFilters = () => {
     setPageSearch('');
     setPageDepartment('');
@@ -593,7 +593,7 @@ export default function Crew() {
   );
 }
 
-/* ─── helper components (unchanged) ─── */
+/* ——— helper components (unchanged) ——— */
 
 function StatNumber({ value, label, note }) {
   return (

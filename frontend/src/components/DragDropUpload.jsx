@@ -25,7 +25,7 @@ export default function DragDropUpload({ onFiles, accept = 'image/*', multiple =
       >
         <div className="rounded-full bg-zinc-800 p-3"><FiUpload className="h-5 w-5 text-gold-400" /></div>
         <p className="text-sm font-medium text-zinc-200">Drop files here or click to upload</p>
-        <p className="text-xs text-zinc-500">{accept} Â· up to {Math.round(maxSize / 1024 / 1024)}MB</p>
+        <p className="text-xs text-zinc-500">{accept} · up to {Math.round(maxSize / 1024 / 1024)}MB</p>
         <input ref={inputRef} type="file" accept={accept} multiple={multiple} className="hidden" onChange={(e) => handleFiles(e.target.files)} />
       </div>
       {error && <p className="flex items-center gap-1 text-xs text-red-400"><FiX className="h-3 w-3" /> {error}</p>}
