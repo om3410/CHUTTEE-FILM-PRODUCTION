@@ -1,4 +1,4 @@
-﻿import api from './index';
+import api from './index';
 import { fetchAllPages } from './production';
 
 const mapCrewMember = (member) => ({
@@ -25,13 +25,16 @@ export const fetchCrewMember = async (id) => {
 };
 
 export const createCrewMember = async (crewMember) => {
+  const skills = typeof crewMember.skills === 'string'
+    ? crewMember.skills.split(',').map((s) => s.trim()).filter(Boolean)
+    : Array.isArray(crewMember.skills) ? crewMember.skills : [];
   const { data } = await api.post('/production/crew/', {
     full_name: crewMember.name,
     role: crewMember.role,
     department: crewMember.department,
     daily_rate: Number(crewMember.dailyRate),
     is_available: true,
-    skills: [],
+    skills,
   });
   return mapCrewMember(data);
 };

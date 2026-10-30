@@ -50,7 +50,7 @@ export default function Crew() {
   const [confirm, setConfirm] = useState(null);
   const [addOpen, setAddOpen] = useState(Boolean(location.state?.openAdd));
   const [adding, setAdding] = useState(false);
-  const [newCrew, setNewCrew] = useState({ name: '', role: '', department: DEPARTMENTS[0], dailyRate: '' });
+  const [newCrew, setNewCrew] = useState({ name: '', role: '', department: DEPARTMENTS[0], dailyRate: '', skills: '' });
 
   /* ——————————————— Effective filters (page overrides navbar) ——————————————— */
   const effectiveSearch = pageSearch || crewSearch;
@@ -583,6 +583,7 @@ export default function Crew() {
             </select>
           </label>
           <Input label="Daily Rate" type="number" min="0" step="1" value={newCrew.dailyRate} onChange={(e) => setNewCrew({ ...newCrew, dailyRate: e.target.value })} required />
+          <Input label="Skills (comma separated)" value={newCrew.skills} onChange={(e) => setNewCrew({ ...newCrew, skills: e.target.value })} placeholder="e.g. Adobe Premiere, DaVinci Resolve" />
           <div className="flex justify-end gap-2">
             <Button type="button" variant="ghost" onClick={() => setAddOpen(false)}>Cancel</Button>
             <Button type="submit" variant="primary" loading={adding}>Add Crew</Button>

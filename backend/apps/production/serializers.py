@@ -56,12 +56,30 @@ class CrewMemberSerializer(TimestampedSerializerMixin, serializers.ModelSerializ
         fields = '__all__'
         read_only_fields = ['id', 'created_at', 'updated_at']
 
+    def to_internal_value(self, data):
+        data = data.copy() if hasattr(data, 'copy') else dict(data)
+        skills = data.get('skills')
+        if isinstance(skills, str):
+            data['skills'] = [s.strip() for s in skills.split(',') if s.strip()]
+        elif skills is None:
+            data['skills'] = []
+        return super().to_internal_value(data)
+
 
 class CastMemberSerializer(TimestampedSerializerMixin, serializers.ModelSerializer):
     class Meta:
         model = CastMember
         fields = '__all__'
         read_only_fields = ['id', 'created_at', 'updated_at']
+
+    def to_internal_value(self, data):
+        data = data.copy() if hasattr(data, 'copy') else dict(data)
+        skills = data.get('special_skills')
+        if isinstance(skills, str):
+            data['special_skills'] = [s.strip() for s in skills.split(',') if s.strip()]
+        elif skills is None:
+            data['special_skills'] = []
+        return super().to_internal_value(data)
 
 
 class SceneSerializer(TimestampedSerializerMixin, serializers.ModelSerializer):

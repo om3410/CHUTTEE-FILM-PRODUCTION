@@ -23,6 +23,10 @@ const mapCastMember = (actor) => ({
   character: actor.character_name ?? actor.character ?? '',
   age: actor.physical_attributes?.age ?? actor.age ?? '',
   category: actor.category ?? actor.cast_category ?? 'Actor',
+  roleType: actor.role_type ?? actor.roleType ?? '',
+  dailyRate: actor.daily_rate ?? actor.dailyRate ?? 0,
+  available: actor.is_available ?? actor.available ?? true,
+  skills: Array.isArray(actor.special_skills) ? actor.special_skills : (Array.isArray(actor.skills) ? actor.skills : []),
   categories:
     Array.isArray(actor.categories) && actor.categories.length
       ? actor.categories
@@ -73,25 +77,31 @@ const mapFilmAsset = (asset) => ({
 });
 
 export const fetchCast = async () => {
-  return (await fetchAllPages('/production/cast/')).map(mapCastMember);
+  const results = (await fetchAllPages('/production/cast/')).map(mapCastMember);
+  return { count: results.length, results };
 };
 
-export const createCastMember = async ({ name, character, age, categories }) => {
-  const cats = Array.isArray(categories) && categories.length ? categories : ['Actor'];
+export const createCastMember = async (m) => {
+  const skills = typeof m.skills === 'string'
+    ? m.skills.split(',').map((s) => s.trim()).filter(Boolean)
+    : Array.isArray(m.skills) ? m.skills : [];
   const { data } = await api.post('/production/cast/', {
-    full_name: name,
-    character_name: character,
-    physical_attributes: { age: Number(age) },
-    category: cats[0],
-    categories: cats,
-    special_skills: [],
+    full_name: m.name,
+    role_type: m.role || 'Supporting',
+    daily_rate: Number(m.dailyRate) || 0,
     is_available: true,
+    special_skills: skills,
   });
   return mapCastMember(data);
 };
 
 export const deleteCastMember = async (id) => {
   await api.delete(`/production/cast/${id}/`);
+};
+
+export const updateCastAvailability = async (id, available) => {
+  const { data } = await api.patch(`/production/cast/${id}/`, { is_available: available });
+  return mapCastMember(data);
 };
 
 export const fetchScenes = async () => {

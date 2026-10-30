@@ -10,7 +10,7 @@ import { useAuth } from '../context/AuthContext';
 import { getApiErrorMessage } from '../api/auth';
 import { DEPARTMENTS } from '../utils/constants';
 import { formatCurrency } from '../utils/format';
-import { createCrewMember, deleteCrewMember, fetchCrew, updateCrewAvailability } from '../api/crew';
+import { createCastMember, deleteCastMember, fetchCast, updateCastAvailability } from '../api/production';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
@@ -40,7 +40,7 @@ export default function Crew() {
   const [confirm, setConfirm] = useState(null);
   const [addOpen, setAddOpen] = useState(Boolean(location.state?.openAdd));
   const [adding, setAdding] = useState(false);
-  const [newCrew, setNewCrew] = useState({ name: '', role: '', department: DEPARTMENTS[0], dailyRate: '' });
+  const [newCrew, setNewCrew] = useState({ name: '', role: '', department: 'Cast', dailyRate: '', skills: '' });
 
   /* ——————————————— Filter helpers — use context setters ——————————————— */
   const clearAllFilters = () => {
@@ -70,7 +70,7 @@ export default function Crew() {
 
   useEffect(() => {
     let active = true;
-    fetchCrew()
+    fetchCast()
       .then(({ results }) => {
         if (active) setCrew(results);
       })
@@ -105,7 +105,7 @@ export default function Crew() {
     if (updatingAvailability.includes(member.id)) return;
     setUpdatingAvailability((list) => [...list, member.id]);
     try {
-      const updated = await updateCrewAvailability(member.id, member.available !== true);
+      const updated = await updateCastAvailability(member.id, member.available !== true);
       setCrew((list) => list.map((item) => item.id === updated.id ? updated : item));
       toast(`${updated.name} marked ${updated.available ? 'available' : 'busy'}`, 'success');
     } catch (error) {
@@ -117,7 +117,7 @@ export default function Crew() {
 
   const remove = async (id) => {
     try {
-      await deleteCrewMember(id);
+      await deleteCastMember(id);
       setCrew((list) => list.filter((c) => c.id !== id));
       setSelected((s) => s.filter((x) => x !== id));
       toast('Crew member removed', 'success');
@@ -132,7 +132,7 @@ export default function Crew() {
     e.preventDefault();
     setAdding(true);
     try {
-      const member = await createCrewMember(newCrew);
+      const member = await createCastMember(newCrew);
       setCrew((list) => [...list, member]);
       setNewCrew({ name: '', role: '', department: DEPARTMENTS[0], dailyRate: '' });
       setAddOpen(false);
@@ -573,6 +573,7 @@ export default function Crew() {
             </select>
           </label>
           <Input label="Daily Rate" type="number" min="0" step="1" value={newCrew.dailyRate} onChange={(e) => setNewCrew({ ...newCrew, dailyRate: e.target.value })} required />
+          <Input label="Special Skills (comma separated)" value={newCrew.skills} onChange={(e) => setNewCrew({ ...newCrew, skills: e.target.value })} placeholder="e.g. Method Acting, Improvisation, Stunts" />
           <div className="flex justify-end gap-2">
             <Button type="button" variant="ghost" onClick={() => setAddOpen(false)}>Cancel</Button>
             <Button type="submit" variant="primary" loading={adding}>Add Crew</Button>
