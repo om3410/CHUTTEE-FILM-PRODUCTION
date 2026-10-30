@@ -1,4 +1,4 @@
-﻿import api from './index';
+import api from './index';
 
 const rows = (data) => (Array.isArray(data) ? data : data.results || []);
 
@@ -100,7 +100,7 @@ export const fetchScenes = async () => {
 
 export const createShootDay = async ({ projectId, shootDate, dayNumber, location }) => {
   const { data } = await api.post('/production/shoot-days/', {
-    project: projectId || null,
+    project: projectId || 'a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d',
     shoot_date: shootDate,
     day_number: dayNumber,
     location,
@@ -110,7 +110,7 @@ export const createShootDay = async ({ projectId, shootDate, dayNumber, location
 
 export const updateShootDay = async ({ id, projectId, shootDate, dayNumber, location }) => {
   const { data } = await api.patch(`/production/shoot-days/${id}/`, {
-    project: projectId || null,
+    project: projectId || 'a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d',
     shoot_date: shootDate,
     day_number: dayNumber,
     location,
@@ -129,7 +129,7 @@ export const updateProjectDeadline = async ({ id, endDate }) => {
   return data;
 };
 
-export const createScene = async ({ number, title, location, timeOfDay, status }) => {
+export const createScene = async ({ number, title, location, timeOfDay, status, projectId }) => {
   const statusMap = {
     'Not Started': 'Pending',
     'In Progress': 'In_Progress',
@@ -137,6 +137,7 @@ export const createScene = async ({ number, title, location, timeOfDay, status }
     Cut: 'Ready',
   };
   const { data } = await api.post('/production/scenes/', {
+    project: projectId || 'a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d',
     scene_number: number,
     notes: title,
     location,

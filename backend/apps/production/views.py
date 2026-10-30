@@ -139,3 +139,99 @@ class FilmAssetViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     filterset_fields = ['category']
     search_fields = ['title']
+
+# --- Aggregates ---
+from rest_framework.decorators import api_view, permission_classes as drf_permission_classes
+from rest_framework.response import Response
+from django.db.models import Sum
+
+
+@api_view(['GET'])
+@drf_permission_classes([IsAuthenticated])
+def budget_by_category(request):
+    rows = (
+        BudgetTransaction.objects
+        .values('category')
+        .annotate(actual=Sum('amount'))
+        .order_by('-actual')
+    )
+    data = [
+        {"name": row["category"] or "Uncategorized", "actual": float(row["actual"] or 0)}
+        for row in rows
+    ]
+    return Response({"results": data, "count": len(data)})
+
+# --- Activity feed (from AuditLog) ---
+@api_view(['GET'])
+@drf_permission_classes([IsAuthenticated])
+def recent_activity(request):
+    from apps.collaboration.models import AuditLog
+
+    def friendly(log):
+        # Map HTTP verb + path to a human sentence
+        verb = (log.action or '').upper()
+        path = (log.resource or '').strip('/')
+        who = log.user.username if log.user else 'Someone'
+
+        # Extract the resource segment
+        parts = [p for p in path.split('/') if p]
+        noun = 'record'
+        for candidate in ('scenes', 'crew', 'cast', 'projects', 'budget',
+                          'shoot-days', 'equipment', 'film-assets',
+                          'risks', 'dialogues'):
+            if candidate in parts:
+                noun = candidate.replace('-', ' ').rstrip('s')
+                break
+
+        verb_word = {
+            'POST': 'Created',
+            'PATCH': 'Updated',
+            'PUT': 'Updated',
+            'DELETE': 'Deleted',
+        }.get(verb, verb.title())
+
+        return f"{verb_word} {noun}"
+
+    # Skip auth noise and read-only traffic
+    exclude_paths = ('/api/login/', '/api/refresh/', '/api/logout/',
+                     '/api/token/', '/api/admin/')
+    qs = (
+        AuditLog.objects
+        .select_related('user')
+        .exclude(action__in=['GET', 'HEAD', 'OPTIONS'])
+        .order_by('-timestamp')
+    )
+    for path in exclude_paths:
+        qs = qs.exclude(resource__startswith=path)
+
+    entries = []
+    seen = set()
+    for log in qs[:50]:
+        # Dedupe within the same second for the same resource
+        key = (log.resource_id, log.action, log.timestamp.replace(microsecond=0))
+        if key in seen:
+            continue
+        seen.add(key)
+
+        entries.append({
+            "id": str(log.id),
+            "message": f"{friendly(log)} - {log.user.username if log.user else 'someone'}",
+            "timestamp": _friendly_time(log.timestamp),
+        })
+        if len(entries) >= 15:
+            break
+
+    return Response({"results": entries, "count": len(entries)})
+
+def _friendly_time(dt):
+    from django.utils import timezone
+    if not dt:
+        return ""
+    seconds = int((timezone.now() - dt).total_seconds())
+    if seconds < 60:
+        return str(seconds) + "s ago"
+    if seconds < 3600:
+        return str(seconds // 60) + "m ago"
+    if seconds < 86400:
+        return str(seconds // 3600) + "h ago"
+    return str(seconds // 86400) + "d ago"

@@ -55,7 +55,7 @@ export default function Scenes() {
   const [saving, setSaving] = useState(false);
   const [editingScene, setEditingScene] = useState(null);
   const [editForm, setEditForm] = useState({ title: '', location: '', timeOfDay: '', status: '' });
-  const [newScene, setNewScene] = useState({ title: '', location: '', timeOfDay: '' });
+  const [newScene, setNewScene] = useState({ projectId: '', title: '', location: '', timeOfDay: '' });
 
   /* NEW: delete confirmation state */
   const [deletingScene, setDeletingScene] = useState(null);
@@ -150,11 +150,12 @@ export default function Scenes() {
     try {
       const scene = await createScene({
         ...newScene,
+        projectId: newScene.projectId || null,
         number: Math.max(0, ...scenes.map((item) => Number(item.number) || 0)) + 1,
         status: SCENE_STATUSES[0],
       });
       setScenes((list) => [...list, scene]);
-      setNewScene({ title: '', location: '', timeOfDay: '' });
+      setNewScene({ projectId: '', title: '', location: '', timeOfDay: '' });
       setAddOpen(false);
       toast('Scene added', 'success');
     } catch (error) {

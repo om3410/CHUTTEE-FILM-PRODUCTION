@@ -50,8 +50,10 @@ export default function Dashboard() {
       fetchCast(),
       fetchScenes(),
       fetchAllPages('/production/shoot-days/'),
+      fetchAllPages('/production/budget/by-category/'),
+      fetchAllPages('/production/activity/recent/'),
     ])
-      .then(([projects, crew, cast, scenes, shootDays]) => {
+      .then(([projects, crew, cast, scenes, shootDays, budgetByCategory, recentActivity]) => {
         if (cancelled) return;
         setData({
           summary: {
@@ -60,12 +62,12 @@ export default function Dashboard() {
             availableCrew: crew.results.filter((member) => member.available === true).length,
             busyCrew: crew.results.filter((member) => member.available === false).length,
             cast: cast.length,
-            scenesToShoot: scenes.filter((scene) => ['Not Started', 'In Progress'].includes(scene.status)).length,
+            scenesToShoot: scenes.filter((scene) => ['Not Started', 'In Progress', 'Pending', 'Ready'].includes(scene.status)).length,
           },
-          project: MOCK.projects[0],
-          activity: MOCK.activity,
-          risks: MOCK.ai.filter((item) => item.kind === 'risk'),
-          budget: MOCK.budgetByDept,
+          project: projects[0] || null,
+          activity: Array.isArray(recentActivity) ? recentActivity : (recentActivity?.results ?? []),
+          risks: [],
+          budget: budgetByCategory,
           projects,
           shootDays,
           upcomingDeadlines: buildUpcomingDeadlines(projects, shootDays),
@@ -174,9 +176,7 @@ export default function Dashboard() {
         ...defaultProject,
         ...activeProject,
         budgetTotal: Number(activeProject.total_budget ?? activeProject.budgetTotal ?? 0),
-        budgetSpent: Number(
-          activeProject.budget_spent ?? activeProject.budgetSpent ?? defaultProject?.budgetSpent ?? 0
-        ),
+        budgetSpent: Number(activeProject.budget_spent ?? activeProject.budgetSpent ?? 0),
         crewCount: summary?.crew ?? defaultProject?.crewCount ?? 0,
         castCount: summary?.cast ?? defaultProject?.castCount ?? 0,
         completion: activeProject.completion ?? defaultProject?.completion ?? 0,
@@ -684,7 +684,7 @@ export default function Dashboard() {
 
         <div className="mt-8 grid gap-6 lg:grid-cols-3">
           <Card className="lg:col-span-2">
-            <CardHeader title="Budget by Department" subtitle="Planned vs actual" icon={FiDollarSign} />
+            <CardHeader title="Budget by Department" subtitle="Actual spend per category" icon={FiDollarSign} />
             <CardBody>
               <div className="h-72">
                 <ResponsiveContainer width="100%" height="100%">
@@ -693,7 +693,6 @@ export default function Dashboard() {
                     <XAxis dataKey="name" tick={{ fill: '#71717a', fontSize: 11 }} />
                     <YAxis tick={{ fill: '#71717a', fontSize: 11 }} tickFormatter={(v) => `${v / 100000}L`} />
                     <Tooltip contentStyle={{ background: '#18181b', border: '1px solid #3f3f46', borderRadius: 8, fontSize: 12 }} formatter={(v) => formatShortCurrency(v)} isAnimationActive={false} />
-                    <Bar dataKey="budget" fill="#3f3f46" radius={[4, 4, 0, 0]} name="Planned" isAnimationActive={false} />
                     <Bar dataKey="actual" fill="#d4af37" radius={[4, 4, 0, 0]} name="Actual" isAnimationActive={false} />
                   </BarChart>
                 </ResponsiveContainer>

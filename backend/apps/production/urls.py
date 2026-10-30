@@ -6,6 +6,7 @@ from .views import (
     ShootDayViewSet, ShootDaySceneViewSet, BudgetTransactionViewSet,
     ScriptDialogueViewSet, SentimentAnalysisViewSet, ProductionRiskViewSet,
     FestivalSubmissionViewSet, AnalyticsDailyViewSet, MLPredictionViewSet,
+    budget_by_category, recent_activity,
 )
 
 router = DefaultRouter()
@@ -28,5 +29,7 @@ router.register(r'analytics-daily', AnalyticsDailyViewSet)
 router.register(r'ml-predictions', MLPredictionViewSet)
 
 urlpatterns = [
+    path('budget/by-category/', budget_by_category, name='budget-by-category'),
+    path('activity/recent/', recent_activity, name='recent-activity'),
     path('', include(router.urls)),
 ]

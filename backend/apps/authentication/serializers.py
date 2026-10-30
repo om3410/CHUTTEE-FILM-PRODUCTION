@@ -37,13 +37,19 @@ class EmailOrUsernameTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     """Serializer to return user data including role to React."""
+    full_name = serializers.SerializerMethodField()
+
     class Meta:
         model = User
         fields = [
             "id", "username", "email", "role", "is_superuser",
-            "first_name", "last_name",
+            "first_name", "last_name", "full_name",
         ]
         read_only_fields = ["id", "username", "role", "is_superuser"]
+
+    def get_full_name(self, obj):
+        name = obj.get_full_name().strip()
+        return name or obj.username
 
 
 class RegisterSerializer(serializers.ModelSerializer):

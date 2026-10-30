@@ -31,11 +31,24 @@ class TimestampedSerializerMixin:
 
 
 class FilmProjectSerializer(TimestampedSerializerMixin, serializers.ModelSerializer):
+    budget_spent = serializers.SerializerMethodField()
+    completion = serializers.SerializerMethodField()
+
     class Meta:
         model = FilmProject
         fields = '__all__'
         read_only_fields = ['id', 'created_at', 'updated_at']
 
+    def get_budget_spent(self, obj):
+        from django.db.models import Sum
+        return float(obj.budget.aggregate(s=Sum('amount'))['s'] or 0)
+
+    def get_completion(self, obj):
+        total = obj.scenes.count()
+        if not total:
+            return 0
+        done = obj.scenes.filter(status__in=['Completed', 'Shot', 'Cut', 'Locked']).count()
+        return round(done / total * 100)
 
 class CrewMemberSerializer(TimestampedSerializerMixin, serializers.ModelSerializer):
     class Meta:
